@@ -60,6 +60,37 @@ python manage.py runserver
 
 Ouvrir : [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
+### Demarrage en une commande (Windows)
+
+Un script complet est fourni a la racine du projet :
+
+```powershell
+# Lance toute la sequence: venv -> dependances -> migrations -> demo -> serveur
+.\startup.ps1
+
+# Equivalent via batch (double-clic possible)
+.\startup.bat
+```
+
+Options utiles :
+
+```powershell
+# Prepare l'environnement sans demarrer le serveur
+.\startup.ps1 -NoRunServer
+
+# Ignore l'installation des dependances
+.\startup.ps1 -SkipInstall
+
+# Ignore l'initialisation des donnees de demo
+.\startup.ps1 -SkipDemo
+
+# Reinitialise la base SQLite puis relance les migrations
+.\startup.ps1 -ResetDatabase
+
+# Change le port
+.\startup.ps1 -Port 8080
+```
+
 ---
 
 ## Comptes par défaut

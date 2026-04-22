@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="columns is-gapless" style="min-height: calc(100vh - 64px);">
+  <!-- Sidebar -->
+  <div class="column is-narrow admin-sidebar is-hidden-mobile">
+    <aside class="menu p-4">
+      <p class="menu-label">Navigation</p>
+      <ul class="menu-list">
+        <li><a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}is-active{% endif %}">
+          <span class="icon"><i class="fas fa-tachometer-alt"></i></span> Tableau de bord
+        </a></li>
+      </ul>
+      <p class="menu-label">Flotte</p>
+      <ul class="menu-list">
+        <li><a href="{% url 'admin_pontons' %}" class="{% if 'ponton' in request.resolver_match.url_name %}is-active{% endif %}">
+          <span class="icon"><i class="fas fa-anchor"></i></span> Pontons
+        </a></li>
+        <li><a href="{% url 'admin_embarcations' %}" class="{% if 'embarcation' in request.resolver_match.url_name %}is-active{% endif %}">
+          <span class="icon"><i class="fas fa-ship"></i></span> Embarcations
+        </a></li>
+        <li><a href="{% url 'admin_locations' %}" class="{% if 'location' in request.resolver_match.url_name %}is-active{% endif %}">
+          <span class="icon"><i class="fas fa-calendar-check"></i></span> Locations
+        </a></li>
+      </ul>
+      <p class="menu-label">Accès</p>
+      <ul class="menu-list">
+        <li><a href="{% url 'admin_users' %}" class="{% if 'user' in request.resolver_match.url_name %}is-active{% endif %}">
+          <span class="icon"><i class="fas fa-users"></i></span> Utilisateurs
+        </a></li>
+      </ul>
+      <p class="menu-label">Vues</p>
+      <ul class="menu-list">
+        <li><a href="{% url 'planning' %}"><span class="icon"><i class="fas fa-calendar-alt"></i></span> Planning</a></li>
+        <li><a href="{% url 'gestionnaire' %}"><span class="icon"><i class="fas fa-ship"></i></span> Gestion rapide</a></li>
+      </ul>
+    </aside>
+  </div>
+
+  <!-- Main content -->
+  <div class="column p-5">
+    {% block admin_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

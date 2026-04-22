@@ -1,0 +1,62 @@
+{% extends 'pontons/admin/base_admin.html' %}
+{% block title %}Pontons{% endblock %}
+
+{% block admin_content %}
+<div class="level mb-4">
+  <div class="level-left">
+    <h1 class="title is-5"><span class="icon"><i class="fas fa-anchor"></i></span> Pontons</h1>
+  </div>
+  <div class="level-right">
+    <a href="{% url 'admin_ponton_new' %}" class="button is-primary">
+      <span class="icon"><i class="fas fa-plus"></i></span><span>Nouveau ponton</span>
+    </a>
+  </div>
+</div>
+
+<div class="box">
+  <table class="table is-fullwidth is-hoverable is-striped">
+    <thead>
+      <tr>
+        <th>Ordre</th>
+        <th>Nom</th>
+        <th>Description</th>
+        <th>Embarcations</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ponton in pontons %}
+      <tr>
+        <td>{{ ponton.ordre }}</td>
+        <td><strong>{{ ponton.nom }}</strong></td>
+        <td>{{ ponton.description|default:"—" }}</td>
+        <td><span class="tag is-info is-light">{{ ponton.embarcations.count }}</span></td>
+        <td>
+          {% if ponton.actif %}
+            <span class="tag is-success is-light">Actif</span>
+          {% else %}
+            <span class="tag is-light">Inactif</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="buttons are-small">
+            <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="button is-info is-outlined">
+              <span class="icon"><i class="fas fa-edit"></i></span>
+            </a>
+            <form method="post" action="{% url 'admin_ponton_delete' ponton.pk %}" onsubmit="return confirm('Supprimer ce ponton ?')">
+              {% csrf_token %}
+              <button type="submit" class="button is-danger is-outlined">
+                <span class="icon"><i class="fas fa-trash"></i></span>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+        <tr><td colspan="6" class="has-text-centered has-text-grey-light">Aucun ponton.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

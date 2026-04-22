@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Planning — {{ date_cible|date:"d/m/Y" }}{% endblock %}
+
+{% block content %}
+<section class="section py-4">
+  <div class="container is-fluid">
+
+    <!-- En-tête avec navigation de date -->
+    <div class="level mb-4">
+      <div class="level-left">
+        <div class="level-item">
+          <h1 class="title is-4 mb-0">
+            <span class="icon-text">
+              <span class="icon has-text-info"><i class="fas fa-calendar-alt"></i></span>
+              <span>Planning du <strong>{{ date_cible|date:"l d F Y" }}</strong></span>
+            </span>
+          </h1>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <div class="buttons has-addons">
+            <a href="?date={{ date_prev|date:'Y-m-d' }}" class="button is-light">
+              <span class="icon"><i class="fas fa-chevron-left"></i></span>
+            </a>
+            <a href="?date={% now 'Y-m-d' %}" class="button is-info is-light">
+              <span class="icon"><i class="fas fa-circle-dot"></i></span>
+              <span>Aujourd'hui</span>
+            </a>
+            <a href="?date={{ date_next|date:'Y-m-d' }}" class="button is-light">
+              <span class="icon"><i class="fas fa-chevron-right"></i></span>
+            </a>
+          </div>
+        </div>
+        <div class="level-item">
+          <span class="tag is-info is-light is-medium" id="live-clock">
+            <span class="icon"><i class="fas fa-clock"></i></span>
+            <span>{{ now|time:"H:i" }}</span>
+          </span>
+        </div>
+        {% if role == 'gestionnaire' or role == 'admin' %}
+        <div class="level-item">
+          <a href="{% url 'gestionnaire' %}" class="button is-primary">
+            <span class="icon"><i class="fas fa-ship"></i></span>
+            <span>Gérer les sorties</span>
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="tags mb-4">
+      <span class="tag is-success is-light"><span class="icon"><i class="fas fa-check"></i></span><span>Disponible</span></span>
+      <span class="tag is-danger is-light"><span class="icon"><i class="fas fa-ship"></i></span><span>En location</span></span>
+    </div>
+
+    {% if not planning_data %}
+      <div class="notification is-info is-light">
+        <span class="icon"><i class="fas fa-info-circle"></i></span>
+        Aucun ponton actif configuré. <a href="{% url 'admin_pontons' %}">Ajouter un ponton</a>.
+      </div>
+    {% else %}
+    <!-- Grille planning -->
+    <div class="planning-scroll">
+      <table class="planning-table">
+        <thead>
+          <tr>
+            <th class="col-emb">Embarcation</th>
+            {% for slot in slots %}
+              <th id="th-slot-{{ forloop.counter0 }}" style="min-width:52px;">{{ slot }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for ponton_data in planning_data %}
+            <!-- Ligne de séparation ponton -->
+            <tr class="ponton-header">
+              <td colspan="{{ slots|length|add:1 }}">
+                <span class="icon"><i class="fas fa-anchor"></i></span>
+                {{ ponton_data.ponton.nom }}
+              </td>
+            </tr>
+
+            {% for row in ponton_data.rows %}
+            <tr>
+              <td class="col-emb">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ row.embarcation.couleur }};margin-right:5px;vertical-align:middle;"></span>
+                {{ row.embarcation.nom }}
+                <br>
+                <span class="has-text-grey" style="font-size:0.7rem;">{{ row.embarcation.get_type_embarcation_display }}</span>
+              </td>
+              {% for cell in row.cells %}
+                {% if cell == 'skip' %}
+                  {# Cette cellule est couverte par le colspan de la précédente #}
+                {% elif cell %}
+                  <td class="slot-cell" colspan="{{ cell.span }}" title="{{ cell.loc }}">
+                    <div class="slot-rented" style="background:{{ cell.color }};">
+                      <i class="fas fa-ship"></i>
+                      {% if cell.span >= 2 %}
+                        {{ cell.loc.heure_debut|time:"H:i" }}–{{ cell.loc.heure_fin|time:"H:i" }}
+                      {% endif %}
+                    </div>
+                  </td>
+                {% else %}
+                  <td class="slot-cell slot-free"></td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Résumé du jour -->
+    <div class="columns mt-4">
+      {% for ponton_data in planning_data %}
+      <div class="column">
+        <div class="card">
+          <div class="card-content">
+            <p class="title is-6"><i class="fas fa-anchor mr-2"></i>{{ ponton_data.ponton.nom }}</p>
+            {% for row in ponton_data.rows %}
+            <div class="level is-mobile mb-2">
+              <div class="level-left">
+                <div class="level-item">
+                  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ row.embarcation.couleur }};margin-right:6px;"></span>
+                  <small>{{ row.embarcation.nom }}</small>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="level-item">
+                  {% if row.embarcation.est_louee_maintenant %}
+                    <span class="tag is-danger is-small"><span class="pulse">●</span> Sortie</span>
+                  {% else %}
+                    <span class="tag is-success is-small is-light">Dispo</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Horloge live
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('live-clock').querySelector('span:last-child').textContent = `${h}:${m}`;
+}
+setInterval(updateClock, 10000);
+
+// Surligner la colonne de l'heure actuelle
+function highlightCurrentSlot() {
+  const now = new Date();
+  const h = now.getHours();
+  const min = now.getMinutes();
+  if (h < 13 || h >= 20) return;
+  const slot = (h - 13) * 2 + (min >= 30 ? 1 : 0);
+  document.querySelectorAll(`#th-slot-${slot}`).forEach(el => el.classList.add('current-time-col'));
+  // Trouver les td à la même position... approximation via nth-child
+  document.querySelectorAll('.planning-table tbody tr:not(.ponton-header) td').forEach((td, i) => {
+    // nth-child n'est pas direct à cause des colspan, on laisse juste le th
+  });
+}
+highlightCurrentSlot();
+
+// Rafraîchissement automatique toutes les 60s
+setTimeout(() => location.reload(), 60000);
+</script>
+{% endblock %}

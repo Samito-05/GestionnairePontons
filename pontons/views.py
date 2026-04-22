@@ -40,17 +40,29 @@ def require_role(*roles):
     return decorator
 
 
-def build_planning_data(date_cible):
-    """Construit la structure de données pour le planning d'une journée."""
-    # Créneaux : 13h00 → 20h00 par tranches de 30 min → 14 slots
-    slots = []
-    for i in range(14):
-        h = 13 + i // 2
-        m = 30 if i % 2 else 0
-        slots.append(f"{h:02d}:{m:02d}")
+GRID_START = 13 * 60   # 780 min depuis minuit
+GRID_END   = 20 * 60   # 1200 min depuis minuit
+GRID_SPAN  = GRID_END - GRID_START  # 420 min
 
-    debut_jour = timezone.make_aware(datetime.combine(date_cible, datetime.min.time().replace(hour=13)))
-    fin_jour = timezone.make_aware(datetime.combine(date_cible, datetime.min.time().replace(hour=20)))
+
+def build_planning_data(date_cible):
+    """Construit le planning avec positionnement CSS au pixel près (13h–20h)."""
+    from datetime import time as dtime
+
+    # Graduations : heures pleines + demi-heures
+    # Les pct sont des strings avec point décimal pour ne pas subir la locale fr-fr dans les templates CSS
+    marks = []
+    for h in range(13, 21):
+        pct = (h * 60 - GRID_START) / GRID_SPAN * 100
+        marks.append({'label': f'{h}h', 'pct': f'{pct:.4f}', 'is_hour': True,
+                       'show_mobile': h in (13, 15, 17, 20)})
+        if h < 20:
+            half_pct = ((h * 60 + 30) - GRID_START) / GRID_SPAN * 100
+            marks.append({'label': '', 'pct': f'{half_pct:.4f}', 'is_hour': False,
+                          'show_mobile': False})
+
+    debut_jour = timezone.make_aware(datetime.combine(date_cible, dtime(13, 0)))
+    fin_jour   = timezone.make_aware(datetime.combine(date_cible, dtime(20, 0)))
 
     pontons = Ponton.objects.filter(actif=True).prefetch_related('embarcations')
     locations_jour = Location.objects.filter(
@@ -58,7 +70,6 @@ def build_planning_data(date_cible):
         heure_fin__gt=debut_jour,
     ).select_related('embarcation', 'gestionnaire')
 
-    # Indexer les locations par embarcation
     loc_by_emb = {}
     for loc in locations_jour:
         loc_by_emb.setdefault(loc.embarcation_id, []).append(loc)
@@ -67,33 +78,30 @@ def build_planning_data(date_cible):
     for ponton in pontons:
         rows = []
         for emb in ponton.embarcations.filter(actif=True):
-            cells = [None] * 14  # 14 slots de 30 min
-            skip_until = -1
-            locs = sorted(loc_by_emb.get(emb.id, []), key=lambda l: l.heure_debut)
+            blocks = []
+            for loc in sorted(loc_by_emb.get(emb.id, []), key=lambda l: l.heure_debut):
+                ld = timezone.localtime(loc.heure_debut)
+                lf = timezone.localtime(loc.heure_fin)
 
-            for loc in locs:
-                # Convertir heure_debut en slot index (0-13)
-                local_debut = timezone.localtime(loc.heure_debut)
-                local_fin = timezone.localtime(loc.heure_fin)
-                slot_start = (local_debut.hour - 13) * 2 + (1 if local_debut.minute >= 30 else 0)
-                slot_end = (local_fin.hour - 13) * 2 + (1 if local_fin.minute > 0 else 0)
-                slot_start = max(0, min(slot_start, 13))
-                slot_end = max(0, min(slot_end, 14))
+                start_min = max(ld.hour * 60 + ld.minute, GRID_START)
+                end_min   = min(lf.hour * 60 + lf.minute, GRID_END)
+                if end_min <= start_min:
+                    continue
 
-                if slot_start < 14:
-                    span = max(1, slot_end - slot_start)
-                    cells[slot_start] = {
-                        'loc': loc,
-                        'span': span,
-                        'color': emb.couleur,
-                    }
-                    for s in range(slot_start + 1, min(slot_start + span, 14)):
-                        cells[s] = 'skip'
+                left_pct  = (start_min - GRID_START) / GRID_SPAN * 100
+                width_pct = (end_min - start_min)    / GRID_SPAN * 100
 
-            rows.append({'embarcation': emb, 'cells': cells})
+                blocks.append({
+                    'loc':       loc,
+                    'left_pct':  f'{left_pct:.4f}',   # string avec point : safe pour CSS en locale fr
+                    'width_pct': f'{width_pct:.4f}',
+                    'color':     emb.couleur,
+                    'label':     f"{ld.strftime('%H:%M')}–{lf.strftime('%H:%M')}",
+                })
+            rows.append({'embarcation': emb, 'blocks': blocks})
         planning.append({'ponton': ponton, 'rows': rows})
 
-    return slots, planning
+    return marks, planning
 
 
 # ─── Vue Planning ──────────────────────────────────────────────────────────────
@@ -105,11 +113,11 @@ def planning(request):
     except ValueError:
         date_cible = date.today()
 
-    slots, planning_data = build_planning_data(date_cible)
+    marks, planning_data = build_planning_data(date_cible)
     role = get_user_role(request.user) if request.user.is_authenticated else 'visiteur'
 
     return render(request, 'pontons/planning.html', {
-        'slots': slots,
+        'marks': marks,
         'planning_data': planning_data,
         'date_cible': date_cible,
         'date_prev': date_cible - timedelta(days=1),

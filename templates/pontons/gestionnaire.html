@@ -2,31 +2,30 @@
 {% block title %}Gestion rapide des sorties{% endblock %}
 
 {% block content %}
-<section class="section py-4">
+<section class="section pb-5">
   <div class="container">
 
-    <div class="level mb-4">
+    <!-- En-tête -->
+    <div class="level mb-5">
       <div class="level-left">
         <div class="level-item">
-          <h1 class="title is-4">
-            <span class="icon-text">
-              <span class="icon has-text-primary"><i class="fas fa-ship"></i></span>
-              <span>Gestion des sorties</span>
-            </span>
+          <h1 class="title is-4 mb-0">
+            <span class="icon has-text-link mr-1"><i class="fas fa-ship"></i></span>
+            Gestion des sorties
           </h1>
         </div>
       </div>
       <div class="level-right">
         <div class="level-item">
-          <span class="tag is-info is-medium" id="live-clock">
-            <span class="icon"><i class="fas fa-clock"></i></span>
+          <span id="live-clock" class="tag is-dark is-light is-medium">
+            <span class="icon mr-1"><i class="fas fa-clock"></i></span>
             <span>{{ now|time:"H:i" }}</span>
           </span>
         </div>
         <div class="level-item">
-          <a href="{% url 'planning' %}" class="button is-light">
+          <a href="{% url 'planning' %}" class="button is-small">
             <span class="icon"><i class="fas fa-calendar-alt"></i></span>
-            <span>Voir le planning</span>
+            <span>Planning</span>
           </a>
         </div>
       </div>
@@ -35,68 +34,86 @@
     {% for ponton_data in embarcations_status %}
     <div class="mb-5">
       <h2 class="subtitle is-5 has-text-weight-bold mb-3">
-        <span class="icon has-text-info"><i class="fas fa-anchor"></i></span>
         {{ ponton_data.ponton.nom }}
       </h2>
 
       <div class="columns is-multiline">
         {% for item in ponton_data.embarcations %}
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
-          <div class="emb-card {% if item.louee %}is-rented{% else %}is-available{% endif %}">
-            <div class="level is-mobile mb-2">
-              <div class="level-left">
-                <div class="level-item">
-                  <div>
-                    <p class="has-text-weight-bold">{{ item.embarcation.nom }}</p>
-                    <p class="has-text-grey is-size-7">{{ item.embarcation.get_type_embarcation_display }}</p>
+
+          {% if item.louee %}
+          <!-- ── Embarcation LOUÉE ── -->
+          <article class="message is-danger mb-0">
+            <div class="message-body" style="padding:1rem 1.25rem;">
+              <div class="level is-mobile mb-2">
+                <div class="level-left">
+                  <div class="level-item">
+                    <div>
+                      <p class="has-text-weight-bold has-text-grey-darker">{{ item.embarcation.nom }}</p>
+                      <p class="is-size-7 has-text-grey">{{ item.embarcation.get_type_embarcation_display }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="level-right">
+                  <div class="level-item">
+                    <span class="tag is-danger is-small">
+                      <span class="pulse mr-1">●</span> Sortie
+                    </span>
                   </div>
                 </div>
               </div>
-              <div class="level-right">
-                <div class="level-item">
-                  {% if item.louee %}
-                    <span class="tag is-danger">
-                      <span class="pulse mr-1">●</span> Sortie
-                    </span>
-                  {% else %}
-                    <span class="tag is-success">
-                      ● Disponible
-                    </span>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-
-            {% if item.louee %}
               <p class="is-size-7 has-text-grey mb-3">
-                <span class="icon"><i class="fas fa-undo"></i></span>
-                Retour prévu à <strong>{{ item.retour }}</strong>
-                {% if item.location.notes %} — {{ item.location.notes }}{% endif %}
+                <span class="icon"><i class="fas fa-rotate-left"></i></span>
+                Retour à <strong class="has-text-grey-darker">{{ item.retour }}</strong>
+                {% if item.location.notes %}&nbsp;— {{ item.location.notes }}{% endif %}
               </p>
               <form method="post" action="{% url 'retour_embarcation' item.embarcation.pk %}">
                 {% csrf_token %}
                 <button type="submit" class="button is-warning is-small is-fullwidth">
                   <span class="icon"><i class="fas fa-flag-checkered"></i></span>
-                  <span>Marquer retour anticipé</span>
+                  <span>Retour anticipé</span>
                 </button>
               </form>
-            {% else %}
+            </div>
+          </article>
+
+          {% else %}
+          <!-- ── Embarcation DISPONIBLE ── -->
+          <article class="message is-success mb-0">
+            <div class="message-body" style="padding:1rem 1.25rem;">
+              <div class="level is-mobile mb-3">
+                <div class="level-left">
+                  <div class="level-item">
+                    <div>
+                      <p class="has-text-weight-bold has-text-grey-darker">{{ item.embarcation.nom }}</p>
+                      <p class="is-size-7 has-text-grey">{{ item.embarcation.get_type_embarcation_display }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="level-right">
+                  <div class="level-item">
+                    <span class="tag is-success is-small">● Disponible</span>
+                  </div>
+                </div>
+              </div>
               <form method="post" action="{% url 'louer_embarcation' item.embarcation.pk %}">
                 {% csrf_token %}
-                <div class="field has-addons">
+                <div class="field has-addons mb-0">
                   <div class="control is-expanded">
                     <input type="text" name="notes" class="input is-small" placeholder="Notes (optionnel)">
                   </div>
                   <div class="control">
-                    <button type="submit" class="button is-success is-small">
+                    <button type="submit" class="button is-success is-small" style="font-weight:600;">
                       <span class="icon"><i class="fas fa-play"></i></span>
                       <span>Louer 1h</span>
                     </button>
                   </div>
                 </div>
               </form>
-            {% endif %}
-          </div>
+            </div>
+          </article>
+          {% endif %}
+
         </div>
         {% empty %}
           <div class="column">
@@ -120,14 +137,11 @@
 <script>
 function updateClock() {
   const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
+  const txt = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const el = document.getElementById('live-clock');
-  if (el) el.querySelector('span:last-child').textContent = `${h}:${m}`;
+  if (el) el.querySelector('span:last-child').textContent = txt;
 }
 setInterval(updateClock, 10000);
-
-// Rafraîchissement auto toutes les 30s
 setTimeout(() => location.reload(), 30000);
 </script>
 {% endblock %}

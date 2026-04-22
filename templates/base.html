@@ -3,194 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#00b4d8">
+  <meta name="theme-color" content="#363636">
   <meta name="description" content="Gestion des locations d'embarcations">
   <title>{% block title %}Pontons{% endblock %}</title>
 
-  <!-- Bulma CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- PWA -->
   <link rel="manifest" href="/static/manifest.json">
   <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 
   <style>
-    :root {
-      --color-primary: #00b4d8;
-      --color-secondary: #0077b6;
-      --color-available: #23d160;
-      --color-rented: #ff3860;
+    /* ── Layout ──────────────────────────────────────────── */
+    body  { min-height: 100vh; display: flex; flex-direction: column; }
+    main  { flex: 1; }
+
+    /* ── Navbar : indicateur d'item actif ────────────────── */
+    .navbar.is-dark .navbar-item.is-nav-active,
+    .navbar.is-dark .navbar-link.is-nav-active {
+      background-color: rgba(0,0,0,.25) !important;
+      box-shadow: inset 0 -3px 0 rgba(255,255,255,.45);
     }
 
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: #f5f7fa;
-      min-height: 100vh;
-    }
-
-    /* Navbar */
-    .navbar {
-      background: linear-gradient(135deg, #0077b6, #00b4d8);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    .navbar-brand .navbar-item {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #fff !important;
-      letter-spacing: 0.5px;
-    }
-    .navbar-item, .navbar-link {
-      color: rgba(255,255,255,0.9) !important;
-    }
-    .navbar-item:hover, .navbar-link:hover {
-      background: rgba(255,255,255,0.15) !important;
-      color: #fff !important;
-    }
-    .navbar-burger span { background: #fff; }
-
-    /* Sidebar admin */
+    /* ── Admin sidebar ───────────────────────────────────── */
     .admin-sidebar {
-      min-height: calc(100vh - 64px);
-      background: #fff;
-      border-right: 1px solid #e8e8e8;
-      padding: 1.5rem 0;
-    }
-    .admin-sidebar .menu-label { padding: 0 1.25rem; }
-    .admin-sidebar .menu-list a {
-      border-radius: 0;
-      padding: 0.6rem 1.5rem;
-      transition: background 0.15s;
-    }
-    .admin-sidebar .menu-list a:hover,
-    .admin-sidebar .menu-list a.is-active {
-      background: #e8f4fd;
-      color: #0077b6;
+      min-height: calc(100vh - 52px);
+      border-right: 1px solid hsl(0,0%,86%); /* Bulma border */
     }
 
-    /* Cards */
-    .card {
-      border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      border: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+    /* ── Planning table ──────────────────────────────────── */
+    .planning-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-    /* Embarcation status cards */
-    .emb-card {
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 0.75rem;
-      border-left: 5px solid transparent;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-      transition: all 0.2s;
-    }
-    .emb-card.is-available { border-left-color: var(--color-available); }
-    .emb-card.is-rented    { border-left-color: var(--color-rented); background: #fff5f7; }
-
-    /* Planning grid */
     .planning-table {
       table-layout: fixed;
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
-    .planning-table th, .planning-table td {
-      border: 1px solid #e0e0e0;
+
+    .planning-table th,
+    .planning-table td {
+      border: 1px solid hsl(0,0%,86%);
       padding: 4px 6px;
       white-space: nowrap;
       overflow: hidden;
     }
-    .planning-table th {
-      background: #0077b6;
-      color: #fff;
-      text-align: center;
-      font-weight: 600;
-      font-size: 0.78rem;
-    }
-    .planning-table th.col-emb {
-      background: #023e8a;
-      min-width: 130px;
-      width: 130px;
-    }
-    .planning-table td.col-emb {
-      font-weight: 600;
-      background: #f8f9fa;
-      font-size: 0.82rem;
-    }
-    .planning-table .slot-cell {
-      text-align: center;
-      vertical-align: middle;
-      height: 40px;
-      cursor: default;
-    }
+
+    .planning-table th          { text-align: center; font-weight: 600; font-size: 0.76rem; }
+    .planning-table th.col-emb  { min-width: 130px; width: 130px; text-align: left; }
+    .planning-table td.col-emb  { font-weight: 600; font-size: 0.81rem; }
+
+    .planning-table .slot-cell  { height: 42px; vertical-align: middle; text-align: center; }
+
     .planning-table .slot-rented {
-      border-radius: 6px;
-      color: #fff;
+      border-radius: 4px;
+      color: #fff;               /* blanc sur fond coloré : inévitable */
       font-weight: 600;
-      font-size: 0.75rem;
-      padding: 2px 4px;
-      text-align: center;
+      font-size: 0.73rem;
+      padding: 3px 5px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .planning-table .slot-free {
-      background: #f0faf5;
-    }
-    .planning-table .ponton-header td {
-      background: #e8f4fd;
-      font-weight: 700;
-      color: #0077b6;
-      font-size: 0.9rem;
-      padding: 8px 10px;
+
+    /* Colonne heure courante — utilise les teintes Bulma warning */
+    .current-time-col {
+      background-color: hsl(48,100%,94%) !important;
+      border-left:  2px solid hsl(48,100%,67%) !important;
+      border-right: 2px solid hsl(48,100%,67%) !important;
     }
 
-    /* Current time indicator */
-    .current-time-col { background: rgba(255, 193, 7, 0.15) !important; border-left: 2px solid #ffc107 !important; }
+    /* ── Animation pulse ─────────────────────────────────── */
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+    .pulse { animation: pulse-dot 1.6s ease-in-out infinite; }
 
-    /* Notifications */
-    .notification { border-radius: 10px; }
-
-    /* Buttons */
-    .button { border-radius: 8px; font-weight: 500; }
-    .button.is-primary { background: var(--color-secondary); border-color: var(--color-secondary); }
-    .button.is-primary:hover { background: #005f8e; }
-
-    /* Tags */
-    .tag { border-radius: 20px; font-weight: 600; }
-
-    /* Responsive planning */
-    .planning-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
+    /* ── Mobile ──────────────────────────────────────────── */
     @media (max-width: 768px) {
-      .planning-table th.col-emb, .planning-table td.col-emb { min-width: 90px; width: 90px; font-size: 0.72rem; }
-      .planning-table th, .planning-table td { font-size: 0.7rem; padding: 3px 2px; }
-      .admin-sidebar { display: none; }
+      .planning-table th.col-emb,
+      .planning-table td.col-emb { min-width: 88px; width: 88px; font-size: 0.7rem; }
+      .planning-table th,
+      .planning-table td          { font-size: 0.68rem; padding: 3px 2px; }
+      .admin-sidebar              { display: none; }
+      .section                    { padding: 1rem; }
     }
-
-    /* Footer */
-    footer { margin-top: auto; }
-
-    /* Pulse animation pour embarcation louée */
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .pulse { animation: pulse-dot 1.5s infinite; }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="has-background-white-ter">
 
-<!-- NAVBAR -->
-<nav class="navbar" role="navigation" aria-label="navigation principale">
+<!-- ── NAVBAR ─────────────────────────────────────────────────── -->
+<nav class="navbar is-dark" role="navigation" aria-label="navigation principale">
   <div class="navbar-brand">
-    <a class="navbar-item" href="{% url 'planning' %}">
-      <span class="icon mr-2"><i class="fas fa-water"></i></span>
-      Pontons
+    <a class="navbar-item has-text-white" href="{% url 'planning' %}" style="font-weight:700;font-size:1.1rem;gap:.5rem;">
+      <i class="fas fa-water"></i> Pontons
     </a>
     <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
       <span></span><span></span><span></span><span></span>
@@ -199,57 +102,58 @@
 
   <div id="navMenu" class="navbar-menu">
     <div class="navbar-start">
-      <a class="navbar-item {% if request.resolver_match.url_name == 'planning' %}has-background-white-bis{% endif %}" href="{% url 'planning' %}">
-        <span class="icon"><i class="fas fa-calendar-alt"></i></span>
-        <span>Planning</span>
+
+      <a class="navbar-item {% if request.resolver_match.url_name == 'planning' %}is-nav-active{% endif %}"
+         href="{% url 'planning' %}">
+        <span class="icon"><i class="fas fa-calendar-alt"></i></span>&nbsp;Planning
       </a>
 
       {% if user.is_authenticated %}
         {% if role == 'gestionnaire' or role == 'admin' or user.is_superuser %}
-        <a class="navbar-item {% if 'gestionnaire' in request.resolver_match.url_name %}has-background-white-bis{% endif %}" href="{% url 'gestionnaire' %}">
-          <span class="icon"><i class="fas fa-ship"></i></span>
-          <span>Gestion rapide</span>
+        <a class="navbar-item {% if 'gestionnaire' in request.resolver_match.url_name %}is-nav-active{% endif %}"
+           href="{% url 'gestionnaire' %}">
+          <span class="icon"><i class="fas fa-ship"></i></span>&nbsp;Gestion rapide
         </a>
         {% endif %}
 
         {% if role == 'admin' or user.is_superuser %}
         <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link">
-            <span class="icon"><i class="fas fa-cog"></i></span>
-            <span>Administration</span>
+          <a class="navbar-link {% if 'admin_' in request.resolver_match.url_name %}is-nav-active{% endif %}">
+            <span class="icon"><i class="fas fa-sliders"></i></span>&nbsp;Administration
           </a>
           <div class="navbar-dropdown">
-            <a class="navbar-item" href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt mr-2"></i>Tableau de bord</a>
-            <a class="navbar-item" href="{% url 'admin_pontons' %}"><i class="fas fa-anchor mr-2"></i>Pontons</a>
-            <a class="navbar-item" href="{% url 'admin_embarcations' %}"><i class="fas fa-ship mr-2"></i>Embarcations</a>
-            <a class="navbar-item" href="{% url 'admin_locations' %}"><i class="fas fa-calendar-check mr-2"></i>Locations</a>
+            <a class="navbar-item" href="{% url 'admin_dashboard' %}"><span class="icon has-text-grey-light"><i class="fas fa-chart-simple"></i></span>&nbsp;Tableau de bord</a>
+            <a class="navbar-item" href="{% url 'admin_pontons' %}">Pontons</a>
+            <a class="navbar-item" href="{% url 'admin_embarcations' %}"><span class="icon has-text-grey-light"><i class="fas fa-ship"></i></span>&nbsp;Embarcations</a>
+            <a class="navbar-item" href="{% url 'admin_locations' %}"><span class="icon has-text-grey-light"><i class="fas fa-calendar-check"></i></span>&nbsp;Locations</a>
             <hr class="navbar-divider">
-            <a class="navbar-item" href="{% url 'admin_users' %}"><i class="fas fa-users mr-2"></i>Utilisateurs</a>
+            <a class="navbar-item" href="{% url 'admin_users' %}"><span class="icon has-text-grey-light"><i class="fas fa-users"></i></span>&nbsp;Utilisateurs</a>
           </div>
         </div>
         {% endif %}
       {% endif %}
+
     </div>
 
     <div class="navbar-end">
       <div class="navbar-item">
         {% if user.is_authenticated %}
           <div class="buttons">
-            <span class="button is-light is-small is-static">
-              <span class="icon"><i class="fas fa-user"></i></span>
+            <span class="button is-dark is-static is-small">
+              <span class="icon"><i class="fas fa-circle-user"></i></span>
               <span>{{ user.username }}</span>
             </span>
-            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            <form method="post" action="{% url 'logout' %}" style="display:contents;">
               {% csrf_token %}
               <button type="submit" class="button is-light is-small">
-                <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+                <span class="icon"><i class="fas fa-right-from-bracket"></i></span>
                 <span>Déconnexion</span>
               </button>
             </form>
           </div>
         {% else %}
           <a href="{% url 'login' %}" class="button is-light is-small">
-            <span class="icon"><i class="fas fa-sign-in-alt"></i></span>
+            <span class="icon"><i class="fas fa-right-to-bracket"></i></span>
             <span>Connexion</span>
           </a>
         {% endif %}
@@ -258,11 +162,11 @@
   </div>
 </nav>
 
-<!-- MESSAGES -->
+<!-- ── FLASH MESSAGES ──────────────────────────────────────────── -->
 {% if messages %}
-<div class="container mt-3">
+<div class="px-5 pt-4">
   {% for message in messages %}
-    <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'success' %}is-success{% elif message.tags == 'warning' %}is-warning{% else %}is-info{% endif %} is-light">
+    <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'success' %}is-success{% elif message.tags == 'warning' %}is-warning{% else %}is-info{% endif %} is-light mb-2">
       <button class="delete"></button>
       {{ message }}
     </div>
@@ -270,43 +174,38 @@
 </div>
 {% endif %}
 
-<!-- CONTENT -->
-<main>
-  {% block content %}{% endblock %}
-</main>
+<!-- ── CONTENT ─────────────────────────────────────────────────── -->
+<main>{% block content %}{% endblock %}</main>
 
-<!-- FOOTER -->
-<footer class="footer py-4 mt-5">
-  <div class="content has-text-centered has-text-grey-light">
-    <small><i class="fas fa-water mr-1"></i> Gestionnaire Pontons &mdash; {% now "Y" %}</small>
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
+<footer class="footer has-background-white py-4" style="border-top:1px solid hsl(0,0%,86%);">
+  <div class="has-text-centered has-text-grey" style="font-size:.8rem;">
+    <i class="fas fa-water mr-1"></i> Gestionnaire Pontons &mdash; {% now "Y" %}
   </div>
 </footer>
 
 <script>
-  // Burger menu
   document.addEventListener('DOMContentLoaded', () => {
-    const burgers = document.querySelectorAll('.navbar-burger');
-    burgers.forEach(burger => {
-      burger.addEventListener('click', () => {
-        const target = document.getElementById(burger.dataset.target);
-        burger.classList.toggle('is-active');
-        target.classList.toggle('is-active');
+    document.querySelectorAll('.navbar-burger').forEach(b => {
+      b.addEventListener('click', () => {
+        const t = document.getElementById(b.dataset.target);
+        b.classList.toggle('is-active');
+        t.classList.toggle('is-active');
       });
     });
-
-    // Auto-dismiss notifications
-    document.querySelectorAll('.notification .delete').forEach(btn => {
-      btn.addEventListener('click', () => btn.parentElement.remove());
-    });
+    document.querySelectorAll('.notification .delete').forEach(btn =>
+      btn.addEventListener('click', () => btn.parentElement.remove())
+    );
     setTimeout(() => {
-      document.querySelectorAll('.notification').forEach(n => n.remove());
+      document.querySelectorAll('.notification').forEach(n => {
+        n.style.transition = 'opacity .4s';
+        n.style.opacity = '0';
+        setTimeout(() => n.remove(), 400);
+      });
     }, 5000);
   });
-
-  // PWA service worker
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator)
     navigator.serviceWorker.register('/static/sw.js').catch(() => {});
-  }
 </script>
 {% block extra_js %}{% endblock %}
 </body>

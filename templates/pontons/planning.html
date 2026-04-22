@@ -1,139 +1,365 @@
 {% extends 'base.html' %}
 {% block title %}Planning — {{ date_cible|date:"d/m/Y" }}{% endblock %}
 
+{% block extra_css %}
+<style>
+
+/* ════════════════════════════════════════════════
+   TIMELINE DESKTOP
+   ════════════════════════════════════════════════ */
+.tl-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid hsl(0,0%,86%);
+  border-radius: 8px;
+  background: #fff;
+}
+.tl-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid hsl(0,0%,93%);
+}
+.tl-row:last-child { border-bottom: none; }
+.tl-label {
+  width: 150px;
+  min-width: 150px;
+  padding: .25rem .6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 2px solid hsl(0,0%,86%);
+  flex-shrink: 0;
+  font-size: .8rem;
+}
+.tl-track {
+  position: relative;
+  flex: 1;
+  min-width: 560px;
+  margin-right: 10px;
+  overflow: visible;
+}
+.tl-row-axis { height: 26px; border-bottom: 2px solid hsl(0,0%,80%); }
+.tl-row-axis .tl-label {
+  font-size: .72rem;
+  font-weight: 400;
+  color: hsl(0,0%,50%);
+  border-right-color: transparent;
+}
+.hour-tick {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: .72rem;
+  font-weight: 700;
+  color: hsl(0,0%,30%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.hour-tick-last { transform: translate(-100%, -50%); }
+.tl-row-ponton { height: 28px; border-bottom: 2px solid hsl(0,0%,86%); }
+.tl-row-ponton .tl-label { font-weight: 700; font-size: .8rem; }
+.tl-row-emb { height: 44px; }
+.tl-row-emb:hover { background: hsl(0,0%,98%); }
+.grid-h  { position: absolute; top: 0; bottom: 0; width: 1px; background: hsl(0,0%,86%); pointer-events: none; }
+.grid-hh { position: absolute; top: 0; bottom: 0; width: 1px; background: hsl(0,0%,92%); pointer-events: none; }
+.rental-block {
+  position: absolute;
+  top: 5px; bottom: 5px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: .71rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  cursor: default;
+  transition: filter .1s;
+  min-width: 6px;
+}
+.rental-block:hover { filter: brightness(1.08); z-index: 2; }
+.rental-block.is-narrow { font-size: 0; }
+.now-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: hsl(4,90%,55%);
+  z-index: 5;
+  pointer-events: none;
+}
+.now-line::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: hsl(4,90%,55%);
+}
+
+/* ════════════════════════════════════════════════
+   PLANNING MOBILE (cards + mini-barres)
+   ════════════════════════════════════════════════ */
+.mob-ponton-label {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 1.25rem 0 .6rem;
+  font-weight: 700;
+  font-size: .9rem;
+}
+
+.mob-emb-card {
+  background: #fff;
+  border: 1px solid hsl(0,0%,88%);
+  border-radius: 12px;
+  padding: .85rem 1rem;
+  margin-bottom: .6rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.mob-emb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .55rem;
+}
+
+.mob-emb-name {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-weight: 600;
+  font-size: .88rem;
+}
+
+.mob-color-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* Mini barre de timeline */
+.mini-bar-wrap { margin: 0 0 .25rem; }
+
+.mini-bar {
+  position: relative;
+  height: 10px;
+  background: hsl(0,0%,92%);
+  border-radius: 10px;
+  margin-bottom: .3rem;
+  overflow: hidden; /* les blocs ne débordent pas */
+}
+
+/* "Now" sur la mini barre */
+.mini-bar-now {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: hsl(4,90%,55%);
+  z-index: 3;
+}
+
+.mini-block {
+  position: absolute;
+  top: 0; bottom: 0;
+  border-radius: 10px;
+  min-width: 4px;
+}
+
+/* Graduation horaire sous la mini-barre */
+.mini-ticks {
+  position: relative;
+  height: 13px;
+}
+
+.mini-tick {
+  position: absolute;
+  font-size: .62rem;
+  color: hsl(0,0%,55%);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  line-height: 13px;
+  user-select: none;
+}
+.mini-tick.is-last { transform: translateX(-100%); }
+
+/* Étiquettes de créneaux */
+.mob-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin-top: .45rem;
+}
+
+.mob-slot-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE : bascule desktop ↔ mobile
+   ════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+  .mobile-planning { display: none !important; }
+}
+@media (max-width: 768px) {
+  .tl-wrap         { display: none !important; }
+  .desktop-summary { display: none !important; }
+}
+
+</style>
+{% endblock %}
+
+
 {% block content %}
-<section class="section py-4">
+<section class="section pb-5">
   <div class="container is-fluid">
 
-    <!-- En-tête avec navigation de date -->
+    <!-- ── En-tête ───────────────────────────────────────────── -->
     <div class="level mb-4">
       <div class="level-left">
         <div class="level-item">
-          <h1 class="title is-4 mb-0">
-            <span class="icon-text">
-              <span class="icon has-text-info"><i class="fas fa-calendar-alt"></i></span>
-              <span>Planning du <strong>{{ date_cible|date:"l d F Y" }}</strong></span>
-            </span>
+          <h1 class="title is-5 mb-0">
+            <span class="icon has-text-link mr-1"><i class="fas fa-calendar-alt"></i></span>
+            <span class="is-hidden-mobile">Planning du </span>
+            <strong>{{ date_cible|date:"l d F Y" }}</strong>
           </h1>
         </div>
       </div>
-      <div class="level-right">
-        <div class="level-item">
-          <div class="buttons has-addons">
-            <a href="?date={{ date_prev|date:'Y-m-d' }}" class="button is-light">
-              <span class="icon"><i class="fas fa-chevron-left"></i></span>
-            </a>
-            <a href="?date={% now 'Y-m-d' %}" class="button is-info is-light">
-              <span class="icon"><i class="fas fa-circle-dot"></i></span>
-              <span>Aujourd'hui</span>
-            </a>
-            <a href="?date={{ date_next|date:'Y-m-d' }}" class="button is-light">
-              <span class="icon"><i class="fas fa-chevron-right"></i></span>
-            </a>
-          </div>
-        </div>
-        <div class="level-item">
-          <span class="tag is-info is-light is-medium" id="live-clock">
-            <span class="icon"><i class="fas fa-clock"></i></span>
-            <span>{{ now|time:"H:i" }}</span>
-          </span>
-        </div>
-        {% if role == 'gestionnaire' or role == 'admin' %}
-        <div class="level-item">
-          <a href="{% url 'gestionnaire' %}" class="button is-primary">
-            <span class="icon"><i class="fas fa-ship"></i></span>
-            <span>Gérer les sorties</span>
+      <div class="level-right" style="gap:.4rem;display:flex;flex-wrap:wrap;align-items:center;">
+        <div class="buttons has-addons mb-0">
+          <a href="?date={{ date_prev|date:'Y-m-d' }}" class="button is-small">
+            <span class="icon"><i class="fas fa-chevron-left"></i></span>
+          </a>
+          <a href="?date={% now 'Y-m-d' %}" class="button is-link is-light is-small">Aujourd'hui</a>
+          <a href="?date={{ date_next|date:'Y-m-d' }}" class="button is-small">
+            <span class="icon"><i class="fas fa-chevron-right"></i></span>
           </a>
         </div>
+        <span id="live-clock" class="tag is-medium is-dark is-light">
+          <span class="icon mr-1"><i class="fas fa-clock"></i></span>
+          <span>{{ now|time:"H:i" }}</span>
+        </span>
+        {% if role == 'gestionnaire' or role == 'admin' %}
+        <a href="{% url 'gestionnaire' %}" class="button is-small is-link">
+          <span class="icon"><i class="fas fa-ship"></i></span>
+          <span class="is-hidden-mobile">Gérer les sorties</span>
+          <span class="is-hidden-tablet">Gérer</span>
+        </a>
         {% endif %}
       </div>
     </div>
 
-    <!-- Légende -->
-    <div class="tags mb-4">
-      <span class="tag is-success is-light"><span class="icon"><i class="fas fa-check"></i></span><span>Disponible</span></span>
-      <span class="tag is-danger is-light"><span class="icon"><i class="fas fa-ship"></i></span><span>En location</span></span>
+    <!-- ── Légende ───────────────────────────────────────────── -->
+    <div class="tags mb-3">
+      <span class="tag is-success is-light"><span class="icon mr-1"><i class="fas fa-check"></i></span>Disponible</span>
+      <span class="tag is-danger is-light"><span class="icon mr-1"><i class="fas fa-ship"></i></span>En location</span>
+      <span class="tag" style="background:hsl(4,90%,93%);color:hsl(4,90%,40%);">
+        <span class="mr-1" style="font-weight:900;">|</span>Maintenant
+      </span>
     </div>
 
     {% if not planning_data %}
       <div class="notification is-info is-light">
         <span class="icon"><i class="fas fa-info-circle"></i></span>
-        Aucun ponton actif configuré. <a href="{% url 'admin_pontons' %}">Ajouter un ponton</a>.
+        Aucun ponton actif configuré.
+        {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}">Ajouter un ponton</a>{% endif %}
       </div>
-    {% else %}
-    <!-- Grille planning -->
-    <div class="planning-scroll">
-      <table class="planning-table">
-        <thead>
-          <tr>
-            <th class="col-emb">Embarcation</th>
-            {% for slot in slots %}
-              <th id="th-slot-{{ forloop.counter0 }}" style="min-width:52px;">{{ slot }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for ponton_data in planning_data %}
-            <!-- Ligne de séparation ponton -->
-            <tr class="ponton-header">
-              <td colspan="{{ slots|length|add:1 }}">
-                <span class="icon"><i class="fas fa-anchor"></i></span>
-                {{ ponton_data.ponton.nom }}
-              </td>
-            </tr>
 
-            {% for row in ponton_data.rows %}
-            <tr>
-              <td class="col-emb">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:{{ row.embarcation.couleur }};margin-right:5px;vertical-align:middle;"></span>
-                {{ row.embarcation.nom }}
-                <br>
-                <span class="has-text-grey" style="font-size:0.7rem;">{{ row.embarcation.get_type_embarcation_display }}</span>
-              </td>
-              {% for cell in row.cells %}
-                {% if cell == 'skip' %}
-                  {# Cette cellule est couverte par le colspan de la précédente #}
-                {% elif cell %}
-                  <td class="slot-cell" colspan="{{ cell.span }}" title="{{ cell.loc }}">
-                    <div class="slot-rented" style="background:{{ cell.color }};">
-                      <i class="fas fa-ship"></i>
-                      {% if cell.span >= 2 %}
-                        {{ cell.loc.heure_debut|time:"H:i" }}–{{ cell.loc.heure_fin|time:"H:i" }}
-                      {% endif %}
-                    </div>
-                  </td>
-                {% else %}
-                  <td class="slot-cell slot-free"></td>
-                {% endif %}
-              {% endfor %}
-            </tr>
+    {% else %}
+
+    <!-- ════════════════════════════════════════════
+         TIMELINE DESKTOP
+         ════════════════════════════════════════════ -->
+    <div class="tl-wrap mb-5">
+
+      <div class="tl-row tl-row-axis has-background-white-bis">
+        <div class="tl-label">13h → 20h</div>
+        <div class="tl-track">
+          {% for m in marks %}{% if m.is_hour %}
+            <span class="hour-tick {% if forloop.last %}hour-tick-last{% endif %}"
+                  style="left:{{ m.pct }}%">{{ m.label }}</span>
+          {% endif %}{% endfor %}
+        </div>
+      </div>
+
+      {% for ponton_data in planning_data %}
+        <div class="tl-row tl-row-ponton has-background-link-light">
+          <div class="tl-label has-text-link">
+            {{ ponton_data.ponton.nom }}
+          </div>
+          <div class="tl-track">
+            {% for m in marks %}
+              <div class="{% if m.is_hour %}grid-h{% else %}grid-hh{% endif %}" style="left:{{ m.pct }}%"></div>
             {% endfor %}
-          {% endfor %}
-        </tbody>
-      </table>
+          </div>
+        </div>
+
+        {% for row in ponton_data.rows %}
+        <div class="tl-row tl-row-emb">
+          <div class="tl-label has-background-white-bis">
+            <div style="display:flex;align-items:center;gap:.3rem;overflow:hidden;">
+              <span style="width:9px;height:9px;border-radius:50%;background:{{ row.embarcation.couleur }};flex-shrink:0;display:inline-block;"></span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;">{{ row.embarcation.nom }}</span>
+            </div>
+            <div class="has-text-grey" style="font-size:.68rem;padding-left:14px;">
+              {{ row.embarcation.get_type_embarcation_display }}
+            </div>
+          </div>
+          <div class="tl-track">
+            {% for m in marks %}
+              <div class="{% if m.is_hour %}grid-h{% else %}grid-hh{% endif %}" style="left:{{ m.pct }}%"></div>
+            {% endfor %}
+            {% for block in row.blocks %}
+              <div class="rental-block"
+                   style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};"
+                   title="{{ block.label }}">
+                {{ block.label }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+
     </div>
 
-    <!-- Résumé du jour -->
-    <div class="columns mt-4">
+    <!-- Résumé desktop -->
+    <div class="desktop-summary columns is-multiline">
       {% for ponton_data in planning_data %}
-      <div class="column">
+      <div class="column is-12-mobile is-6-tablet">
         <div class="card">
-          <div class="card-content">
-            <p class="title is-6"><i class="fas fa-anchor mr-2"></i>{{ ponton_data.ponton.nom }}</p>
+          <div class="card-header">
+            <p class="card-header-title has-text-grey-dark" style="font-size:.85rem;">
+              {{ ponton_data.ponton.nom }}
+            </p>
+          </div>
+          <div class="card-content py-3 px-4">
             {% for row in ponton_data.rows %}
             <div class="level is-mobile mb-2">
               <div class="level-left">
                 <div class="level-item">
-                  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ row.embarcation.couleur }};margin-right:6px;"></span>
+                  <span style="width:8px;height:8px;border-radius:50%;background:{{ row.embarcation.couleur }};margin-right:.4rem;display:inline-block;flex-shrink:0;"></span>
                   <small>{{ row.embarcation.nom }}</small>
                 </div>
               </div>
               <div class="level-right">
                 <div class="level-item">
                   {% if row.embarcation.est_louee_maintenant %}
-                    <span class="tag is-danger is-small"><span class="pulse">●</span> Sortie</span>
+                    <span class="tag is-danger is-light is-small"><span class="pulse mr-1">●</span>Sortie</span>
                   {% else %}
-                    <span class="tag is-success is-small is-light">Dispo</span>
+                    <span class="tag is-success is-light is-small">Dispo</span>
                   {% endif %}
                 </div>
               </div>
@@ -144,39 +370,139 @@
       </div>
       {% endfor %}
     </div>
-    {% endif %}
 
+
+    <!-- ════════════════════════════════════════════
+         VUE MOBILE
+         ════════════════════════════════════════════ -->
+    <div class="mobile-planning">
+      {% for ponton_data in planning_data %}
+
+        <div class="mob-ponton-label">
+          {{ ponton_data.ponton.nom }}
+        </div>
+
+        {% for row in ponton_data.rows %}
+        <div class="mob-emb-card">
+
+          <!-- Nom + statut -->
+          <div class="mob-emb-header">
+            <div class="mob-emb-name">
+              <span class="mob-color-dot" style="background:{{ row.embarcation.couleur }};"></span>
+              {{ row.embarcation.nom }}
+              <span class="has-text-grey" style="font-size:.72rem;font-weight:400;">
+                — {{ row.embarcation.get_type_embarcation_display }}
+              </span>
+            </div>
+            {% if row.embarcation.est_louee_maintenant %}
+              <span class="tag is-danger is-light is-small"><span class="pulse mr-1">●</span>Sortie</span>
+            {% else %}
+              <span class="tag is-success is-light is-small">Dispo</span>
+            {% endif %}
+          </div>
+
+          <!-- Mini barre 13h→20h -->
+          <div class="mini-bar-wrap">
+            <div class="mini-bar">
+              {% for block in row.blocks %}
+                <div class="mini-block"
+                     style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};"></div>
+              {% endfor %}
+            </div>
+            <!-- Graduations horaires sous la barre -->
+            <div class="mini-ticks">
+              {% for m in marks %}{% if m.show_mobile %}
+                <span class="mini-tick {% if forloop.last %}is-last{% endif %}"
+                      style="left:{{ m.pct }}%">{{ m.label }}</span>
+              {% endif %}{% endfor %}
+            </div>
+          </div>
+
+          <!-- Créneaux réservés -->
+          {% if row.blocks %}
+            <div class="mob-slots">
+              {% for block in row.blocks %}
+                <span class="mob-slot-tag" style="background:{{ block.color }};">
+                  {{ block.label }}
+                </span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="has-text-grey-light" style="font-size:.75rem;margin-top:.3rem;">
+              Aucune sortie planifiée
+            </p>
+          {% endif %}
+
+        </div>
+        {% endfor %}
+
+      {% endfor %}
+    </div>
+    <!-- fin mobile-planning -->
+
+    {% endif %}
   </div>
 </section>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
-// Horloge live
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  document.getElementById('live-clock').querySelector('span:last-child').textContent = `${h}:${m}`;
-}
-setInterval(updateClock, 10000);
+const GRID_START_H = 13, GRID_DUR = 420;
 
-// Surligner la colonne de l'heure actuelle
-function highlightCurrentSlot() {
+function timeToPct(h, m) {
+  return ((h - GRID_START_H) * 60 + m) / GRID_DUR * 100;
+}
+
+/* Ligne "maintenant" sur desktop et mini-barres mobile */
+function drawNowLine() {
   const now = new Date();
-  const h = now.getHours();
-  const min = now.getMinutes();
+  const h = now.getHours(), m = now.getMinutes();
+
+  /* Nettoyer les anciens indicateurs */
+  document.querySelectorAll('.now-line, .mini-bar-now').forEach(el => el.remove());
   if (h < 13 || h >= 20) return;
-  const slot = (h - 13) * 2 + (min >= 30 ? 1 : 0);
-  document.querySelectorAll(`#th-slot-${slot}`).forEach(el => el.classList.add('current-time-col'));
-  // Trouver les td à la même position... approximation via nth-child
-  document.querySelectorAll('.planning-table tbody tr:not(.ponton-header) td').forEach((td, i) => {
-    // nth-child n'est pas direct à cause des colspan, on laisse juste le th
+
+  const pct = timeToPct(h, m).toFixed(4);
+
+  /* Desktop : injecter dans chaque tl-track */
+  document.querySelectorAll('.tl-track').forEach(track => {
+    const line = document.createElement('div');
+    line.className = 'now-line';
+    line.style.left = pct + '%';
+    track.appendChild(line);
+  });
+
+  /* Mobile : injecter dans chaque mini-bar */
+  document.querySelectorAll('.mini-bar').forEach(bar => {
+    const line = document.createElement('div');
+    line.className = 'mini-bar-now';
+    line.style.left = pct + '%';
+    bar.appendChild(line);
   });
 }
-highlightCurrentSlot();
 
-// Rafraîchissement automatique toutes les 60s
+/* Masquer le label si le bloc desktop est trop étroit */
+function adjustNarrowBlocks() {
+  document.querySelectorAll('.rental-block').forEach(b => {
+    b.classList.toggle('is-narrow', parseFloat(b.style.width) < 4);
+  });
+}
+
+/* Horloge */
+function updateClock() {
+  const now = new Date();
+  const txt = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const el = document.getElementById('live-clock');
+  if (el) el.querySelector('span:last-child').textContent = txt;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  drawNowLine();
+  adjustNarrowBlocks();
+});
+setInterval(updateClock,  10000);
+setInterval(drawNowLine,  30000);
 setTimeout(() => location.reload(), 60000);
 </script>
 {% endblock %}

@@ -4,7 +4,8 @@
       "Bash(pip install *)",
       "Bash(django-admin startproject *)",
       "Bash(python manage.py startapp pontons)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(python manage.py --version)"
     ]
   }
 }

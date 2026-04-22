@@ -1,0 +1,36 @@
+{% extends 'pontons/admin/base_admin.html' %}
+{% block title %}{{ titre }}{% endblock %}
+
+{% block admin_content %}
+<div class="level mb-4">
+  <div class="level-left"><h1 class="title is-5">{{ titre }}</h1></div>
+  <div class="level-right">
+    <a href="{% url 'admin_embarcations' %}" class="button is-light">
+      <span class="icon"><i class="fas fa-arrow-left"></i></span><span>Retour</span>
+    </a>
+  </div>
+</div>
+
+<div class="box" style="max-width:600px;">
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="field">
+      <label class="label">{{ field.label }}</label>
+      <div class="control">{{ field }}</div>
+      {% if field.errors %}<p class="help is-danger">{{ field.errors.0 }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="field is-grouped mt-4">
+      <div class="control">
+        <button type="submit" class="button is-primary">
+          <span class="icon"><i class="fas fa-save"></i></span><span>Enregistrer</span>
+        </button>
+      </div>
+      <div class="control">
+        <a href="{% url 'admin_embarcations' %}" class="button is-light">Annuler</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

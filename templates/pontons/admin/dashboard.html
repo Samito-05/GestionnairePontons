@@ -1,0 +1,115 @@
+{% extends 'pontons/admin/base_admin.html' %}
+{% block title %}Tableau de bord admin{% endblock %}
+
+{% block admin_content %}
+<h1 class="title is-4 mb-5">
+  <span class="icon-text">
+    <span class="icon has-text-info"><i class="fas fa-tachometer-alt"></i></span>
+    <span>Tableau de bord</span>
+  </span>
+</h1>
+
+<div class="columns is-multiline">
+  <div class="column is-3-desktop is-6-tablet">
+    <div class="card has-background-info-light">
+      <div class="card-content">
+        <div class="level">
+          <div class="level-left">
+            <div>
+              <p class="heading">Pontons</p>
+              <p class="title">{{ nb_pontons }}</p>
+            </div>
+          </div>
+          <div class="level-right">
+            <span class="icon is-large has-text-info"><i class="fas fa-anchor fa-2x"></i></span>
+          </div>
+        </div>
+        <a href="{% url 'admin_pontons' %}" class="button is-info is-small is-fullwidth mt-2">Gérer</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="column is-3-desktop is-6-tablet">
+    <div class="card has-background-primary-light">
+      <div class="card-content">
+        <div class="level">
+          <div class="level-left">
+            <div>
+              <p class="heading">Embarcations actives</p>
+              <p class="title">{{ nb_embarcations }}</p>
+            </div>
+          </div>
+          <div class="level-right">
+            <span class="icon is-large has-text-primary"><i class="fas fa-ship fa-2x"></i></span>
+          </div>
+        </div>
+        <a href="{% url 'admin_embarcations' %}" class="button is-primary is-small is-fullwidth mt-2">Gérer</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="column is-3-desktop is-6-tablet">
+    <div class="card has-background-success-light">
+      <div class="card-content">
+        <div class="level">
+          <div class="level-left">
+            <div>
+              <p class="heading">Locations aujourd'hui</p>
+              <p class="title">{{ nb_locations_today }}</p>
+            </div>
+          </div>
+          <div class="level-right">
+            <span class="icon is-large has-text-success"><i class="fas fa-calendar-check fa-2x"></i></span>
+          </div>
+        </div>
+        <a href="{% url 'admin_locations' %}" class="button is-success is-small is-fullwidth mt-2">Voir</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="column is-3-desktop is-6-tablet">
+    <div class="card has-background-warning-light">
+      <div class="card-content">
+        <div class="level">
+          <div class="level-left">
+            <div>
+              <p class="heading">Utilisateurs</p>
+              <p class="title">{{ nb_users }}</p>
+            </div>
+          </div>
+          <div class="level-right">
+            <span class="icon is-large has-text-warning"><i class="fas fa-users fa-2x"></i></span>
+          </div>
+        </div>
+        <a href="{% url 'admin_users' %}" class="button is-warning is-small is-fullwidth mt-2">Gérer</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="columns mt-4">
+  <div class="column">
+    <div class="card">
+      <div class="card-header">
+        <p class="card-header-title">Actions rapides</p>
+      </div>
+      <div class="card-content">
+        <div class="buttons">
+          <a href="{% url 'admin_ponton_new' %}" class="button is-info is-outlined">
+            <span class="icon"><i class="fas fa-plus"></i></span><span>Nouveau ponton</span>
+          </a>
+          <a href="{% url 'admin_embarcation_new' %}" class="button is-primary is-outlined">
+            <span class="icon"><i class="fas fa-plus"></i></span><span>Nouvelle embarcation</span>
+          </a>
+          <a href="{% url 'admin_location_new' %}" class="button is-success is-outlined">
+            <span class="icon"><i class="fas fa-plus"></i></span><span>Nouvelle location</span>
+          </a>
+          <a href="{% url 'admin_user_new' %}" class="button is-warning is-outlined">
+            <span class="icon"><i class="fas fa-plus"></i></span><span>Nouvel utilisateur</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

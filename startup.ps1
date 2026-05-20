@@ -76,5 +76,5 @@ if ($NoRunServer) {
     exit 0
 }
 
-Write-Step "Starting Django server on http://127.0.0.1:$Port"
-python manage.py runserver "127.0.0.1:$Port"
+Write-Step "Starting Django server on http://0.0.0.0:$Port"
+python manage.py runserver "0.0.0.0:$Port"

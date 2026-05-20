@@ -45,10 +45,14 @@ class Embarcation(models.Model):
         return f"{self.nom} ({self.ponton.nom})"
 
     def est_louee_maintenant(self):
+        if hasattr(self, 'est_louee_now'):
+            return self.est_louee_now
         now = timezone.now()
         return self.locations.filter(heure_debut__lte=now, heure_fin__gt=now).exists()
 
     def location_en_cours(self):
+        if hasattr(self, 'locations_actives'):
+            return self.locations_actives[0] if self.locations_actives else None
         now = timezone.now()
         return self.locations.filter(heure_debut__lte=now, heure_fin__gt=now).first()
 

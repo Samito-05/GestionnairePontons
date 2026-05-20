@@ -4,12 +4,12 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.db.models import Count, Exists, OuterRef, Prefetch
 from datetime import timedelta, datetime, date
-import json
 
 from .models import Ponton, Embarcation, Location, UserProfile
 from .forms import (
-    LocationRapideForm, PontonForm, EmbarcationForm,
+    PontonForm, EmbarcationForm,
     LocationForm, UserCreateForm, UserProfileForm,
 )
 from django.contrib.auth.models import User
@@ -45,6 +45,14 @@ GRID_END   = 20 * 60   # 1200 min depuis minuit
 GRID_SPAN  = GRID_END - GRID_START  # 420 min
 
 
+def _text_color(hex_color):
+    """Return #000 or #fff for maximum contrast against a hex background."""
+    h = hex_color.lstrip('#')
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return '#000000' if luminance > 0.5 else '#ffffff'
+
+
 def build_planning_data(date_cible):
     """Construit le planning avec positionnement CSS au pixel près (13h–20h)."""
     from datetime import time as dtime
@@ -74,14 +82,20 @@ def build_planning_data(date_cible):
     for loc in locations_jour:
         loc_by_emb.setdefault(loc.embarcation_id, []).append(loc)
 
+    now = timezone.now()
+
     planning = []
     for ponton in pontons:
         rows = []
         for emb in ponton.embarcations.filter(actif=True):
             blocks = []
+            is_rented_now = False
             for loc in sorted(loc_by_emb.get(emb.id, []), key=lambda l: l.heure_debut):
                 ld = timezone.localtime(loc.heure_debut)
                 lf = timezone.localtime(loc.heure_fin)
+
+                if loc.heure_debut <= now < loc.heure_fin:
+                    is_rented_now = True
 
                 start_min = max(ld.hour * 60 + ld.minute, GRID_START)
                 end_min   = min(lf.hour * 60 + lf.minute, GRID_END)
@@ -92,13 +106,14 @@ def build_planning_data(date_cible):
                 width_pct = (end_min - start_min)    / GRID_SPAN * 100
 
                 blocks.append({
-                    'loc':       loc,
-                    'left_pct':  f'{left_pct:.4f}',   # string avec point : safe pour CSS en locale fr
-                    'width_pct': f'{width_pct:.4f}',
-                    'color':     emb.couleur,
-                    'label':     f"{ld.strftime('%H:%M')}–{lf.strftime('%H:%M')}",
+                    'loc':        loc,
+                    'left_pct':   f'{left_pct:.4f}',
+                    'width_pct':  f'{width_pct:.4f}',
+                    'color':      emb.couleur,
+                    'text_color': _text_color(emb.couleur),
+                    'label':      f"{ld.strftime('%H:%M')}–{lf.strftime('%H:%M')}",
                 })
-            rows.append({'embarcation': emb, 'blocks': blocks})
+            rows.append({'embarcation': emb, 'blocks': blocks, 'est_louee_maintenant': is_rented_now})
         planning.append({'ponton': ponton, 'rows': rows})
 
     return marks, planning
@@ -131,13 +146,23 @@ def planning(request):
 
 @require_role('admin', 'gestionnaire')
 def gestionnaire(request):
-    pontons = Ponton.objects.filter(actif=True).prefetch_related('embarcations')
     now = timezone.now()
+    active_locs_qs = Location.objects.filter(
+        heure_debut__lte=now, heure_fin__gt=now
+    ).select_related('gestionnaire')
+    pontons = Ponton.objects.filter(actif=True).prefetch_related(
+        Prefetch(
+            'embarcations',
+            queryset=Embarcation.objects.filter(actif=True).prefetch_related(
+                Prefetch('locations', queryset=active_locs_qs, to_attr='locations_actives')
+            ),
+        )
+    )
 
     embarcations_status = []
     for ponton in pontons:
         embs = []
-        for emb in ponton.embarcations.filter(actif=True):
+        for emb in ponton.embarcations.all():
             loc = emb.location_en_cours()
             embs.append({
                 'embarcation': emb,
@@ -208,7 +233,7 @@ def admin_dashboard(request):
 
 @require_role('admin')
 def admin_pontons(request):
-    pontons = Ponton.objects.all()
+    pontons = Ponton.objects.annotate(nb_embarcations=Count('embarcations'))
     return render(request, 'pontons/admin/pontons.html', {'pontons': pontons, 'role': 'admin'})
 
 
@@ -246,7 +271,16 @@ def admin_ponton_delete(request, pk):
 
 @require_role('admin')
 def admin_embarcations(request):
-    embarcations = Embarcation.objects.select_related('ponton').all()
+    now = timezone.now()
+    embarcations = Embarcation.objects.select_related('ponton').annotate(
+        est_louee_now=Exists(
+            Location.objects.filter(
+                embarcation=OuterRef('pk'),
+                heure_debut__lte=now,
+                heure_fin__gt=now,
+            )
+        )
+    )
     return render(request, 'pontons/admin/embarcations.html', {'embarcations': embarcations, 'role': 'admin'})
 
 
@@ -383,9 +417,13 @@ def admin_user_delete(request, pk):
 
 def api_status(request):
     now = timezone.now()
+    current_locs = {
+        loc.embarcation_id: loc
+        for loc in Location.objects.filter(heure_debut__lte=now, heure_fin__gt=now)
+    }
     data = []
     for emb in Embarcation.objects.filter(actif=True).select_related('ponton'):
-        loc = emb.location_en_cours()
+        loc = current_locs.get(emb.id)
         data.append({
             'id': emb.id,
             'nom': emb.nom,

@@ -2,19 +2,17 @@
 {% block title %}Utilisateurs{% endblock %}
 
 {% block admin_content %}
-<div class="level mb-4">
-  <div class="level-left">
-    <h1 class="title is-5"><span class="icon"><i class="fas fa-users"></i></span> Utilisateurs</h1>
-  </div>
-  <div class="level-right">
-    <a href="{% url 'admin_user_new' %}" class="button is-primary">
-      <span class="icon"><i class="fas fa-plus"></i></span><span>Nouvel utilisateur</span>
-    </a>
-  </div>
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-users" style="color:var(--accent);font-size:1rem;"></i>&nbsp; Utilisateurs
+  </h1>
+  <a href="{% url 'admin_user_new' %}" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> Nouvel utilisateur
+  </a>
 </div>
 
-<div class="box">
-  <table class="table is-fullwidth is-hoverable is-striped">
+<div class="table-wrap">
+  <table class="data-table">
     <thead>
       <tr>
         <th>Identifiant</th>
@@ -28,35 +26,38 @@
     <tbody>
       {% for u in users %}
       <tr>
-        <td><strong>{{ u.username }}</strong></td>
-        <td>{{ u.get_full_name|default:"—" }}</td>
-        <td>{{ u.email|default:"—" }}</td>
+        <td><span class="fw-600 mono" style="font-size:.85rem;">{{ u.username }}</span></td>
+        <td style="font-size:.85rem;color:var(--text-muted);">{{ u.get_full_name|default:"—" }}</td>
+        <td style="font-size:.83rem;color:var(--text-muted);">{{ u.email|default:"—" }}</td>
         <td>
           {% if u.is_superuser %}
-            <span class="tag is-dark">Super Admin</span>
+            <span class="badge badge-accent">Super Admin</span>
           {% elif u.profile.role == 'admin' %}
-            <span class="tag is-danger">Admin</span>
+            <span class="badge badge-danger">Admin</span>
           {% elif u.profile.role == 'gestionnaire' %}
-            <span class="tag is-info">Gestionnaire</span>
+            <span class="badge badge-info">Gestionnaire</span>
           {% else %}
-            <span class="tag is-light">Visiteur</span>
+            <span class="badge badge-muted">Visiteur</span>
           {% endif %}
         </td>
         <td>
           {% if u.is_superuser %}
-            <span class="icon has-text-warning"><i class="fas fa-star"></i></span>
-          {% else %}—{% endif %}
+            <i class="fas fa-star" style="color:var(--accent);font-size:.85rem;"></i>
+          {% else %}
+            <span style="color:var(--text-dim);">—</span>
+          {% endif %}
         </td>
         <td>
-          <div class="buttons are-small">
-            <a href="{% url 'admin_user_edit' u.pk %}" class="button is-info is-outlined">
-              <span class="icon"><i class="fas fa-edit"></i></span>
+          <div style="display:flex;gap:.4rem;">
+            <a href="{% url 'admin_user_edit' u.pk %}" class="btn btn-info btn-sm">
+              <i class="fas fa-edit"></i>
             </a>
             {% if u != request.user %}
-            <form method="post" action="{% url 'admin_user_delete' u.pk %}" onsubmit="return confirm('Supprimer cet utilisateur ?')">
+            <form method="post" action="{% url 'admin_user_delete' u.pk %}"
+                  onsubmit="return confirm('Supprimer cet utilisateur ?')">
               {% csrf_token %}
-              <button type="submit" class="button is-danger is-outlined">
-                <span class="icon"><i class="fas fa-trash"></i></span>
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash"></i>
               </button>
             </form>
             {% endif %}
@@ -64,7 +65,7 @@
         </td>
       </tr>
       {% empty %}
-        <tr><td colspan="6" class="has-text-centered has-text-grey-light">Aucun utilisateur.</td></tr>
+        <tr class="empty-row"><td colspan="6">Aucun utilisateur.</td></tr>
       {% endfor %}
     </tbody>
   </table>

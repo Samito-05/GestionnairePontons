@@ -4,33 +4,105 @@
 {% block extra_css %}
 <style>
 
-/* ════════════════════════════════════════════════
-   TIMELINE DESKTOP
-   ════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   DATE NAV BAR
+══════════════════════════════════════════════ */
+.planning-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.planning-title {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  color: var(--text);
+}
+.planning-title i { color: var(--accent); font-size: .95rem; }
+.planning-title strong { font-family: 'Playfair Display', serif; }
+
+.planning-controls {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  flex-wrap: wrap;
+}
+
+.clock-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .42rem;
+  padding: .32rem .78rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+.clock-tag i { font-size: .72rem; color: var(--accent); }
+
+/* Legend */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1.1rem;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: .38rem;
+  font-size: .77rem;
+  color: var(--text-muted);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.legend-line {
+  width: 12px; height: 2px;
+  background: var(--danger);
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════
+   DESKTOP TIMELINE
+══════════════════════════════════════════════ */
 .tl-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border: 1px solid hsl(0,0%,86%);
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  margin-bottom: 1.5rem;
 }
+
 .tl-row {
   display: flex;
   align-items: stretch;
-  border-bottom: 1px solid hsl(0,0%,93%);
+  border-bottom: 1px solid var(--border);
 }
 .tl-row:last-child { border-bottom: none; }
+
 .tl-label {
-  width: 150px;
-  min-width: 150px;
-  padding: .25rem .6rem;
+  width: 155px;
+  min-width: 155px;
+  padding: .28rem .65rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-right: 2px solid hsl(0,0%,86%);
+  border-right: 1px solid var(--border-bright);
   flex-shrink: 0;
-  font-size: .8rem;
+  font-size: .79rem;
 }
+
 .tl-track {
   position: relative;
   flex: 1;
@@ -38,58 +110,90 @@
   margin-right: 10px;
   overflow: visible;
 }
-.tl-row-axis { height: 26px; border-bottom: 2px solid hsl(0,0%,80%); }
-.tl-row-axis .tl-label {
-  font-size: .72rem;
-  font-weight: 400;
-  color: hsl(0,0%,50%);
-  border-right-color: transparent;
+
+/* Axis row */
+.tl-row-axis {
+  height: 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-bright) !important;
 }
+.tl-row-axis .tl-label {
+  font-size: .7rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  border-right-color: transparent;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .hour-tick {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: .72rem;
-  font-weight: 700;
-  color: hsl(0,0%,30%);
+  font-size: .7rem;
+  font-weight: 600;
+  color: var(--text-muted);
   white-space: nowrap;
   pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
 }
 .hour-tick-last { transform: translate(-100%, -50%); }
-.tl-row-ponton { height: 28px; border-bottom: 2px solid hsl(0,0%,86%); }
-.tl-row-ponton .tl-label { font-weight: 700; font-size: .8rem; }
-.tl-row-emb { height: 44px; }
-.tl-row-emb:hover { background: hsl(0,0%,98%); }
-.grid-h  { position: absolute; top: 0; bottom: 0; width: 1px; background: hsl(0,0%,86%); pointer-events: none; }
-.grid-hh { position: absolute; top: 0; bottom: 0; width: 1px; background: hsl(0,0%,92%); pointer-events: none; }
+
+/* Ponton header row */
+.tl-row-ponton {
+  height: 30px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-bright) !important;
+}
+.tl-row-ponton .tl-label {
+  font-weight: 700;
+  font-size: .8rem;
+  color: var(--accent);
+  font-family: 'Playfair Display', serif;
+  border-right-color: var(--border-bright);
+}
+
+/* Embarcation row */
+.tl-row-emb { height: 46px; }
+.tl-row-emb .tl-label { background: var(--surface-2); }
+.tl-row-emb:hover .tl-label { background: var(--surface-3); }
+.tl-row-emb:hover { background: var(--surface-3); }
+
+/* Grid lines */
+.grid-h  { position: absolute; top:0; bottom:0; width:1px; background: var(--border-bright); pointer-events:none; }
+.grid-hh { position: absolute; top:0; bottom:0; width:1px; background: var(--border); pointer-events:none; }
+
+/* Rental block */
 .rental-block {
   position: absolute;
   top: 5px; bottom: 5px;
-  border-radius: 4px;
-  color: #fff;
-  font-size: .71rem;
+  border-radius: 5px;
+  font-size: .7rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  padding: 0 6px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
   cursor: default;
-  transition: filter .1s;
+  transition: filter .12s;
   min-width: 6px;
+  font-family: 'JetBrains Mono', monospace;
 }
-.rental-block:hover { filter: brightness(1.08); z-index: 2; }
+.rental-block:hover { filter: brightness(1.1); z-index: 2; }
 .rental-block.is-narrow { font-size: 0; }
+
+/* Now line */
 .now-line {
   position: absolute;
   top: 0; bottom: 0;
   width: 2px;
-  background: hsl(4,90%,55%);
+  background: var(--danger);
   z-index: 5;
   pointer-events: none;
+  box-shadow: 0 0 8px rgba(226,89,107,.5);
 }
 .now-line::before {
   content: '';
@@ -97,28 +201,76 @@
   top: -1px; left: -4px;
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: hsl(4,90%,55%);
+  background: var(--danger);
+  box-shadow: 0 0 6px rgba(226,89,107,.6);
 }
 
-/* ════════════════════════════════════════════════
-   PLANNING MOBILE (cards + mini-barres)
-   ════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   DESKTOP SUMMARY CARDS
+══════════════════════════════════════════════ */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.summary-card-head {
+  padding: .6rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: 'Playfair Display', serif;
+  letter-spacing: .01em;
+}
+
+.summary-card-body { padding: .65rem 1rem; }
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .38rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.summary-row:last-child { border-bottom: none; }
+
+.summary-emb-name {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .83rem;
+}
+
+/* ══════════════════════════════════════════════
+   MOBILE PLANNING
+══════════════════════════════════════════════ */
 .mob-ponton-label {
   display: flex;
   align-items: center;
   gap: .5rem;
-  margin: 1.25rem 0 .6rem;
+  margin: 1.5rem 0 .65rem;
   font-weight: 700;
-  font-size: .9rem;
+  font-size: .92rem;
+  color: var(--accent);
+  font-family: 'Playfair Display', serif;
 }
 
 .mob-emb-card {
-  background: #fff;
-  border: 1px solid hsl(0,0%,88%);
-  border-radius: 12px;
-  padding: .85rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .9rem 1rem;
   margin-bottom: .6rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
 
 .mob-emb-header {
@@ -131,47 +283,45 @@
 .mob-emb-name {
   display: flex;
   align-items: center;
-  gap: .4rem;
+  gap: .42rem;
   font-weight: 600;
-  font-size: .88rem;
+  font-size: .87rem;
 }
 
 .mob-color-dot {
-  width: 10px; height: 10px;
+  width: 9px; height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
-  display: inline-block;
 }
 
-/* Mini barre de timeline */
-.mini-bar-wrap { margin: 0 0 .25rem; }
+/* Mini bar */
+.mini-bar-wrap { margin: 0 0 .22rem; }
 
 .mini-bar {
   position: relative;
-  height: 10px;
-  background: hsl(0,0%,92%);
-  border-radius: 10px;
-  margin-bottom: .3rem;
-  overflow: hidden; /* les blocs ne débordent pas */
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: 8px;
+  margin-bottom: .28rem;
+  overflow: hidden;
 }
 
-/* "Now" sur la mini barre */
 .mini-bar-now {
   position: absolute;
   top: 0; bottom: 0;
   width: 2px;
-  background: hsl(4,90%,55%);
+  background: var(--danger);
   z-index: 3;
+  box-shadow: 0 0 4px rgba(226,89,107,.6);
 }
 
 .mini-block {
   position: absolute;
   top: 0; bottom: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   min-width: 4px;
 }
 
-/* Graduation horaire sous la mini-barre */
 .mini-ticks {
   position: relative;
   height: 13px;
@@ -179,16 +329,16 @@
 
 .mini-tick {
   position: absolute;
-  font-size: .62rem;
-  color: hsl(0,0%,55%);
+  font-size: .6rem;
+  color: var(--text-dim);
   transform: translateX(-50%);
   white-space: nowrap;
   line-height: 13px;
   user-select: none;
+  font-family: 'JetBrains Mono', monospace;
 }
 .mini-tick.is-last { transform: translateX(-100%); }
 
-/* Étiquettes de créneaux */
 .mob-slots {
   display: flex;
   flex-wrap: wrap;
@@ -201,15 +351,15 @@
   align-items: center;
   gap: .25rem;
   border-radius: 20px;
-  padding: 2px 8px;
-  font-size: .72rem;
+  padding: 2px 9px;
+  font-size: .7rem;
   font-weight: 700;
-  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
 }
 
-/* ════════════════════════════════════════════════
-   RESPONSIVE : bascule desktop ↔ mobile
-   ════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
 @media (min-width: 769px) {
   .mobile-planning { display: none !important; }
 }
@@ -217,74 +367,81 @@
   .tl-wrap         { display: none !important; }
   .desktop-summary { display: none !important; }
 }
-
 </style>
 {% endblock %}
 
 
 {% block content %}
-<section class="section pb-5">
-  <div class="container is-fluid">
+<section class="page-section">
+  <div class="container">
 
-    <!-- ── En-tête ───────────────────────────────────────────── -->
-    <div class="level mb-4">
-      <div class="level-left">
-        <div class="level-item">
-          <h1 class="title is-5 mb-0">
-            <span class="icon has-text-link mr-1"><i class="fas fa-calendar-alt"></i></span>
-            <span class="is-hidden-mobile">Planning du </span>
-            <strong>{{ date_cible|date:"l d F Y" }}</strong>
-          </h1>
-        </div>
+    <!-- ── Header ──────────────────────────────────────────────── -->
+    <div class="planning-header">
+      <div class="planning-title">
+        <i class="fas fa-calendar-alt"></i>
+        <span>
+          <span class="hide-mobile text-muted text-sm" style="font-family:'Outfit',sans-serif;font-weight:400;">Planning du&nbsp;</span>
+          <strong>{{ date_cible|date:"l d F Y" }}</strong>
+        </span>
       </div>
-      <div class="level-right" style="gap:.4rem;display:flex;flex-wrap:wrap;align-items:center;">
-        <div class="buttons has-addons mb-0">
-          <a href="?date={{ date_prev|date:'Y-m-d' }}" class="button is-small">
-            <span class="icon"><i class="fas fa-chevron-left"></i></span>
+      <div class="planning-controls">
+        <div class="btn-group">
+          <a href="?date={{ date_prev|date:'Y-m-d' }}" class="btn btn-ghost btn-sm">
+            <i class="fas fa-chevron-left"></i>
           </a>
-          <a href="?date={% now 'Y-m-d' %}" class="button is-link is-light is-small">Aujourd'hui</a>
-          <a href="?date={{ date_next|date:'Y-m-d' }}" class="button is-small">
-            <span class="icon"><i class="fas fa-chevron-right"></i></span>
+          <a href="?date={% now 'Y-m-d' %}" class="btn btn-ghost btn-sm">Aujourd'hui</a>
+          <a href="?date={{ date_next|date:'Y-m-d' }}" class="btn btn-ghost btn-sm">
+            <i class="fas fa-chevron-right"></i>
           </a>
         </div>
-        <span id="live-clock" class="tag is-medium is-dark is-light">
-          <span class="icon mr-1"><i class="fas fa-clock"></i></span>
+        <span id="live-clock" class="clock-tag">
+          <i class="fas fa-clock"></i>
           <span>{{ now|time:"H:i" }}</span>
         </span>
         {% if role == 'gestionnaire' or role == 'admin' %}
-        <a href="{% url 'gestionnaire' %}" class="button is-small is-link">
-          <span class="icon"><i class="fas fa-ship"></i></span>
-          <span class="is-hidden-mobile">Gérer les sorties</span>
-          <span class="is-hidden-tablet">Gérer</span>
+        <a href="{% url 'gestionnaire' %}" class="btn btn-primary btn-sm">
+          <i class="fas fa-ship"></i>
+          <span class="hide-mobile">Gérer les sorties</span>
+          <span class="hide-desktop">Gérer</span>
         </a>
         {% endif %}
       </div>
     </div>
 
-    <!-- ── Légende ───────────────────────────────────────────── -->
-    <div class="tags mb-3">
-      <span class="tag is-success is-light"><span class="icon mr-1"><i class="fas fa-check"></i></span>Disponible</span>
-      <span class="tag is-danger is-light"><span class="icon mr-1"><i class="fas fa-ship"></i></span>En location</span>
-      <span class="tag" style="background:hsl(4,90%,93%);color:hsl(4,90%,40%);">
-        <span class="mr-1" style="font-weight:900;">|</span>Maintenant
-      </span>
+    <!-- ── Legend ──────────────────────────────────────────────── -->
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-dot" style="background:var(--success);"></span>
+        Disponible
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:var(--danger);"></span>
+        En location
+      </div>
+      <div class="legend-item">
+        <span class="legend-line"></span>
+        Maintenant
+      </div>
     </div>
 
     {% if not planning_data %}
-      <div class="notification is-info is-light">
-        <span class="icon"><i class="fas fa-info-circle"></i></span>
-        Aucun ponton actif configuré.
-        {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}">Ajouter un ponton</a>{% endif %}
+      <div class="toast toast-info" style="max-width:520px;">
+        <span>
+          <i class="fas fa-info-circle"></i>&nbsp;
+          Aucun ponton actif configuré.
+          {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" style="color:inherit;text-decoration:underline;">Ajouter un ponton</a>{% endif %}
+        </span>
       </div>
 
     {% else %}
 
-    <!-- ════════════════════════════════════════════
-         TIMELINE DESKTOP
-         ════════════════════════════════════════════ -->
-    <div class="tl-wrap mb-5">
+    <!-- ════════════════════════════════════════
+         DESKTOP TIMELINE
+    ════════════════════════════════════════ -->
+    <div class="tl-wrap">
 
-      <div class="tl-row tl-row-axis has-background-white-bis">
+      <!-- Axis -->
+      <div class="tl-row tl-row-axis">
         <div class="tl-label">13h → 20h</div>
         <div class="tl-track">
           {% for m in marks %}{% if m.is_hour %}
@@ -295,10 +452,9 @@
       </div>
 
       {% for ponton_data in planning_data %}
-        <div class="tl-row tl-row-ponton has-background-link-light">
-          <div class="tl-label has-text-link">
-            {{ ponton_data.ponton.nom }}
-          </div>
+        <!-- Ponton header -->
+        <div class="tl-row tl-row-ponton">
+          <div class="tl-label">{{ ponton_data.ponton.nom }}</div>
           <div class="tl-track">
             {% for m in marks %}
               <div class="{% if m.is_hour %}grid-h{% else %}grid-hh{% endif %}" style="left:{{ m.pct }}%"></div>
@@ -308,12 +464,14 @@
 
         {% for row in ponton_data.rows %}
         <div class="tl-row tl-row-emb">
-          <div class="tl-label has-background-white-bis">
-            <div style="display:flex;align-items:center;gap:.3rem;overflow:hidden;">
-              <span style="width:9px;height:9px;border-radius:50%;background:{{ row.embarcation.couleur }};flex-shrink:0;display:inline-block;"></span>
-              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;">{{ row.embarcation.nom }}</span>
+          <div class="tl-label">
+            <div style="display:flex;align-items:center;gap:.35rem;overflow:hidden;">
+              <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.8rem;">
+                {{ row.embarcation.nom }}
+              </span>
             </div>
-            <div class="has-text-grey" style="font-size:.68rem;padding-left:14px;">
+            <div style="font-size:.67rem;color:var(--text-muted);padding-left:14px;font-family:'Outfit',sans-serif;">
               {{ row.embarcation.get_type_embarcation_display }}
             </div>
           </div>
@@ -323,7 +481,7 @@
             {% endfor %}
             {% for block in row.blocks %}
               <div class="rental-block"
-                   style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};"
+                   style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};color:{{ block.text_color }};"
                    title="{{ block.label }}">
                 {{ block.label }}
               </div>
@@ -333,75 +491,60 @@
         {% endfor %}
       {% endfor %}
 
-    </div>
+    </div><!-- /tl-wrap -->
 
-    <!-- Résumé desktop -->
-    <div class="desktop-summary columns is-multiline">
+    <!-- Desktop summary -->
+    <div class="summary-grid desktop-summary">
       {% for ponton_data in planning_data %}
-      <div class="column is-12-mobile is-6-tablet">
-        <div class="card">
-          <div class="card-header">
-            <p class="card-header-title has-text-grey-dark" style="font-size:.85rem;">
-              {{ ponton_data.ponton.nom }}
-            </p>
-          </div>
-          <div class="card-content py-3 px-4">
-            {% for row in ponton_data.rows %}
-            <div class="level is-mobile mb-2">
-              <div class="level-left">
-                <div class="level-item">
-                  <span style="width:8px;height:8px;border-radius:50%;background:{{ row.embarcation.couleur }};margin-right:.4rem;display:inline-block;flex-shrink:0;"></span>
-                  <small>{{ row.embarcation.nom }}</small>
-                </div>
-              </div>
-              <div class="level-right">
-                <div class="level-item">
-                  {% if row.embarcation.est_louee_maintenant %}
-                    <span class="tag is-danger is-light is-small"><span class="pulse mr-1">●</span>Sortie</span>
-                  {% else %}
-                    <span class="tag is-success is-light is-small">Dispo</span>
-                  {% endif %}
-                </div>
-              </div>
+      <div class="summary-card">
+        <div class="summary-card-head">{{ ponton_data.ponton.nom }}</div>
+        <div class="summary-card-body">
+          {% for row in ponton_data.rows %}
+          <div class="summary-row">
+            <div class="summary-emb-name">
+              <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
+              <span>{{ row.embarcation.nom }}</span>
             </div>
-            {% endfor %}
+            {% if row.est_louee_maintenant %}
+              <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
+            {% else %}
+              <span class="badge badge-success">● Dispo</span>
+            {% endif %}
           </div>
+          {% endfor %}
         </div>
       </div>
       {% endfor %}
     </div>
 
-
-    <!-- ════════════════════════════════════════════
-         VUE MOBILE
-         ════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════
+         MOBILE VIEW
+    ════════════════════════════════════════ -->
     <div class="mobile-planning">
       {% for ponton_data in planning_data %}
 
         <div class="mob-ponton-label">
+          <i class="fas fa-water" style="font-size:.8rem;"></i>
           {{ ponton_data.ponton.nom }}
         </div>
 
         {% for row in ponton_data.rows %}
         <div class="mob-emb-card">
-
-          <!-- Nom + statut -->
           <div class="mob-emb-header">
             <div class="mob-emb-name">
               <span class="mob-color-dot" style="background:{{ row.embarcation.couleur }};"></span>
               {{ row.embarcation.nom }}
-              <span class="has-text-grey" style="font-size:.72rem;font-weight:400;">
+              <span style="color:var(--text-muted);font-size:.72rem;font-weight:400;">
                 — {{ row.embarcation.get_type_embarcation_display }}
               </span>
             </div>
-            {% if row.embarcation.est_louee_maintenant %}
-              <span class="tag is-danger is-light is-small"><span class="pulse mr-1">●</span>Sortie</span>
+            {% if row.est_louee_maintenant %}
+              <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
             {% else %}
-              <span class="tag is-success is-light is-small">Dispo</span>
+              <span class="badge badge-success">● Dispo</span>
             {% endif %}
           </div>
 
-          <!-- Mini barre 13h→20h -->
           <div class="mini-bar-wrap">
             <div class="mini-bar">
               {% for block in row.blocks %}
@@ -409,7 +552,6 @@
                      style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};"></div>
               {% endfor %}
             </div>
-            <!-- Graduations horaires sous la barre -->
             <div class="mini-ticks">
               {% for m in marks %}{% if m.show_mobile %}
                 <span class="mini-tick {% if forloop.last %}is-last{% endif %}"
@@ -418,27 +560,22 @@
             </div>
           </div>
 
-          <!-- Créneaux réservés -->
           {% if row.blocks %}
             <div class="mob-slots">
               {% for block in row.blocks %}
-                <span class="mob-slot-tag" style="background:{{ block.color }};">
+                <span class="mob-slot-tag" style="background:{{ block.color }};color:{{ block.text_color }};">
                   {{ block.label }}
                 </span>
               {% endfor %}
             </div>
           {% else %}
-            <p class="has-text-grey-light" style="font-size:.75rem;margin-top:.3rem;">
-              Aucune sortie planifiée
-            </p>
+            <p style="font-size:.73rem;color:var(--text-dim);margin-top:.3rem;">Aucune sortie planifiée</p>
           {% endif %}
-
         </div>
         {% endfor %}
 
       {% endfor %}
-    </div>
-    <!-- fin mobile-planning -->
+    </div><!-- /mobile-planning -->
 
     {% endif %}
   </div>
@@ -454,18 +591,15 @@ function timeToPct(h, m) {
   return ((h - GRID_START_H) * 60 + m) / GRID_DUR * 100;
 }
 
-/* Ligne "maintenant" sur desktop et mini-barres mobile */
 function drawNowLine() {
   const now = new Date();
   const h = now.getHours(), m = now.getMinutes();
 
-  /* Nettoyer les anciens indicateurs */
   document.querySelectorAll('.now-line, .mini-bar-now').forEach(el => el.remove());
   if (h < 13 || h >= 20) return;
 
   const pct = timeToPct(h, m).toFixed(4);
 
-  /* Desktop : injecter dans chaque tl-track */
   document.querySelectorAll('.tl-track').forEach(track => {
     const line = document.createElement('div');
     line.className = 'now-line';
@@ -473,7 +607,6 @@ function drawNowLine() {
     track.appendChild(line);
   });
 
-  /* Mobile : injecter dans chaque mini-bar */
   document.querySelectorAll('.mini-bar').forEach(bar => {
     const line = document.createElement('div');
     line.className = 'mini-bar-now';
@@ -482,14 +615,12 @@ function drawNowLine() {
   });
 }
 
-/* Masquer le label si le bloc desktop est trop étroit */
 function adjustNarrowBlocks() {
   document.querySelectorAll('.rental-block').forEach(b => {
     b.classList.toggle('is-narrow', parseFloat(b.style.width) < 4);
   });
 }
 
-/* Horloge */
 function updateClock() {
   const now = new Date();
   const txt = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
@@ -501,8 +632,9 @@ document.addEventListener('DOMContentLoaded', () => {
   drawNowLine();
   adjustNarrowBlocks();
 });
-setInterval(updateClock,  10000);
-setInterval(drawNowLine,  30000);
+
+setInterval(updateClock, 10000);
+setInterval(drawNowLine, 30000);
 setTimeout(() => location.reload(), 60000);
 </script>
 {% endblock %}

@@ -2,19 +2,17 @@
 {% block title %}Pontons{% endblock %}
 
 {% block admin_content %}
-<div class="level mb-4">
-  <div class="level-left">
-    <h1 class="title is-5">Pontons</h1>
-  </div>
-  <div class="level-right">
-    <a href="{% url 'admin_ponton_new' %}" class="button is-primary">
-      <span class="icon"><i class="fas fa-plus"></i></span><span>Nouveau ponton</span>
-    </a>
-  </div>
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-water" style="color:var(--accent);font-size:1rem;"></i>&nbsp; Pontons
+  </h1>
+  <a href="{% url 'admin_ponton_new' %}" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> Nouveau ponton
+  </a>
 </div>
 
-<div class="box">
-  <table class="table is-fullwidth is-hoverable is-striped">
+<div class="table-wrap">
+  <table class="data-table">
     <thead>
       <tr>
         <th>Ordre</th>
@@ -28,33 +26,40 @@
     <tbody>
       {% for ponton in pontons %}
       <tr>
-        <td>{{ ponton.ordre }}</td>
-        <td><strong>{{ ponton.nom }}</strong></td>
-        <td>{{ ponton.description|default:"—" }}</td>
-        <td><span class="tag is-info is-light">{{ ponton.embarcations.count }}</span></td>
+        <td>
+          <span class="mono" style="font-size:.8rem;color:var(--text-muted);">{{ ponton.ordre }}</span>
+        </td>
+        <td>
+          <span class="fw-600">{{ ponton.nom }}</span>
+        </td>
+        <td style="color:var(--text-muted);font-size:.85rem;">{{ ponton.description|default:"—" }}</td>
+        <td>
+          <span class="badge badge-info">{{ ponton.nb_embarcations }}</span>
+        </td>
         <td>
           {% if ponton.actif %}
-            <span class="tag is-success is-light">Actif</span>
+            <span class="badge badge-success">● Actif</span>
           {% else %}
-            <span class="tag is-light">Inactif</span>
+            <span class="badge badge-muted">Inactif</span>
           {% endif %}
         </td>
         <td>
-          <div class="buttons are-small">
-            <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="button is-info is-outlined">
-              <span class="icon"><i class="fas fa-edit"></i></span>
+          <div style="display:flex;gap:.4rem;">
+            <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="btn btn-info btn-sm">
+              <i class="fas fa-edit"></i>
             </a>
-            <form method="post" action="{% url 'admin_ponton_delete' ponton.pk %}" onsubmit="return confirm('Supprimer ce ponton ?')">
+            <form method="post" action="{% url 'admin_ponton_delete' ponton.pk %}"
+                  onsubmit="return confirm('Supprimer ce ponton ?')">
               {% csrf_token %}
-              <button type="submit" class="button is-danger is-outlined">
-                <span class="icon"><i class="fas fa-trash"></i></span>
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash"></i>
               </button>
             </form>
           </div>
         </td>
       </tr>
       {% empty %}
-        <tr><td colspan="6" class="has-text-centered has-text-grey-light">Aucun ponton.</td></tr>
+        <tr class="empty-row"><td colspan="6">Aucun ponton.</td></tr>
       {% endfor %}
     </tbody>
   </table>

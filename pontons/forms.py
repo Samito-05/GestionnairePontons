@@ -1,27 +1,6 @@
 from django import forms
-from django.utils import timezone
 from .models import Embarcation, Location, Ponton, UserProfile
 from django.contrib.auth.models import User
-
-
-class LocationRapideForm(forms.Form):
-    """Formulaire gestionnaire : louer une embarcation en 1 clic."""
-    embarcation = forms.ModelChoiceField(
-        queryset=Embarcation.objects.filter(actif=True),
-        label='Embarcation',
-        widget=forms.Select(attrs={'class': 'select is-fullwidth'}),
-    )
-    notes = forms.CharField(
-        max_length=255,
-        required=False,
-        label='Notes',
-        widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'Optionnel…'}),
-    )
-
-    def __init__(self, *args, ponton=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if ponton:
-            self.fields['embarcation'].queryset = Embarcation.objects.filter(actif=True, ponton=ponton)
 
 
 class PontonForm(forms.ModelForm):

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from django.utils.html import format_html
 from .models import Ponton, Embarcation, Location, UserProfile
 
@@ -9,9 +10,13 @@ class PontonAdmin(admin.ModelAdmin):
     list_editable = ['ordre', 'actif']
     search_fields = ['nom']
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(nb_emb=Count('embarcations'))
+
     def nb_embarcations(self, obj):
-        return obj.embarcations.count()
+        return obj.nb_emb
     nb_embarcations.short_description = 'Embarcations'
+    nb_embarcations.admin_order_field = 'nb_emb'
 
 
 @admin.register(Embarcation)

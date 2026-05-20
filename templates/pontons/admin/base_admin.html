@@ -1,45 +1,100 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="columns is-gapless" style="min-height: calc(100vh - 64px);">
-  <!-- Sidebar -->
-  <div class="column is-narrow admin-sidebar is-hidden-mobile">
-    <aside class="menu p-4">
-      <p class="menu-label">Navigation</p>
-      <ul class="menu-list">
-        <li><a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}is-active{% endif %}">
-          <span class="icon"><i class="fas fa-tachometer-alt"></i></span> Tableau de bord
-        </a></li>
-      </ul>
-      <p class="menu-label">Flotte</p>
-      <ul class="menu-list">
-        <li><a href="{% url 'admin_pontons' %}" class="{% if 'ponton' in request.resolver_match.url_name %}is-active{% endif %}">
-          Pontons
-        </a></li>
-        <li><a href="{% url 'admin_embarcations' %}" class="{% if 'embarcation' in request.resolver_match.url_name %}is-active{% endif %}">
-          <span class="icon"><i class="fas fa-ship"></i></span> Embarcations
-        </a></li>
-        <li><a href="{% url 'admin_locations' %}" class="{% if 'location' in request.resolver_match.url_name %}is-active{% endif %}">
-          <span class="icon"><i class="fas fa-calendar-check"></i></span> Locations
-        </a></li>
-      </ul>
-      <p class="menu-label">Accès</p>
-      <ul class="menu-list">
-        <li><a href="{% url 'admin_users' %}" class="{% if 'user' in request.resolver_match.url_name %}is-active{% endif %}">
-          <span class="icon"><i class="fas fa-users"></i></span> Utilisateurs
-        </a></li>
-      </ul>
-      <p class="menu-label">Vues</p>
-      <ul class="menu-list">
-        <li><a href="{% url 'planning' %}"><span class="icon"><i class="fas fa-calendar-alt"></i></span> Planning</a></li>
-        <li><a href="{% url 'gestionnaire' %}"><span class="icon"><i class="fas fa-ship"></i></span> Gestion rapide</a></li>
-      </ul>
-    </aside>
-  </div>
+<div style="display:flex;min-height:calc(100vh - 54px - 46px);">
 
-  <!-- Main content -->
-  <div class="column p-5">
+  <!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
+  <aside class="admin-sidebar hide-mobile">
+    <nav style="padding:1.25rem .75rem;">
+
+      <div style="padding:.35rem .65rem;margin-bottom:.75rem;">
+        <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+          Navigation
+        </span>
+      </div>
+
+      <a href="{% url 'admin_dashboard' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+        <i class="fas fa-chart-simple"></i> Tableau de bord
+      </a>
+
+      <div style="padding:.55rem .65rem .28rem;margin-top:.5rem;">
+        <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+          Flotte
+        </span>
+      </div>
+
+      <a href="{% url 'admin_pontons' %}"
+         class="sidebar-link {% if 'ponton' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="fas fa-water"></i> Pontons
+      </a>
+      <a href="{% url 'admin_embarcations' %}"
+         class="sidebar-link {% if 'embarcation' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="fas fa-ship"></i> Embarcations
+      </a>
+      <a href="{% url 'admin_locations' %}"
+         class="sidebar-link {% if 'location' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="fas fa-calendar-check"></i> Locations
+      </a>
+
+      <div style="padding:.55rem .65rem .28rem;margin-top:.5rem;">
+        <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+          Accès
+        </span>
+      </div>
+
+      <a href="{% url 'admin_users' %}"
+         class="sidebar-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="fas fa-users"></i> Utilisateurs
+      </a>
+
+      <div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1rem;">
+        <div style="padding:.35rem .65rem .28rem;">
+          <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+            Vues
+          </span>
+        </div>
+        <a href="{% url 'planning' %}" class="sidebar-link">
+          <i class="fas fa-calendar-alt"></i> Planning
+        </a>
+        <a href="{% url 'gestionnaire' %}" class="sidebar-link">
+          <i class="fas fa-ship"></i> Gestion rapide
+        </a>
+      </div>
+
+    </nav>
+  </aside>
+
+  <!-- ══ MAIN CONTENT ════════════════════════════════════════ -->
+  <div style="flex:1;min-width:0;padding:1.75rem 2rem;overflow:auto;">
     {% block admin_content %}{% endblock %}
   </div>
+
 </div>
+
+<style>
+  .admin-sidebar {
+    width: 210px;
+    min-width: 210px;
+    background: var(--surface);
+    border-right: 1px solid var(--border-bright);
+    flex-shrink: 0;
+  }
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .48rem .75rem;
+    border-radius: var(--radius-sm);
+    font-size: .84rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--t), background var(--t);
+    margin-bottom: .08rem;
+  }
+  .sidebar-link i { font-size: .76rem; width: 14px; text-align: center; }
+  .sidebar-link:hover { color: var(--text); background: var(--surface-2); }
+  .sidebar-link.active { color: var(--accent); background: var(--accent-dim); }
+</style>
 {% endblock %}

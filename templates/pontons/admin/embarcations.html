@@ -2,19 +2,17 @@
 {% block title %}Embarcations{% endblock %}
 
 {% block admin_content %}
-<div class="level mb-4">
-  <div class="level-left">
-    <h1 class="title is-5"><span class="icon"><i class="fas fa-ship"></i></span> Embarcations</h1>
-  </div>
-  <div class="level-right">
-    <a href="{% url 'admin_embarcation_new' %}" class="button is-primary">
-      <span class="icon"><i class="fas fa-plus"></i></span><span>Nouvelle embarcation</span>
-    </a>
-  </div>
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-ship" style="color:var(--accent);font-size:1rem;"></i>&nbsp; Embarcations
+  </h1>
+  <a href="{% url 'admin_embarcation_new' %}" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> Nouvelle embarcation
+  </a>
 </div>
 
-<div class="box">
-  <table class="table is-fullwidth is-hoverable is-striped">
+<div class="table-wrap">
+  <table class="data-table">
     <thead>
       <tr>
         <th>Couleur</th>
@@ -30,38 +28,45 @@
       {% for emb in embarcations %}
       <tr>
         <td>
-          <span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:{{ emb.couleur }};border:2px solid #ddd;"></span>
+          <span style="display:inline-block;width:20px;height:20px;border-radius:50%;
+                       background:{{ emb.couleur }};border:2px solid rgba(255,255,255,.12);
+                       vertical-align:middle;"></span>
         </td>
-        <td><strong>{{ emb.nom }}</strong></td>
-        <td>{{ emb.get_type_embarcation_display }}</td>
-        <td>{{ emb.ponton.nom }}</td>
-        <td>{{ emb.ordre }}</td>
+        <td><span class="fw-600">{{ emb.nom }}</span></td>
+        <td style="color:var(--text-muted);font-size:.85rem;">{{ emb.get_type_embarcation_display }}</td>
+        <td style="font-size:.85rem;">{{ emb.ponton.nom }}</td>
         <td>
-          {% if emb.actif %}
-            <span class="tag is-success is-light">Active</span>
-          {% else %}
-            <span class="tag is-light">Inactive</span>
-          {% endif %}
-          {% if emb.est_louee_maintenant %}
-            <span class="tag is-danger ml-1">Sortie</span>
-          {% endif %}
+          <span class="mono" style="font-size:.8rem;color:var(--text-muted);">{{ emb.ordre }}</span>
         </td>
         <td>
-          <div class="buttons are-small">
-            <a href="{% url 'admin_embarcation_edit' emb.pk %}" class="button is-info is-outlined">
-              <span class="icon"><i class="fas fa-edit"></i></span>
+          <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+            {% if emb.actif %}
+              <span class="badge badge-success">Active</span>
+            {% else %}
+              <span class="badge badge-muted">Inactive</span>
+            {% endif %}
+            {% if emb.est_louee_maintenant %}
+              <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
+            {% endif %}
+          </div>
+        </td>
+        <td>
+          <div style="display:flex;gap:.4rem;">
+            <a href="{% url 'admin_embarcation_edit' emb.pk %}" class="btn btn-info btn-sm">
+              <i class="fas fa-edit"></i>
             </a>
-            <form method="post" action="{% url 'admin_embarcation_delete' emb.pk %}" onsubmit="return confirm('Supprimer cette embarcation ?')">
+            <form method="post" action="{% url 'admin_embarcation_delete' emb.pk %}"
+                  onsubmit="return confirm('Supprimer cette embarcation ?')">
               {% csrf_token %}
-              <button type="submit" class="button is-danger is-outlined">
-                <span class="icon"><i class="fas fa-trash"></i></span>
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash"></i>
               </button>
             </form>
           </div>
         </td>
       </tr>
       {% empty %}
-        <tr><td colspan="7" class="has-text-centered has-text-grey-light">Aucune embarcation.</td></tr>
+        <tr class="empty-row"><td colspan="7">Aucune embarcation.</td></tr>
       {% endfor %}
     </tbody>
   </table>

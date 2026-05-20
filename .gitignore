@@ -1,45 +1,199 @@
-# Python virtual environments
+# ══════════════════════════════════════════════
+#  Python
+# ══════════════════════════════════════════════
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*$py.class
+*.so
+
+# ══════════════════════════════════════════════
+#  Virtual environments
+# ══════════════════════════════════════════════
 venv/
 .venv/
 env/
 ENV/
+env.bak/
+venv.bak/
+.python-version
+pip-wheel-metadata/
 
-# Python cache
-__pycache__/
-*.py[cod]
-
-# Distribution / build
+# ══════════════════════════════════════════════
+#  Distribution / packaging
+# ══════════════════════════════════════════════
 build/
 dist/
 *.egg-info/
+*.egg
+MANIFEST
+wheels/
+share/python-wheels/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Test / type-check caches
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-coverage.xml
-htmlcov/
-
-# Django local files
+# ══════════════════════════════════════════════
+#  Django
+# ══════════════════════════════════════════════
+# Local databases
 db.sqlite3
+db.sqlite3-journal
 *.sqlite3
-media/
-staticfiles/
+*.db
 
-# Local environment files
+# Collected static / uploaded media
+staticfiles/
+static_root/
+media/
+
+# Django secret key / local config
+local_settings.py
+*.local.py
+
+# Compiled messages
+*.mo
+
+# ══════════════════════════════════════════════
+#  Environment / secrets
+# ══════════════════════════════════════════════
 .env
 .env.*
+!.env.example
+*.env
+secrets.json
+secrets.yaml
+secrets.toml
 
-# IDE/editor
+# ══════════════════════════════════════════════
+#  Testing / coverage
+# ══════════════════════════════════════════════
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+coverage.json
+htmlcov/
+nosetests.xml
+test-results/
+.tox/
+.nox/
+
+# ══════════════════════════════════════════════
+#  Type-checkers / linters
+# ══════════════════════════════════════════════
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
+.ruff_cache/
+
+# ══════════════════════════════════════════════
+#  Jupyter / IPython
+# ══════════════════════════════════════════════
+.ipynb_checkpoints/
+profile_default/
+ipython_config.py
+*.ipynb
+
+# ══════════════════════════════════════════════
+#  IDEs & editors
+# ══════════════════════════════════════════════
+# VS Code
 .vscode/
+*.code-workspace
+
+# JetBrains (PyCharm, WebStorm, etc.)
 .idea/
+*.iml
+*.iws
+*.ipr
+out/
 
-# OS / logs
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim / Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*#
+.\#*
+
+# ══════════════════════════════════════════════
+#  OS artifacts
+# ══════════════════════════════════════════════
+# macOS
 .DS_Store
-Thumbs.db
-*.log
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
 
-# Claude
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+.fuse_hidden*
+.Trash-*
+
+# ══════════════════════════════════════════════
+#  Logs & temp files
+# ══════════════════════════════════════════════
+*.log
+*.log.*
+logs/
+log/
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+
+# ══════════════════════════════════════════════
+#  Node (if any frontend tooling)
+# ══════════════════════════════════════════════
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+.yarn/
+
+# ══════════════════════════════════════════════
+#  Docker
+# ══════════════════════════════════════════════
+.dockerenv
+docker-compose.override.yml
+
+# ══════════════════════════════════════════════
+#  Claude / AI tooling
+# ══════════════════════════════════════════════
 .claude/
 claude/
+
+# ══════════════════════════════════════════════
+#  Misc
+# ══════════════════════════════════════════════
+*.pid
+*.seed
+*.pid.lock
+.cache/
+.parcel-cache/
+.sass-cache/

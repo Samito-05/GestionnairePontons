@@ -197,3 +197,4 @@ docker-compose.override.yml
 .cache/
 .parcel-cache/
 .sass-cache/
+*.stackdump

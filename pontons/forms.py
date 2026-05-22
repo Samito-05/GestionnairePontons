@@ -1,4 +1,5 @@
 from django import forms
+from django.utils import timezone as tz
 from .models import Embarcation, Location, Ponton, UserProfile
 from django.contrib.auth.models import User
 
@@ -55,6 +56,14 @@ class LocationForm(forms.ModelForm):
         debut = cleaned.get('heure_debut')
         fin = cleaned.get('heure_fin')
         embarcation = cleaned.get('embarcation')
+
+        # Fix #3: datetime-local soumet une heure naïve — rendre aware (USE_TZ=True + Europe/Paris)
+        if debut and tz.is_naive(debut):
+            debut = tz.make_aware(debut)
+            cleaned['heure_debut'] = debut
+        if fin and tz.is_naive(fin):
+            fin = tz.make_aware(fin)
+            cleaned['heure_fin'] = fin
 
         if debut and not fin:
             from datetime import timedelta

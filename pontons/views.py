@@ -40,11 +40,6 @@ def require_role(*roles):
     return decorator
 
 
-GRID_START = 13 * 60   # 780 min depuis minuit
-GRID_END   = 20 * 60   # 1200 min depuis minuit
-GRID_SPAN  = GRID_END - GRID_START  # 420 min
-
-
 def _text_color(hex_color):
     """Return #000 or #fff for maximum contrast against a hex background."""
     h = hex_color.lstrip('#')
@@ -54,35 +49,57 @@ def _text_color(hex_color):
 
 
 def build_planning_data(date_cible):
-    """Construit le planning avec positionnement CSS au pixel près (13h–20h)."""
+    """Construit le planning avec positionnement CSS.
+
+    La fenêtre temporelle (grid_start_h → grid_end_h) est calculée
+    dynamiquement depuis les locations du jour, avec un fallback 13h–20h.
+    Ainsi une location créée à n'importe quelle heure reste visible.
+    """
     from datetime import time as dtime
 
-    # Graduations : heures pleines + demi-heures
-    # Les pct sont des strings avec point décimal pour ne pas subir la locale fr-fr dans les templates CSS
-    marks = []
-    for h in range(13, 21):
-        pct = (h * 60 - GRID_START) / GRID_SPAN * 100
-        marks.append({'label': f'{h}h', 'pct': f'{pct:.4f}', 'is_hour': True,
-                       'show_mobile': h in (13, 15, 17, 20)})
-        if h < 20:
-            half_pct = ((h * 60 + 30) - GRID_START) / GRID_SPAN * 100
-            marks.append({'label': '', 'pct': f'{half_pct:.4f}', 'is_hour': False,
-                          'show_mobile': False})
-
-    debut_jour = timezone.make_aware(datetime.combine(date_cible, dtime(13, 0)))
-    fin_jour   = timezone.make_aware(datetime.combine(date_cible, dtime(20, 0)))
-
-    pontons = Ponton.objects.filter(actif=True).prefetch_related('embarcations')
-    locations_jour = Location.objects.filter(
-        heure_debut__lt=fin_jour,
-        heure_fin__gt=debut_jour,
+    # ── 1. Récupérer TOUTES les locations du jour (sans filtre horaire) ──
+    all_locs_today = Location.objects.filter(
+        heure_debut__date=date_cible,
     ).select_related('embarcation', 'gestionnaire')
 
-    loc_by_emb = {}
-    for loc in locations_jour:
-        loc_by_emb.setdefault(loc.embarcation_id, []).append(loc)
+    # ── 2. Calculer la fenêtre temporelle dynamique ──────────────────────
+    if all_locs_today.exists():
+        local_starts = [timezone.localtime(l.heure_debut) for l in all_locs_today]
+        local_ends   = [timezone.localtime(l.heure_fin)   for l in all_locs_today]
+        min_h = min(t.hour for t in local_starts)
+        max_h = max(t.hour + (1 if t.minute > 0 else 0) for t in local_ends)
+        # Padding d'1h de chaque côté, limites absolues 6h–23h, min 3h de large
+        grid_start_h = max(6,  min_h - 1)
+        grid_end_h   = min(23, max(max_h + 1, grid_start_h + 3))
+    else:
+        grid_start_h = 13
+        grid_end_h   = 20
 
+    GRID_START = grid_start_h * 60
+    GRID_END   = grid_end_h   * 60
+    GRID_SPAN  = GRID_END - GRID_START
+
+    # ── 3. Graduations : heures pleines + demi-heures ────────────────────
+    # Les pct sont des strings avec point décimal (locale fr-fr safe)
+    marks = []
+    step_mobile = max(1, round((grid_end_h - grid_start_h) / 4))
+    for h in range(grid_start_h, grid_end_h + 1):
+        pct = (h * 60 - GRID_START) / GRID_SPAN * 100
+        show_mobile = ((h - grid_start_h) % step_mobile == 0) or (h == grid_end_h)
+        marks.append({'label': f'{h}h', 'pct': f'{pct:.4f}',
+                      'is_hour': True, 'show_mobile': show_mobile})
+        if h < grid_end_h:
+            half_pct = ((h * 60 + 30) - GRID_START) / GRID_SPAN * 100
+            marks.append({'label': '', 'pct': f'{half_pct:.4f}',
+                          'is_hour': False, 'show_mobile': False})
+
+    # ── 4. Construire le planning par ponton/embarcation ─────────────────
     now = timezone.now()
+    pontons = Ponton.objects.filter(actif=True).prefetch_related('embarcations')
+
+    loc_by_emb = {}
+    for loc in all_locs_today:
+        loc_by_emb.setdefault(loc.embarcation_id, []).append(loc)
 
     planning = []
     for ponton in pontons:
@@ -90,12 +107,14 @@ def build_planning_data(date_cible):
         for emb in ponton.embarcations.filter(actif=True):
             blocks = []
             is_rented_now = False
+            retour_time   = None
             for loc in sorted(loc_by_emb.get(emb.id, []), key=lambda l: l.heure_debut):
                 ld = timezone.localtime(loc.heure_debut)
                 lf = timezone.localtime(loc.heure_fin)
 
                 if loc.heure_debut <= now < loc.heure_fin:
                     is_rented_now = True
+                    retour_time   = lf.strftime('%H:%M')
 
                 start_min = max(ld.hour * 60 + ld.minute, GRID_START)
                 end_min   = min(lf.hour * 60 + lf.minute, GRID_END)
@@ -113,10 +132,15 @@ def build_planning_data(date_cible):
                     'text_color': _text_color(emb.couleur),
                     'label':      f"{ld.strftime('%H:%M')}–{lf.strftime('%H:%M')}",
                 })
-            rows.append({'embarcation': emb, 'blocks': blocks, 'est_louee_maintenant': is_rented_now})
+            rows.append({
+                'embarcation':      emb,
+                'blocks':           blocks,
+                'est_louee_maintenant': is_rented_now,
+                'retour':           retour_time,
+            })
         planning.append({'ponton': ponton, 'rows': rows})
 
-    return marks, planning
+    return marks, planning, grid_start_h, grid_end_h, GRID_SPAN
 
 
 # ─── Vue Planning ──────────────────────────────────────────────────────────────
@@ -128,17 +152,20 @@ def planning(request):
     except ValueError:
         date_cible = date.today()
 
-    marks, planning_data = build_planning_data(date_cible)
+    marks, planning_data, grid_start_h, grid_end_h, grid_span = build_planning_data(date_cible)
     role = get_user_role(request.user) if request.user.is_authenticated else 'visiteur'
 
     return render(request, 'pontons/planning.html', {
-        'marks': marks,
+        'marks':         marks,
         'planning_data': planning_data,
-        'date_cible': date_cible,
-        'date_prev': date_cible - timedelta(days=1),
-        'date_next': date_cible + timedelta(days=1),
-        'now': timezone.localtime(timezone.now()),
-        'role': role,
+        'date_cible':    date_cible,
+        'date_prev':     date_cible - timedelta(days=1),
+        'date_next':     date_cible + timedelta(days=1),
+        'now':           timezone.localtime(timezone.now()),
+        'role':          role,
+        'grid_start_h':  grid_start_h,
+        'grid_end_h':    grid_end_h,
+        'grid_span':     grid_span,
     })
 
 

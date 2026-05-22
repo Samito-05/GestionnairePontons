@@ -348,17 +348,6 @@
   font-family: var(--mono);
 }
 
-.mob-slot-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
-  border-radius: 3px;
-  padding: 2px 9px;
-  font-size: .7rem;
-  font-weight: 700;
-  font-family: var(--mono);
-}
-
 /* ══════════════════════════════════════════════
    MOBILE — VIEW TOGGLE
 ══════════════════════════════════════════════ */
@@ -907,9 +896,14 @@ window.addEventListener('pageshow', function(event) {
   if (event.persisted) location.reload();
 });
 
-// Reload when tab regains focus after switching to gestionnaire
+// Reload on tab focus only if away > 2 min (prevents interrupting form interactions)
+let lastFocusTime = Date.now();
 document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) location.reload();
+  if (!document.hidden) {
+    if (Date.now() - lastFocusTime > 120000) location.reload();
+  } else {
+    lastFocusTime = Date.now();
+  }
 });
 </script>
 {% endblock %}

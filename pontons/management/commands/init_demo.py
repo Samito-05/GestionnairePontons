@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
@@ -9,6 +9,12 @@ class Command(BaseCommand):
     help = 'Initialise les données de démonstration'
 
     def handle(self, *args, **options):
+        from django.conf import settings
+        if not settings.DEBUG:
+            raise CommandError(
+                "init_demo ne doit PAS tourner en production (DEBUG=False). "
+                "Forcez avec --settings=... si vous êtes sûr."
+            )
         self.stdout.write('Création des données de démo...')
 
         # Pontons

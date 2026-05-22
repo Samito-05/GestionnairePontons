@@ -14,8 +14,8 @@ services:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    env_file:
+      - .env.production           # cloudflared reads TUNNEL_TOKEN natively
     depends_on:
       - web
 

@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"   # Only accessible locally — Cloudflare Tunnel connects here
+    env_file:
+      - .env.production           # Create this from .env.example, never commit it
+    volumes:
+      - db_data:/app/db.sqlite3   # Persist SQLite across container rebuilds
+      - media_data:/app/media
+
+volumes:
+  db_data:
+  media_data:

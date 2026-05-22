@@ -1,22 +1,25 @@
-# 🚤 Gestionnaire Pontons
+# Gestionnaire Pontons
 
-Application web de gestion de locations d'embarcations (pédalos, kayaks, canoës, SUP…) avec planning visuel, interface gestionnaire et administration complète.
+Application web de gestion de locations d'embarcations (pédalos, kayaks, canoës, barques, SUP) avec planning visuel, interface de gestion rapide et administration complète.
 
-> Installable comme application mobile (PWA) — fonctionne sur Android, iOS et desktop.
+Installable comme application mobile (PWA) sur Android, iOS et desktop.
 
 ---
 
 ## Stack
 
-| Composant | Technologie |
+| Composant | Version |
 |---|---|
-| Backend | Django 5.2 (Python 3.12) |
-| Base de données | SQLite (dev) — remplaçable par PostgreSQL/MySQL |
-| CSS | Thème maritime custom (CSS variables) + Font Awesome 6 |
-| Serveur de fichiers statiques | WhiteNoise + CompressedManifest |
-| Serveur WSGI | Gunicorn (production) |
-| Mobile | PWA (manifest + service worker) |
+| Python | 3.12 |
+| Django | 5.2 |
+| Base de données | SQLite (dev) / remplaçable PostgreSQL ou MySQL |
+| CSS | Thème maritime custom (CSS variables, sans framework) |
+| Icônes | Font Awesome 6 (CDN) |
+| Fichiers statiques | WhiteNoise 6.8 avec CompressedManifestStaticFilesStorage |
+| WSGI | Gunicorn 23 |
+| Variables d'environnement | python-dotenv 1.0 |
 | Déploiement | Docker + Cloudflare Tunnel |
+| PWA | manifest.json + Service Worker v3 (cache-first static, HTML jamais mis en cache) |
 
 ---
 
@@ -24,160 +27,168 @@ Application web de gestion de locations d'embarcations (pédalos, kayaks, canoë
 
 ### Prérequis
 
-- Python 3.10+
+- Python 3.10 ou supérieur
 - pip
 
-### Installation
+### Mise en place
 
 ```bash
 git clone https://github.com/Samito-05/GestionnairePontons.git
 cd GestionnairePontons
 
-# Copier la config locale
 cp .env.example .env
-# Éditer .env si besoin (DEBUG=True, clé générée automatiquement)
+# .env est prérempli pour le dev local — aucune modification requise
 ```
 
 #### Windows — script tout-en-un
 
 ```powershell
-# Lance : venv → dépendances → migrations → données démo → serveur
+# Lance dans l'ordre : venv, dependances pip, migrations, donnees demo, serveur
 .\startup.ps1
 
-# Options utiles
-.\startup.ps1 -NoRunServer     # Prépare sans lancer le serveur
-.\startup.ps1 -SkipInstall     # Ignore pip install
-.\startup.ps1 -SkipDemo        # Ignore les données de démo
-.\startup.ps1 -ResetDatabase   # Recrée la base SQLite depuis zéro
-.\startup.ps1 -Port 8080       # Change le port
+# Options
+.\startup.ps1 -NoRunServer    # Prepare l'environnement sans lancer le serveur
+.\startup.ps1 -SkipInstall    # Ignore pip install (dependances deja presentes)
+.\startup.ps1 -SkipDemo       # Ignore le chargement des donnees de demonstration
+.\startup.ps1 -ResetDatabase  # Supprime et recrée la base SQLite
+.\startup.ps1 -Port 8080      # Change le port (defaut : 8000)
 ```
 
-#### Manuel (Linux/macOS/Windows)
+#### Autre OS
 
 ```bash
 python -m venv venv
-source venv/bin/activate          # Linux/macOS
-# venv\Scripts\activate           # Windows
+source venv/bin/activate
 
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py init_demo        # Données de démo (optionnel)
+python manage.py init_demo    # Optionnel — charge les donnees de demonstration
 python manage.py runserver
 ```
 
-Ouvrir : [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Ouvrir : http://127.0.0.1:8000
 
-### Comptes de démo
+### Commandes de developpement courantes
 
-> ⚠️ Ces comptes n'existent qu'après `init_demo`. **Ne jamais utiliser en production.**
+```bash
+# Apres modification des modeles
+python manage.py makemigrations && python manage.py migrate
 
-| Identifiant | Mot de passe | Rôle |
+# Reinitialiser les donnees de demonstration
+python manage.py flush --no-input && python manage.py init_demo
+
+# Verification systeme Django
+python manage.py check
+```
+
+### Comptes de demonstration
+
+Disponibles apres `init_demo`. Ne pas utiliser en production.
+
+| Identifiant | Mot de passe | Role |
 |---|---|---|
 | `admin` | `admin123` | Superadmin |
 | `gestionnaire1` | `gest123` | Gestionnaire |
-| `visiteur1` | `visit123` | Visiteur (lecture seule) |
+| `visiteur1` | `visit123` | Visiteur |
 
 ---
 
-## Production — Docker + Cloudflare Tunnel
+## Production
 
 ### Architecture
 
 ```
-Navigateur → Cloudflare (HTTPS) → Tunnel chiffré → QNAP/serveur (Docker, port 8000 local)
+Navigateur  -->  Cloudflare (HTTPS/TLS)  -->  Tunnel chiffre  -->  Serveur Docker (port 8000, local uniquement)
 ```
 
-Cloudflare gère le HTTPS. Le serveur n'est jamais directement exposé à Internet.
+Cloudflare gere le HTTPS et le certificat. Le serveur n'est jamais expose directement a Internet — aucun port a ouvrir sur la box ou le pare-feu.
 
 ### Prérequis
 
-- Docker + Docker Compose sur le serveur (ou NAS avec Container Station)
+- Serveur ou NAS avec Docker et Docker Compose (QNAP Container Station supporte)
 - Compte Cloudflare avec un domaine
-- Accès SSH au serveur
+- Acces SSH au serveur
 
-### 1 — Récupérer le code
+### 1. Recuperer le code
 
 ```bash
-# Option A : git
+# Avec git
 git clone https://github.com/Samito-05/GestionnairePontons.git
 cd GestionnairePontons
 
-# Option B : zip (si git non disponible)
+# Sans git (wget disponible sur la plupart des NAS)
 wget -O pontons.zip https://github.com/Samito-05/GestionnairePontons/archive/refs/heads/main.zip
-unzip pontons.zip && mv GestionnairePontons-main GestionnairePontons
+unzip pontons.zip
+mv GestionnairePontons-main GestionnairePontons
 cd GestionnairePontons
 ```
 
-### 2 — Créer le fichier de configuration production
+### 2. Creer le fichier de configuration production
 
 ```bash
 cp .env.production.example .env.production
 ```
 
-Éditer `.env.production` :
+Editer `.env.production` :
 
 ```env
-DJANGO_SECRET_KEY=<générer avec la commande ci-dessous>
+DJANGO_SECRET_KEY=<cle generee — voir commande ci-dessous>
 DJANGO_DEBUG=False
-DJANGO_ALLOWED_HOSTS=pontons.tondomaine.com
-TUNNEL_TOKEN=<token Cloudflare — étape 4>
+DJANGO_ALLOWED_HOSTS=pontons.mondomaine.com
+TUNNEL_TOKEN=<token Cloudflare — obtenu a l'etape 4>
 ```
 
-Générer une clé secrète :
+Generer une cle secrete :
 
 ```bash
-# Sur le serveur (si Python dispo)
 python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-
-# Sur Windows (dans le dossier du projet)
-python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-> **Note :** Si la clé contient des `$`, les échapper en `$$` dans le fichier `.env.production`
-> (Docker Compose interprète `$` comme une variable shell).
+> Si la cle contient des caracteres `$`, les echapper en `$$` dans le fichier `.env.production`.
+> Docker Compose interprete `$VAR` comme une substitution de variable shell.
 
-### 3 — Lancer l'application
+### 3. Demarrer l'application
 
 ```bash
 docker compose up -d --build
+
+# Initialiser la base de donnees (premier demarrage uniquement)
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py createsuperuser
 ```
 
-Vérifier :
+Verification :
 
 ```bash
-docker compose ps               # web: Up, tunnel: Up
-curl -I http://127.0.0.1:8000   # HTTP/1.1 302 Found
+docker compose ps              # web: Up, tunnel: Up (ou Down si tunnel pas encore configure)
+curl -I http://127.0.0.1:8000  # Attendu : HTTP/1.1 302 Found
 ```
 
-### 4 — Configurer le tunnel Cloudflare
+### 4. Configurer le tunnel Cloudflare
 
 1. Aller sur [one.dash.cloudflare.com](https://one.dash.cloudflare.com) → **Networks → Tunnels**
-2. **Create a tunnel** → **Cloudflared** → nommer `gestionnaire-pontons` → **Save**
-3. Copier le token affiché, le coller dans `.env.production` (`TUNNEL_TOKEN=...`)
-4. Dans **Public Hostnames → Add** :
+2. **Create a tunnel** → **Cloudflared** → donner un nom → **Save tunnel**
+3. Copier le token affiche, le coller dans `.env.production` (`TUNNEL_TOKEN=...`)
+4. Dans l'onglet **Public Hostnames**, ajouter :
 
 | Champ | Valeur |
 |---|---|
-| Subdomain | `pontons` |
-| Domain | `tondomaine.com` |
+| Subdomain | `pontons` (ou autre) |
+| Domain | `mondomaine.com` |
 | Service Type | `HTTP` |
 | URL | `web:8000` |
 
-5. Relancer le tunnel :
+5. Relancer le service tunnel pour prendre en compte le token :
 
 ```bash
-docker compose up -d tunnel
+docker compose up -d --build tunnel
 ```
 
-### Mise à jour
+### Mise a jour
 
 ```bash
-# Télécharger la nouvelle version
-git pull   # ou re-télécharger le ZIP
+git pull   # ou re-telecharger le ZIP et remplacer les fichiers
 
-# Reconstruire et redémarrer
 docker compose up -d --build
 docker compose exec web python manage.py migrate   # si nouvelles migrations
 ```
@@ -185,34 +196,108 @@ docker compose exec web python manage.py migrate   # si nouvelles migrations
 ### Commandes utiles
 
 ```bash
-docker compose logs -f                    # Logs en temps réel
-docker compose restart web                # Redémarrer l'appli sans rebuild
-docker compose down                       # Arrêter tout
-docker compose exec web python manage.py shell   # Shell Django
+docker compose logs -f                              # Logs en temps reel
+docker compose logs tunnel                          # Logs du tunnel Cloudflare
+docker compose restart web                          # Redemarrer sans rebuild
+docker compose down                                 # Arreter tout
 
-# Sauvegarde base de données
+# Sauvegarde de la base de donnees
 docker compose exec web python manage.py dumpdata > backup_$(date +%Y%m%d).json
 ```
 
-### Dépannage
+### Depannage
 
-| Symptôme | Cause | Solution |
+| Symptome | Cause probable | Solution |
 |---|---|---|
-| 502 Bad gateway | Conteneur `web` arrêté | `docker compose up -d` |
-| Tunnel inactif | Token manquant ou mauvais | Vérifier `TUNNEL_TOKEN` dans `.env.production` |
-| 500 / erreur Django | Erreur applicative | `docker compose logs web` |
-| DisallowedHost | Domaine absent de `ALLOWED_HOSTS` | Ajouter dans `.env.production` + `docker compose restart web` |
-| Médias perdus au rebuild | Volume non persisté | Vérifier que `media_data` est défini dans `docker-compose.yml` |
+| 502 Bad Gateway | Conteneur `web` arrete | `docker compose up -d` |
+| Tunnel inactif dans Cloudflare | Token absent ou incorrect | Verifier `TUNNEL_TOKEN` dans `.env.production` |
+| Erreur 500 | Erreur applicative | `docker compose logs web` |
+| `DisallowedHost` dans les logs | Domaine absent de `ALLOWED_HOSTS` | Ajouter le domaine dans `.env.production` puis `docker compose restart web` |
+| Medias perdus apres rebuild | Volume non monte | Verifier `media_data` dans `docker-compose.yml` |
 
 ---
 
-## Rôles et permissions
+## Fonctionnalites
 
-| Rôle | Capacités |
+### Planning
+- Grille horaire par embarcation et par ponton
+- Fenetre temporelle dynamique calculee depuis les locations du jour (fallback 13h-20h)
+- Blocs colores selon la couleur de l'embarcation
+- Indicateur de l'heure courante
+- Navigation jour precedent / suivant / aujourd'hui
+- Rafraichissement automatique toutes les 60 secondes
+
+### Gestion rapide (gestionnaire)
+- Vue kanban par ponton : disponible (vert) / en sortie (rouge)
+- Louer en 1 clic (duree : 1 heure, champ notes optionnel)
+- Retour anticipe en 1 clic
+- Heure de retour prevue affichee en temps reel
+- Rafraichissement automatique toutes les 30 secondes
+
+### Administration
+- Tableau de bord avec compteurs
+- CRUD : pontons, embarcations, locations, utilisateurs
+- Validation des chevauchements de reservation
+- Gestion des roles utilisateurs
+
+### PWA
+- Installable sur l'ecran d'accueil Android, iOS, desktop
+- Fichiers statiques mis en cache (cache-first)
+- HTML toujours charge depuis le serveur (jamais mis en cache)
+
+---
+
+## Roles et permissions
+
+| Role | Acces |
 |---|---|
-| **Visiteur** | Consulter le planning (lecture seule), naviguer entre les dates |
-| **Gestionnaire** | + Louer une embarcation, marquer le retour anticipé |
-| **Admin** | + CRUD pontons, embarcations, locations, utilisateurs |
+| Visiteur (non connecte ou role visiteur) | Planning en lecture seule, navigation par date |
+| Gestionnaire | + Louer une embarcation, enregistrer un retour |
+| Admin | + CRUD complet pontons / embarcations / locations / utilisateurs |
+| Superuser Django | Acces a l'interface `/admin/` native |
+
+---
+
+## Modele de donnees
+
+```
+Ponton
+  nom, description, ordre, actif
+
+  Embarcation
+    nom, type, couleur (hex), ordre, actif
+    --> ForeignKey Ponton
+
+    Location
+      heure_debut, heure_fin, notes, created_at
+      --> ForeignKey Embarcation
+      --> ForeignKey User (gestionnaire)
+
+User (Django natif)
+  UserProfile
+    role : admin | gestionnaire | visiteur
+    --> OneToOne User
+```
+
+---
+
+## URLs
+
+| URL | Acces |
+|---|---|
+| `/` | Redirige vers planning |
+| `/planning/` | Public |
+| `/planning/?date=YYYY-MM-DD` | Public |
+| `/gestionnaire/` | Gestionnaire+ |
+| `/gestionnaire/louer/<id>/` | Gestionnaire+ |
+| `/gestionnaire/retour/<id>/` | Gestionnaire+ |
+| `/gestion/` | Admin |
+| `/gestion/pontons/` | Admin |
+| `/gestion/embarcations/` | Admin |
+| `/gestion/locations/` | Admin |
+| `/gestion/users/` | Admin |
+| `/api/status/` | Public (JSON temps reel) |
+| `/admin/` | Superuser Django |
 
 ---
 
@@ -221,67 +306,44 @@ docker compose exec web python manage.py dumpdata > backup_$(date +%Y%m%d).json
 ```
 GestionnairePontons/
 ├── config/
-│   ├── settings.py          # Config Django (secrets via env vars)
-│   ├── urls.py
+│   ├── settings.py          # Configuration Django (secrets via variables d'environnement)
+│   ├── urls.py              # Routes racine
 │   └── wsgi.py
 ├── pontons/
 │   ├── models.py            # Ponton, Embarcation, Location, UserProfile
-│   ├── views.py
-│   ├── forms.py
-│   ├── urls.py
-│   └── management/commands/
-│       └── init_demo.py     # Données de démo
+│   ├── views.py             # Toutes les vues
+│   ├── forms.py             # Formulaires avec validation
+│   ├── urls.py              # Routes de l'application
+│   ├── admin.py             # Interface admin Django natif
+│   └── management/
+│       └── commands/
+│           └── init_demo.py # Donnees de demonstration
 ├── templates/
 │   ├── base.html
-│   ├── registration/login.html
+│   ├── registration/
+│   │   └── login.html
 │   └── pontons/
 │       ├── planning.html
 │       ├── gestionnaire.html
-│       └── admin/
+│       └── admin/           # Dashboard, pontons, embarcations, locations, users + formulaires
 ├── static/
-│   ├── manifest.json        # PWA
-│   ├── sw.js                # Service worker (cache-first static, jamais HTML)
-│   └── icons/
+│   ├── manifest.json        # Manifest PWA
+│   ├── sw.js                # Service Worker v3
+│   └── icons/               # Icones PWA et marque ville
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env.example             # Template config dev (commité, sans secrets)
-├── .env.production.example  # Template config prod (commité, sans secrets)
-├── .env                     # Config dev réelle (gitignored)
-├── .env.production          # Config prod réelle (gitignored, sur le serveur)
-├── startup.ps1              # Script démarrage Windows (dev)
+├── .env.example             # Template configuration developpement (versionne, sans secrets)
+├── .env.production.example  # Template configuration production (versionne, sans secrets)
+├── .env                     # Configuration developpement reelle (gitignore)
+├── .env.production          # Configuration production reelle (gitignore, sur le serveur)
+├── startup.ps1              # Script de demarrage Windows (developpement)
 ├── startup.bat
-└── requirements.txt
+├── requirements.txt
+└── manage.py
 ```
-
----
-
-## Modèle de données
-
-```
-Ponton
-  └── Embarcation (type, couleur, ordre)
-        └── Location (heure_debut, heure_fin, gestionnaire, notes)
-
-User
-  └── UserProfile (role: admin | gestionnaire | visiteur)
-```
-
----
-
-## URLs principales
-
-| URL | Accès |
-|---|---|
-| `/` | Redirige vers planning |
-| `/planning/` | Public |
-| `/planning/?date=YYYY-MM-DD` | Public |
-| `/gestionnaire/` | Gestionnaire+ |
-| `/gestion/` | Admin |
-| `/api/status/` | Public (JSON temps réel) |
-| `/admin/` | Superuser Django |
 
 ---
 
 ## Licence
 
-Projet libre d'utilisation. Adapter à vos besoins.
+Projet libre d'utilisation.

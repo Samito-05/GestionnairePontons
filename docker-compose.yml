@@ -5,10 +5,19 @@ services:
     ports:
       - "127.0.0.1:8000:8000"   # Only accessible locally — Cloudflare Tunnel connects here
     env_file:
-      - .env.production           # Create this from .env.example, never commit it
+      - .env.production           # Create this from .env.production.example, never commit it
     volumes:
       - db_data:/app/data          # Named volume → directory → db.sqlite3 lives inside
       - media_data:/app/media
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - web
 
 volumes:
   db_data:

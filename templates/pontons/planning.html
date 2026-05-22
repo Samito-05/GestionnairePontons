@@ -360,10 +360,158 @@
 }
 
 /* ══════════════════════════════════════════════
+   MOBILE — VIEW TOGGLE
+══════════════════════════════════════════════ */
+.mob-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: 20px;
+  padding: 2px;
+  margin-bottom: 1rem;
+}
+.mob-view-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: .74rem;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  padding: .28rem 1rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+  line-height: 1;
+}
+.mob-view-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ══════════════════════════════════════════════
+   MOBILE — TIMELINE VIEW
+══════════════════════════════════════════════ */
+.mob-tl-outer {
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.mob-tl-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mob-tl-inner {
+  /* width set by JS — tracks need fixed px width for scroll */
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+}
+
+.mob-tl-row {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+}
+.mob-tl-row:last-child { border-bottom: none; }
+
+.mob-tl-label {
+  width: 88px;
+  min-width: 88px;
+  padding: .22rem .5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid var(--border-bright);
+  flex-shrink: 0;
+  font-size: .7rem;
+  background: var(--surface-2);
+  position: sticky;
+  left: 0;
+  z-index: 20;
+}
+
+.mob-tl-track {
+  position: relative;
+  flex: 1;
+  overflow: visible;
+}
+
+/* Axis row */
+.mob-tl-row-axis {
+  height: 22px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-bright) !important;
+  position: sticky;
+  top: 0;
+  z-index: 15;
+}
+.mob-tl-row-axis .mob-tl-label {
+  font-size: .62rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-weight: 400;
+}
+
+/* Ponton header row */
+.mob-tl-row-ponton {
+  height: 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-bright) !important;
+}
+.mob-tl-row-ponton .mob-tl-label {
+  font-weight: 700;
+  font-size: .73rem;
+  color: var(--accent);
+  font-family: var(--font-display);
+}
+
+/* Embarcation row */
+.mob-tl-row-emb { height: 38px; }
+.mob-tl-row-emb .mob-tl-label { background: var(--surface-2); }
+
+/* Tick labels on axis */
+.mob-tl-tick {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: .6rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.mob-tl-tick-last { transform: translate(-100%, -50%); }
+
+/* Grid lines */
+.mob-tl-gh  { position: absolute; top:0; bottom:0; width:1px; background: var(--border-bright); pointer-events:none; }
+.mob-tl-ghh { position: absolute; top:0; bottom:0; width:1px; background: var(--border); pointer-events:none; }
+
+/* Now line */
+.mob-tl-now {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--danger);
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: 0 0 5px var(--danger-dim);
+}
+
+/* ══════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════ */
 @media (min-width: 769px) {
   .mobile-planning { display: none !important; }
+  .mob-tl-outer    { display: none !important; }
+  .mob-view-toggle { display: none !important; }
 }
 @media (max-width: 768px) {
   .tl-wrap         { display: none !important; }
@@ -521,9 +669,76 @@
     </div>
 
     <!-- ════════════════════════════════════════
+         MOBILE — VIEW TOGGLE
+    ════════════════════════════════════════ -->
+    <div class="mob-view-toggle">
+      <button id="btn-mob-grid" class="mob-view-btn active">Grille</button>
+      <button id="btn-mob-tl"   class="mob-view-btn">Chronologie</button>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         MOBILE — TIMELINE VIEW
+    ════════════════════════════════════════ -->
+    <div id="mob-tl-outer" class="mob-tl-outer" style="display:none;">
+      <div id="mob-tl-scroll" class="mob-tl-scroll">
+        <div id="mob-tl-inner" class="mob-tl-inner">
+
+          <!-- Axis -->
+          <div class="mob-tl-row mob-tl-row-axis">
+            <div class="mob-tl-label">{{ grid_start_h }}h–{{ grid_end_h }}h</div>
+            <div class="mob-tl-track" id="mob-tl-axis-track">
+              {% for m in marks %}{% if m.show_mobile %}
+                <span class="mob-tl-tick {% if forloop.last %}mob-tl-tick-last{% endif %}"
+                      style="left:{{ m.pct }}%">{{ m.label }}</span>
+              {% endif %}{% endfor %}
+            </div>
+          </div>
+
+          {% for ponton_data in planning_data %}
+          <!-- Ponton header -->
+          <div class="mob-tl-row mob-tl-row-ponton">
+            <div class="mob-tl-label">{{ ponton_data.ponton.nom }}</div>
+            <div class="mob-tl-track">
+              {% for m in marks %}
+                <div class="{% if m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% for row in ponton_data.rows %}
+          <div class="mob-tl-row mob-tl-row-emb">
+            <div class="mob-tl-label">
+              <div style="display:flex;align-items:center;gap:.3rem;overflow:hidden;">
+                <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.72rem;">
+                  {{ row.embarcation.nom }}
+                </span>
+              </div>
+            </div>
+            <div class="mob-tl-track">
+              {% for m in marks %}
+                <div class="{% if m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
+              {% endfor %}
+              {% for block in row.blocks %}
+                <div class="rental-block"
+                     style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};color:{{ block.text_color }};"
+                     title="{{ block.label }}">
+                  {{ block.label }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          {% endfor %}
+
+        </div><!-- /mob-tl-inner -->
+      </div><!-- /mob-tl-scroll -->
+    </div><!-- /mob-tl-outer -->
+
+    <!-- ════════════════════════════════════════
          MOBILE VIEW — compact grid
     ════════════════════════════════════════ -->
-    <div class="mobile-planning">
+    <div id="mob-grid" class="mobile-planning">
       {% for ponton_data in planning_data %}
 
         <div class="mob-ponton-label">
@@ -552,7 +767,7 @@
         </div>
 
       {% endfor %}
-    </div><!-- /mobile-planning -->
+    </div><!-- /mob-grid -->
 
     {% endif %}
   </div>
@@ -608,15 +823,84 @@ function updateClock() {
   if (el) el.querySelector('span:last-child').textContent = txt;
 }
 
+// ── Mobile timeline setup ─────────────────────────────────────
+const MOB_TL_KEY     = 'planning_mob_view'; // 'grid' | 'timeline'
+const MOB_LABEL_W    = 88;  // px — matches .mob-tl-label width in CSS
+const MOB_TL_MIN_W   = 900; // px minimum track width
+
+function getMobTlWidth() {
+  // 3× viewport so ±1h centered is comfortably visible; never less than MIN
+  return Math.max(MOB_TL_MIN_W, window.innerWidth * 3);
+}
+
+function initMobTlWidth() {
+  const inner = document.getElementById('mob-tl-inner');
+  if (!inner) return;
+  inner.style.width = getMobTlWidth() + 'px';
+}
+
+function drawMobTlNow() {
+  document.querySelectorAll('.mob-tl-now').forEach(el => el.remove());
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes();
+  if (h < GRID_START_H || h >= GRID_END_H) return;
+  const pct = timeToPct(h, m).toFixed(4) + '%';
+  document.querySelectorAll('#mob-tl-inner .mob-tl-track').forEach(track => {
+    const line = document.createElement('div');
+    line.className = 'mob-tl-now';
+    line.style.left = pct;
+    track.appendChild(line);
+  });
+}
+
+function scrollMobTlToNow() {
+  const scroll = document.getElementById('mob-tl-scroll');
+  const inner  = document.getElementById('mob-tl-inner');
+  if (!scroll || !inner) return;
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes();
+  const totalTrackW = inner.offsetWidth - MOB_LABEL_W;
+  const nowPx = timeToPct(h, m) / 100 * totalTrackW;
+  const halfView = (window.innerWidth - MOB_LABEL_W) / 2;
+  scroll.scrollLeft = MOB_LABEL_W + Math.max(0, nowPx - halfView);
+}
+
+function applyMobView(view) {
+  const isGrid = (view !== 'timeline');
+  const grid   = document.getElementById('mob-grid');
+  const tl     = document.getElementById('mob-tl-outer');
+  const btnG   = document.getElementById('btn-mob-grid');
+  const btnTl  = document.getElementById('btn-mob-tl');
+  if (!grid) return; // desktop — nothing to do
+  grid.style.display  = isGrid ? '' : 'none';
+  tl.style.display    = isGrid ? 'none' : '';
+  btnG.classList.toggle('active',  isGrid);
+  btnTl.classList.toggle('active', !isGrid);
+  if (!isGrid) {
+    initMobTlWidth();
+    drawMobTlNow();
+    requestAnimationFrame(scrollMobTlToNow);
+  }
+  localStorage.setItem(MOB_TL_KEY, view);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   drawNowLine();
   adjustNarrowBlocks();
+
+  const btnG  = document.getElementById('btn-mob-grid');
+  const btnTl = document.getElementById('btn-mob-tl');
+  if (btnG && btnTl) {
+    btnG.addEventListener('click',  () => applyMobView('grid'));
+    btnTl.addEventListener('click', () => applyMobView('timeline'));
+    applyMobView(localStorage.getItem(MOB_TL_KEY) || 'grid');
+  }
 });
 
 // Recurring auto-refresh every 30s (was one-shot setTimeout)
 setInterval(updateClock, 10000);
-setInterval(drawNowLine, 30000);
-setInterval(() => location.reload(), 30000);
+setInterval(() => { drawNowLine(); drawMobTlNow(); }, 30000);
+setInterval(() => location.reload(), 60000);
 
 // Reload on back-button (bfcache) — prevents stale page after creating a rental
 window.addEventListener('pageshow', function(event) {

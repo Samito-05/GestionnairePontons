@@ -198,3 +198,4 @@ claude/
 .cache/
 .parcel-cache/
 .sass-cache/
+*.stackdump

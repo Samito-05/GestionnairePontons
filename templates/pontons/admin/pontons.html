@@ -3,11 +3,9 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">
-    <i class="fas fa-water" style="color:var(--accent);font-size:1rem;"></i>&nbsp; Pontons
+  <h1 class="page-title">&nbsp; Pontons
   </h1>
-  <a href="{% url 'admin_ponton_new' %}" class="btn btn-primary btn-sm">
-    <i class="fas fa-plus"></i> Nouveau ponton
+  <a href="{% url 'admin_ponton_new' %}" class="btn btn-primary btn-sm"> Nouveau ponton
   </a>
 </div>
 
@@ -46,13 +44,13 @@
         <td>
           <div style="display:flex;gap:.4rem;">
             <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="btn btn-info btn-sm">
-              <i class="fas fa-edit"></i>
+              Modifier
             </a>
             <form method="post" action="{% url 'admin_ponton_delete' ponton.pk %}"
                   onsubmit="return confirm('Supprimer ce ponton ?')">
               {% csrf_token %}
               <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-trash"></i>
+                Suppr.
               </button>
             </form>
           </div>

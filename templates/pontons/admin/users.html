@@ -3,11 +3,9 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">
-    <i class="fas fa-users" style="color:var(--accent);font-size:1rem;"></i>&nbsp; Utilisateurs
+  <h1 class="page-title">&nbsp; Utilisateurs
   </h1>
-  <a href="{% url 'admin_user_new' %}" class="btn btn-primary btn-sm">
-    <i class="fas fa-plus"></i> Nouvel utilisateur
+  <a href="{% url 'admin_user_new' %}" class="btn btn-primary btn-sm"> Nouvel utilisateur
   </a>
 </div>
 
@@ -42,7 +40,7 @@
         </td>
         <td>
           {% if u.is_superuser %}
-            <i class="fas fa-star" style="color:var(--accent);font-size:.85rem;"></i>
+            ★
           {% else %}
             <span style="color:var(--text-dim);">—</span>
           {% endif %}
@@ -50,14 +48,14 @@
         <td>
           <div style="display:flex;gap:.4rem;">
             <a href="{% url 'admin_user_edit' u.pk %}" class="btn btn-info btn-sm">
-              <i class="fas fa-edit"></i>
+              Modifier
             </a>
             {% if u != request.user %}
             <form method="post" action="{% url 'admin_user_delete' u.pk %}"
                   onsubmit="return confirm('Supprimer cet utilisateur ?')">
               {% csrf_token %}
               <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-trash"></i>
+                Suppr.
               </button>
             </form>
             {% endif %}

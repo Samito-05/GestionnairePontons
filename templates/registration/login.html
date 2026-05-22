@@ -1,162 +1,189 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07111f">
-  <title>Connexion — Pontons</title>
+  <title>Connexion — La Plage L'Isle-Adam</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" type="image/png" href="/static/icons/blason.png">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:            #07111f;
-      --surface:       #0c1a2e;
-      --surface-2:     #112236;
-      --border:        rgba(80,140,220,.09);
-      --border-bright: rgba(100,170,255,.2);
-      --accent:        #c8942e;
-      --accent-dim:    rgba(200,148,46,.13);
-      --danger:        #e2596b;
-      --danger-dim:    rgba(226,89,107,.12);
-      --text:          #d8e8f6;
-      --text-muted:    #607e9c;
-      --text-dim:      #2a4060;
+      --bg:            #eef3f8;
+      --surface:       #dfe8f2;
+      --surface-2:     #ffffff;
+      --border:        rgba(15,107,178,.1);
+      --border-bright: rgba(15,107,178,.2);
+      --accent:        #0F6BB2;
+      --accent-dim:    rgba(15,107,178,.1);
+      --danger:        #c83518;
+      --danger-dim:    rgba(200,53,24,.1);
+      --text:          #181A1D;
+      --text-muted:    #424B58;
+      --text-dim:      #9BB5C8;
+    }
+
+    [data-theme="dark"] {
+      --bg:            #06101c;
+      --surface:       #0a1928;
+      --surface-2:     #0f2238;
+      --border:        rgba(68,124,213,.08);
+      --border-bright: rgba(68,124,213,.16);
+      --accent:        #447CD5;
+      --accent-dim:    rgba(68,124,213,.14);
+      --danger:        #e0566a;
+      --danger-dim:    rgba(224,86,106,.12);
+      --text:          #c8ddf0;
+      --text-muted:    #6080a0;
+      --text-dim:      #223448;
     }
 
     html, body {
       min-height: 100vh;
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Syne', sans-serif;
       color: var(--text);
+      background: var(--bg);
     }
 
     body {
-      background:
-        radial-gradient(ellipse 90% 55% at 15% 85%, rgba(10,45,100,.45) 0%, transparent 55%),
-        radial-gradient(ellipse 70% 45% at 85% 15%, rgba(200,148,46,.06) 0%, transparent 50%),
-        radial-gradient(ellipse 100% 60% at 50% 110%, rgba(5,30,70,.7) 0%, transparent 50%),
-        var(--bg);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
+      position: relative;
     }
 
+    /* Subtle background lines — light mode only */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 80px,
-          rgba(100,170,255,.016) 80px, rgba(100,170,255,.016) 81px);
+        repeating-linear-gradient(0deg, transparent, transparent 40px,
+          var(--border) 40px, var(--border) 41px);
+      opacity: .5;
       pointer-events: none;
     }
 
+    /* Theme toggle — top right corner */
+    .page-theme-toggle {
+      position: fixed;
+      top: 1rem; right: 1rem;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border-bright);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: .82rem;
+      cursor: pointer;
+      transition: color .14s, background .14s;
+      z-index: 10;
+    }
+    .page-theme-toggle:hover { color: var(--text); background: var(--surface); }
+
     .login-wrap {
       width: 100%;
-      max-width: 390px;
+      max-width: 380px;
       position: relative;
+      z-index: 1;
     }
 
     /* Brand */
     .login-brand {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
     }
 
     .brand-logo {
-      width: 54px; height: 54px;
-      background: linear-gradient(140deg, var(--accent), #7a4e10);
-      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.35rem;
-      color: #05090f;
-      margin: 0 auto .9rem;
-      box-shadow: 0 0 30px rgba(200,148,46,.2), 0 8px 30px rgba(0,0,0,.4);
+      margin: 0 auto .85rem;
+    }
+    .brand-logo img {
+      height: 64px;
+      width: auto;
+      filter: drop-shadow(0 2px 8px rgba(15,107,178,.25));
     }
 
     .brand-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.35rem;
+      font-family: 'Fraunces', serif;
+      font-size: 1.3rem;
       font-weight: 700;
       display: block;
-      margin-bottom: .28rem;
+      margin-bottom: .22rem;
+      color: var(--text);
     }
 
     .brand-sub {
-      font-size: .8rem;
+      font-size: .78rem;
       color: var(--text-muted);
-      letter-spacing: .04em;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      font-weight: 600;
     }
 
     /* Card */
     .login-card {
       background: var(--surface-2);
       border: 1px solid var(--border-bright);
-      border-radius: 14px;
-      padding: 2rem;
-      box-shadow: 0 24px 70px rgba(0,0,0,.65), 0 0 0 1px rgba(100,170,255,.04);
+      border-radius: 8px;
+      padding: 1.85rem;
+      box-shadow: 0 4px 20px rgba(26,42,74,.12), 0 1px 4px rgba(26,42,74,.06);
+    }
+
+    [data-theme="dark"] .login-card {
+      box-shadow: 0 16px 50px rgba(0,0,0,.5);
     }
 
     /* Error */
     .error-box {
       display: flex;
       align-items: center;
-      gap: .55rem;
-      padding: .7rem .9rem;
+      gap: .5rem;
+      padding: .65rem .85rem;
       background: var(--danger-dim);
-      border: 1px solid rgba(226,89,107,.28);
-      border-radius: 8px;
+      border: 1px solid rgba(192,54,30,.25);
+      border-radius: 4px;
       color: var(--danger);
-      font-size: .84rem;
-      margin-bottom: 1.4rem;
+      font-size: .83rem;
+      margin-bottom: 1.35rem;
     }
+    [data-theme="dark"] .error-box { border-color: rgba(226,89,107,.25); }
 
     /* Form */
-    .form-field { margin-bottom: 1.15rem; }
+    .form-field { margin-bottom: 1.1rem; }
 
     .form-label {
       display: block;
-      font-size: .77rem;
-      font-weight: 600;
+      font-size: .72rem;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: .07em;
-      margin-bottom: .42rem;
-    }
-
-    .input-wrap { position: relative; }
-
-    .input-icon {
-      position: absolute;
-      left: .85rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: .78rem;
-      pointer-events: none;
+      margin-bottom: .38rem;
     }
 
     input[type=text],
     input[type=password] {
       width: 100%;
-      background: var(--surface);
+      background: var(--surface-2);
       border: 1px solid var(--border-bright);
-      border-radius: 8px;
+      border-radius: 4px;
       color: var(--text);
-      font-family: 'Outfit', sans-serif;
-      font-size: .9rem;
-      padding: .65rem .9rem .65rem 2.35rem;
+      font-family: 'Syne', sans-serif;
+      font-size: .875rem;
+      padding: .6rem .88rem;
       outline: none;
-      transition: border-color .16s, box-shadow .16s;
+      transition: border-color .14s, box-shadow .14s;
       -webkit-appearance: none;
+      appearance: none;
     }
     input:focus {
       border-color: var(--accent);
@@ -164,23 +191,29 @@
     }
     input::placeholder { color: var(--text-dim); }
 
+    [data-theme="dark"] input[type=text],
+    [data-theme="dark"] input[type=password] {
+      background: var(--surface);
+      border-color: var(--border-bright);
+    }
+
     .btn-login {
       width: 100%;
-      padding: .72rem;
+      padding: .7rem;
       background: var(--accent);
-      color: #05090f;
+      color: #fff;
       border: none;
-      border-radius: 8px;
-      font-family: 'Outfit', sans-serif;
-      font-size: .93rem;
+      border-radius: 4px;
+      font-family: 'Syne', sans-serif;
+      font-size: .9rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: .5rem;
-      margin-top: 1.4rem;
-      transition: filter .16s, transform .1s;
+      gap: .45rem;
+      margin-top: 1.35rem;
+      transition: filter .14s, transform .1s;
       letter-spacing: .02em;
     }
     .btn-login:hover  { filter: brightness(1.1); }
@@ -188,32 +221,39 @@
 
     .login-footer {
       text-align: center;
-      margin-top: 1.1rem;
+      margin-top: 1rem;
     }
     .login-footer a {
       color: var(--text-muted);
-      font-size: .8rem;
+      font-size: .78rem;
       display: inline-flex;
       align-items: center;
-      gap: .35rem;
-      transition: color .16s;
+      gap: .32rem;
+      transition: color .14s;
+      font-weight: 500;
     }
     .login-footer a:hover { color: var(--text); }
   </style>
 </head>
 <body>
+
+  <!-- Theme toggle -->
+  <button class="page-theme-toggle" id="themeToggle" aria-label="Basculer le thème"><span id="themeIcon">☾</span></button>
+
   <div class="login-wrap">
 
     <div class="login-brand">
-      <div class="brand-logo"><i class="fas fa-anchor"></i></div>
-      <span class="brand-name">Gestionnaire Pontons</span>
+      <div class="brand-logo">
+        <img src="/static/icons/blason.png"
+             alt="Blason L'Isle-Adam">
+      </div>
+      <span class="brand-name">La Plage</span>
       <span class="brand-sub">Location d'embarcations</span>
     </div>
 
     <div class="login-card">
       {% if form.errors %}
         <div class="error-box">
-          <i class="fas fa-circle-exclamation"></i>
           Identifiant ou mot de passe incorrect.
         </div>
       {% endif %}
@@ -223,31 +263,23 @@
 
         <div class="form-field">
           <label class="form-label">Identifiant</label>
-          <div class="input-wrap">
-            <i class="input-icon fas fa-user"></i>
-            <input type="text" name="username" autofocus autocomplete="username" placeholder="Votre identifiant">
-          </div>
+          <input type="text" name="username" autofocus autocomplete="username" placeholder="Votre identifiant">
         </div>
 
         <div class="form-field">
           <label class="form-label">Mot de passe</label>
-          <div class="input-wrap">
-            <i class="input-icon fas fa-lock"></i>
-            <input type="password" name="password" autocomplete="current-password" placeholder="••••••••">
-          </div>
+          <input type="password" name="password" autocomplete="current-password" placeholder="••••••••">
         </div>
 
         <input type="hidden" name="next" value="{{ next }}">
 
         <button type="submit" class="btn-login">
-          <i class="fas fa-right-to-bracket"></i>
           Se connecter
         </button>
       </form>
 
       <div class="login-footer">
-        <a href="{% url 'planning' %}">
-          <i class="fas fa-eye"></i> Voir le planning sans connexion
+        <a href="{% url 'planning' %}"> Voir le planning sans connexion
         </a>
       </div>
     </div>
@@ -255,8 +287,27 @@
   </div>
 
   <script>
+    (function() {
+      var saved = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+      var icon = document.getElementById('themeIcon');
+      if (icon) icon.textContent = saved === 'dark' ? '☀' : '☾';
+    })();
+
+    var btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next    = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        var icon = document.getElementById('themeIcon');
+        if (icon) icon.textContent = next === 'dark' ? '☀' : '☾';
+      });
+    }
+
     if ('serviceWorker' in navigator)
-      navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+      navigator.serviceWorker.register('/static/sw.js').catch(function() {});
   </script>
 </body>
 </html>

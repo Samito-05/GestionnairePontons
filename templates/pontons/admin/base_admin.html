@@ -1,64 +1,57 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="display:flex;min-height:calc(100vh - 54px - 46px);">
+<div style="display:flex;min-height:calc(100vh - 52px - 45px);">
 
   <!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
   <aside class="admin-sidebar hide-mobile">
-    <nav style="padding:1.25rem .75rem;">
+    <nav style="padding:1.1rem .65rem;">
 
-      <div style="padding:.35rem .65rem;margin-bottom:.75rem;">
-        <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+      <div style="padding:.3rem .6rem;margin-bottom:.65rem;">
+        <span style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);font-family:var(--font-ui);">
           Navigation
         </span>
       </div>
 
       <a href="{% url 'admin_dashboard' %}"
-         class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-        <i class="fas fa-chart-simple"></i> Tableau de bord
+         class="sidebar-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}"> Tableau de bord
       </a>
 
-      <div style="padding:.55rem .65rem .28rem;margin-top:.5rem;">
-        <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+      <div style="padding:.5rem .6rem .24rem;margin-top:.4rem;">
+        <span style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);font-family:var(--font-ui);">
           Flotte
         </span>
       </div>
 
       <a href="{% url 'admin_pontons' %}"
-         class="sidebar-link {% if 'ponton' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="fas fa-water"></i> Pontons
+         class="sidebar-link {% if 'ponton' in request.resolver_match.url_name %}active{% endif %}"> Pontons
       </a>
       <a href="{% url 'admin_embarcations' %}"
-         class="sidebar-link {% if 'embarcation' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="fas fa-ship"></i> Embarcations
+         class="sidebar-link {% if 'embarcation' in request.resolver_match.url_name %}active{% endif %}"> Embarcations
       </a>
       <a href="{% url 'admin_locations' %}"
-         class="sidebar-link {% if 'location' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="fas fa-calendar-check"></i> Locations
+         class="sidebar-link {% if 'location' in request.resolver_match.url_name %}active{% endif %}"> Locations
       </a>
 
-      <div style="padding:.55rem .65rem .28rem;margin-top:.5rem;">
-        <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+      <div style="padding:.5rem .6rem .24rem;margin-top:.4rem;">
+        <span style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);font-family:var(--font-ui);">
           Accès
         </span>
       </div>
 
       <a href="{% url 'admin_users' %}"
-         class="sidebar-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="fas fa-users"></i> Utilisateurs
+         class="sidebar-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}"> Utilisateurs
       </a>
 
-      <div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1rem;">
-        <div style="padding:.35rem .65rem .28rem;">
-          <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);">
+      <div style="margin-top:1.1rem;border-top:1px solid var(--border);padding-top:.9rem;">
+        <div style="padding:.3rem .6rem .22rem;">
+          <span style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);font-family:var(--font-ui);">
             Vues
           </span>
         </div>
-        <a href="{% url 'planning' %}" class="sidebar-link">
-          <i class="fas fa-calendar-alt"></i> Planning
+        <a href="{% url 'planning' %}" class="sidebar-link"> Planning
         </a>
-        <a href="{% url 'gestionnaire' %}" class="sidebar-link">
-          <i class="fas fa-ship"></i> Gestion rapide
+        <a href="{% url 'gestionnaire' %}" class="sidebar-link"> Gestion rapide
         </a>
       </div>
 
@@ -66,7 +59,7 @@
   </aside>
 
   <!-- ══ MAIN CONTENT ════════════════════════════════════════ -->
-  <div style="flex:1;min-width:0;padding:1.75rem 2rem;overflow:auto;">
+  <div style="flex:1;min-width:0;padding:1.65rem 1.85rem;overflow:auto;">
     {% block admin_content %}{% endblock %}
   </div>
 
@@ -74,8 +67,8 @@
 
 <style>
   .admin-sidebar {
-    width: 210px;
-    min-width: 210px;
+    width: 205px;
+    min-width: 205px;
     background: var(--surface);
     border-right: 1px solid var(--border-bright);
     flex-shrink: 0;
@@ -83,17 +76,18 @@
   .sidebar-link {
     display: flex;
     align-items: center;
-    gap: .55rem;
-    padding: .48rem .75rem;
+    gap: .5rem;
+    padding: .44rem .7rem;
     border-radius: var(--radius-sm);
-    font-size: .84rem;
-    font-weight: 500;
+    font-size: .81rem;
+    font-weight: 600;
+    font-family: var(--font-ui);
     color: var(--text-muted);
     text-decoration: none;
     transition: color var(--t), background var(--t);
-    margin-bottom: .08rem;
+    margin-bottom: .06rem;
   }
-  .sidebar-link i { font-size: .76rem; width: 14px; text-align: center; }
+  .sidebar-link i { font-size: .74rem; width: 13px; text-align: center; flex-shrink: 0; }
   .sidebar-link:hover { color: var(--text); background: var(--surface-2); }
   .sidebar-link.active { color: var(--accent); background: var(--accent-dim); }
 </style>

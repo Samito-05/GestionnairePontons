@@ -17,35 +17,35 @@
 }
 
 .planning-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   display: flex;
   align-items: center;
-  gap: .55rem;
+  gap: .5rem;
   color: var(--text);
 }
-.planning-title i { color: var(--accent); font-size: .95rem; }
-.planning-title strong { font-family: 'Playfair Display', serif; }
+.planning-title i { color: var(--accent); font-size: .92rem; }
+.planning-title strong { font-family: var(--font-display); font-weight: 600; }
 
 .planning-controls {
   display: flex;
   align-items: center;
-  gap: .55rem;
+  gap: .5rem;
   flex-wrap: wrap;
 }
 
 .clock-tag {
   display: inline-flex;
   align-items: center;
-  gap: .42rem;
-  padding: .32rem .78rem;
+  gap: .4rem;
+  padding: .3rem .72rem;
   background: var(--surface-2);
   border: 1px solid var(--border-bright);
   border-radius: 20px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .82rem;
+  font-family: var(--mono);
+  font-size: .8rem;
   color: var(--text-muted);
 }
-.clock-tag i { font-size: .72rem; color: var(--accent); }
+.clock-tag i { font-size: .7rem; color: var(--accent); }
 
 /* Legend */
 .legend {
@@ -58,8 +58,8 @@
 .legend-item {
   display: inline-flex;
   align-items: center;
-  gap: .38rem;
-  font-size: .77rem;
+  gap: .36rem;
+  font-size: .76rem;
   color: var(--text-muted);
 }
 .legend-dot {
@@ -120,9 +120,9 @@
 .tl-row-axis .tl-label {
   font-size: .7rem;
   font-weight: 400;
-  color: var(--text-dim);
+  color: var(--text-muted);
   border-right-color: transparent;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--mono);
 }
 
 .hour-tick {
@@ -134,7 +134,7 @@
   color: var(--text-muted);
   white-space: nowrap;
   pointer-events: none;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--mono);
 }
 .hour-tick-last { transform: translate(-100%, -50%); }
 
@@ -148,7 +148,7 @@
   font-weight: 700;
   font-size: .8rem;
   color: var(--accent);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   border-right-color: var(--border-bright);
 }
 
@@ -166,7 +166,7 @@
 .rental-block {
   position: absolute;
   top: 5px; bottom: 5px;
-  border-radius: 5px;
+  border-radius: 4px;
   font-size: .7rem;
   font-weight: 700;
   display: flex;
@@ -176,11 +176,11 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
   cursor: default;
   transition: filter .12s;
   min-width: 6px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--mono);
 }
 .rental-block:hover { filter: brightness(1.1); z-index: 2; }
 .rental-block.is-narrow { font-size: 0; }
@@ -193,7 +193,7 @@
   background: var(--danger);
   z-index: 5;
   pointer-events: none;
-  box-shadow: 0 0 8px rgba(226,89,107,.5);
+  box-shadow: 0 0 6px var(--danger-dim);
 }
 .now-line::before {
   content: '';
@@ -202,7 +202,6 @@
   width: 10px; height: 10px;
   border-radius: 50%;
   background: var(--danger);
-  box-shadow: 0 0 6px rgba(226,89,107,.6);
 }
 
 /* ══════════════════════════════════════════════
@@ -210,16 +209,15 @@
 ══════════════════════════════════════════════ */
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .summary-card {
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-bright);
   border-radius: var(--radius);
-  overflow: hidden;
 }
 
 .summary-card-head {
@@ -228,7 +226,7 @@
   font-size: .8rem;
   font-weight: 700;
   color: var(--accent);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   letter-spacing: .01em;
 }
 
@@ -239,7 +237,7 @@
   align-items: center;
   justify-content: space-between;
   gap: .5rem;
-  padding: .38rem 0;
+  padding: .36rem 0;
   border-bottom: 1px solid var(--border);
 }
 .summary-row:last-child { border-bottom: none; }
@@ -247,8 +245,8 @@
 .summary-emb-name {
   display: flex;
   align-items: center;
-  gap: .45rem;
-  font-size: .83rem;
+  gap: .44rem;
+  font-size: .82rem;
 }
 
 /* ══════════════════════════════════════════════
@@ -257,104 +255,115 @@
 .mob-ponton-label {
   display: flex;
   align-items: center;
-  gap: .5rem;
-  margin: 1.5rem 0 .65rem;
+  gap: .45rem;
+  margin: 1.25rem 0 .5rem;
   font-weight: 700;
-  font-size: .92rem;
+  font-size: .82rem;
   color: var(--accent);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .04em;
 }
 
-.mob-emb-card {
+/* Compact 2-col grid */
+.mob-emb-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .45rem;
+  margin-bottom: .25rem;
+}
+
+.mob-tile {
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-bright);
   border-radius: var(--radius);
-  padding: .9rem 1rem;
-  margin-bottom: .6rem;
-}
-
-.mob-emb-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: .55rem;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 54px;
 }
 
-.mob-emb-name {
-  display: flex;
-  align-items: center;
-  gap: .42rem;
-  font-weight: 600;
-  font-size: .87rem;
-}
-
-.mob-color-dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
+/* Color rail — left edge */
+.mob-tile-rail {
+  width: 4px;
   flex-shrink: 0;
 }
 
-/* Mini bar */
-.mini-bar-wrap { margin: 0 0 .22rem; }
-
-.mini-bar {
-  position: relative;
-  height: 8px;
-  background: var(--surface-3);
-  border-radius: 8px;
-  margin-bottom: .28rem;
-  overflow: hidden;
-}
-
-.mini-bar-now {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 2px;
-  background: var(--danger);
-  z-index: 3;
-  box-shadow: 0 0 4px rgba(226,89,107,.6);
-}
-
-.mini-block {
-  position: absolute;
-  top: 0; bottom: 0;
-  border-radius: 8px;
-  min-width: 4px;
-}
-
-.mini-ticks {
-  position: relative;
-  height: 13px;
-}
-
-.mini-tick {
-  position: absolute;
-  font-size: .6rem;
-  color: var(--text-dim);
-  transform: translateX(-50%);
-  white-space: nowrap;
-  line-height: 13px;
-  user-select: none;
-  font-family: 'JetBrains Mono', monospace;
-}
-.mini-tick.is-last { transform: translateX(-100%); }
-
-.mob-slots {
+.mob-tile-body {
+  flex: 1;
+  padding: .42rem .55rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: .3rem;
-  margin-top: .45rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: .18rem;
+  min-width: 0;
+}
+
+.mob-tile-name {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.mob-tile-status {
+  display: flex;
+  align-items: center;
+  gap: .28rem;
+  font-size: .69rem;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.mob-tile-retour {
+  font-family: var(--mono);
+  font-size: .7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Rented tile — tinted bg */
+.mob-tile-rented {
+  background: var(--danger-dim);
+  border-color: rgba(192,54,30,.25);
+}
+[data-theme="dark"] .mob-tile-rented {
+  border-color: rgba(226,89,107,.2);
+}
+
+/* Available tile */
+.mob-tile-available {
+  background: var(--surface-2);
+}
+
+/* Slot tags (kept for detail row, hidden by default) */
+.mob-slot-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  border-radius: 3px;
+  padding: 2px 9px;
+  font-size: .7rem;
+  font-weight: 700;
+  font-family: var(--mono);
 }
 
 .mob-slot-tag {
   display: inline-flex;
   align-items: center;
   gap: .25rem;
-  border-radius: 20px;
+  border-radius: 3px;
   padding: 2px 9px;
   font-size: .7rem;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--mono);
 }
 
 /* ══════════════════════════════════════════════
@@ -378,29 +387,26 @@
     <!-- ── Header ──────────────────────────────────────────────── -->
     <div class="planning-header">
       <div class="planning-title">
-        <i class="fas fa-calendar-alt"></i>
         <span>
-          <span class="hide-mobile text-muted text-sm" style="font-family:'Outfit',sans-serif;font-weight:400;">Planning du&nbsp;</span>
+          <span class="hide-mobile text-muted text-sm" style="font-family:var(--font-ui);font-weight:400;">Planning du&nbsp;</span>
           <strong>{{ date_cible|date:"l d F Y" }}</strong>
         </span>
       </div>
       <div class="planning-controls">
         <div class="btn-group">
           <a href="?date={{ date_prev|date:'Y-m-d' }}" class="btn btn-ghost btn-sm">
-            <i class="fas fa-chevron-left"></i>
+            ‹
           </a>
           <a href="?date={% now 'Y-m-d' %}" class="btn btn-ghost btn-sm">Aujourd'hui</a>
           <a href="?date={{ date_next|date:'Y-m-d' }}" class="btn btn-ghost btn-sm">
-            <i class="fas fa-chevron-right"></i>
+            ›
           </a>
         </div>
         <span id="live-clock" class="clock-tag">
-          <i class="fas fa-clock"></i>
           <span>{{ now|time:"H:i" }}</span>
         </span>
         {% if role == 'gestionnaire' or role == 'admin' %}
         <a href="{% url 'gestionnaire' %}" class="btn btn-primary btn-sm">
-          <i class="fas fa-ship"></i>
           <span class="hide-mobile">Gérer les sorties</span>
           <span class="hide-desktop">Gérer</span>
         </a>
@@ -426,8 +432,7 @@
 
     {% if not planning_data %}
       <div class="toast toast-info" style="max-width:520px;">
-        <span>
-          <i class="fas fa-info-circle"></i>&nbsp;
+        <span>&nbsp;
           Aucun ponton actif configuré.
           {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" style="color:inherit;text-decoration:underline;">Ajouter un ponton</a>{% endif %}
         </span>
@@ -442,7 +447,7 @@
 
       <!-- Axis -->
       <div class="tl-row tl-row-axis">
-        <div class="tl-label">13h → 20h</div>
+        <div class="tl-label">{{ grid_start_h }}h → {{ grid_end_h }}h</div>
         <div class="tl-track">
           {% for m in marks %}{% if m.is_hour %}
             <span class="hour-tick {% if forloop.last %}hour-tick-last{% endif %}"
@@ -471,7 +476,7 @@
                 {{ row.embarcation.nom }}
               </span>
             </div>
-            <div style="font-size:.67rem;color:var(--text-muted);padding-left:14px;font-family:'Outfit',sans-serif;">
+            <div style="font-size:.67rem;color:var(--text-muted);padding-left:14px;font-family:var(--font-ui);">
               {{ row.embarcation.get_type_embarcation_display }}
             </div>
           </div>
@@ -506,7 +511,12 @@
               <span>{{ row.embarcation.nom }}</span>
             </div>
             {% if row.est_louee_maintenant %}
-              <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
+              <div style="display:flex;align-items:center;gap:.35rem;">
+                <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
+                {% if row.retour %}
+                  <span style="font-family:var(--mono);font-size:.72rem;color:var(--text-muted);">-> {{ row.retour }}</span>
+                {% endif %}
+              </div>
             {% else %}
               <span class="badge badge-success">● Dispo</span>
             {% endif %}
@@ -518,61 +528,35 @@
     </div>
 
     <!-- ════════════════════════════════════════
-         MOBILE VIEW
+         MOBILE VIEW — compact grid
     ════════════════════════════════════════ -->
     <div class="mobile-planning">
       {% for ponton_data in planning_data %}
 
         <div class="mob-ponton-label">
-          <i class="fas fa-water" style="font-size:.8rem;"></i>
           {{ ponton_data.ponton.nom }}
         </div>
 
-        {% for row in ponton_data.rows %}
-        <div class="mob-emb-card">
-          <div class="mob-emb-header">
-            <div class="mob-emb-name">
-              <span class="mob-color-dot" style="background:{{ row.embarcation.couleur }};"></span>
-              {{ row.embarcation.nom }}
-              <span style="color:var(--text-muted);font-size:.72rem;font-weight:400;">
-                — {{ row.embarcation.get_type_embarcation_display }}
-              </span>
-            </div>
-            {% if row.est_louee_maintenant %}
-              <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
-            {% else %}
-              <span class="badge badge-success">● Dispo</span>
-            {% endif %}
-          </div>
-
-          <div class="mini-bar-wrap">
-            <div class="mini-bar">
-              {% for block in row.blocks %}
-                <div class="mini-block"
-                     style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};"></div>
-              {% endfor %}
-            </div>
-            <div class="mini-ticks">
-              {% for m in marks %}{% if m.show_mobile %}
-                <span class="mini-tick {% if forloop.last %}is-last{% endif %}"
-                      style="left:{{ m.pct }}%">{{ m.label }}</span>
-              {% endif %}{% endfor %}
+        <div class="mob-emb-grid">
+          {% for row in ponton_data.rows %}
+          <div class="mob-tile {% if row.est_louee_maintenant %}mob-tile-rented{% else %}mob-tile-available{% endif %}">
+            <div class="mob-tile-rail" style="background:{{ row.embarcation.couleur }};"></div>
+            <div class="mob-tile-body">
+              <div class="mob-tile-name">{{ row.embarcation.nom }}</div>
+              <div class="mob-tile-status">
+                {% if row.est_louee_maintenant %}
+                  <span style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
+                  {% if row.retour %}
+                    <span class="mob-tile-retour">-> {{ row.retour }}</span>
+                  {% endif %}
+                {% else %}
+                  <span style="color:var(--success);">● Dispo</span>
+                {% endif %}
+              </div>
             </div>
           </div>
-
-          {% if row.blocks %}
-            <div class="mob-slots">
-              {% for block in row.blocks %}
-                <span class="mob-slot-tag" style="background:{{ block.color }};color:{{ block.text_color }};">
-                  {{ block.label }}
-                </span>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p style="font-size:.73rem;color:var(--text-dim);margin-top:.3rem;">Aucune sortie planifiée</p>
-          {% endif %}
+          {% endfor %}
         </div>
-        {% endfor %}
 
       {% endfor %}
     </div><!-- /mobile-planning -->
@@ -585,7 +569,10 @@
 
 {% block extra_js %}
 <script>
-const GRID_START_H = 13, GRID_DUR = 420;
+// Grid bounds from server — dynamic based on actual rental data
+const GRID_START_H = {{ grid_start_h }};
+const GRID_END_H   = {{ grid_end_h }};
+const GRID_DUR     = {{ grid_span }};  // minutes
 
 function timeToPct(h, m) {
   return ((h - GRID_START_H) * 60 + m) / GRID_DUR * 100;
@@ -596,7 +583,7 @@ function drawNowLine() {
   const h = now.getHours(), m = now.getMinutes();
 
   document.querySelectorAll('.now-line, .mini-bar-now').forEach(el => el.remove());
-  if (h < 13 || h >= 20) return;
+  if (h < GRID_START_H || h >= GRID_END_H) return;
 
   const pct = timeToPct(h, m).toFixed(4);
 
@@ -633,8 +620,19 @@ document.addEventListener('DOMContentLoaded', () => {
   adjustNarrowBlocks();
 });
 
+// Recurring auto-refresh every 30s (was one-shot setTimeout)
 setInterval(updateClock, 10000);
 setInterval(drawNowLine, 30000);
-setTimeout(() => location.reload(), 60000);
+setInterval(() => location.reload(), 30000);
+
+// Reload on back-button (bfcache) — prevents stale page after creating a rental
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) location.reload();
+});
+
+// Reload when tab regains focus after switching to gestionnaire
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) location.reload();
+});
 </script>
 {% endblock %}

@@ -4,8 +4,7 @@
 {% block admin_content %}
 <div class="page-header">
   <h1 class="page-title">{{ titre }}</h1>
-  <a href="{% url 'admin_embarcations' %}" class="btn btn-ghost btn-sm">
-    <i class="fas fa-arrow-left"></i> Retour
+  <a href="{% url 'admin_embarcations' %}" class="btn btn-ghost btn-sm"> ← Retour
   </a>
 </div>
 
@@ -26,8 +25,7 @@
       </div>
       {% endfor %}
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save"></i> Enregistrer
+        <button type="submit" class="btn btn-primary"> Enregistrer
         </button>
         <a href="{% url 'admin_embarcations' %}" class="btn btn-ghost">Annuler</a>
       </div>

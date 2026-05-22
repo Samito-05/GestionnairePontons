@@ -3,8 +3,7 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">
-    <i class="fas fa-chart-simple" style="color:var(--accent);font-size:1rem;"></i>&nbsp;
+  <h1 class="page-title">&nbsp;
     Tableau de bord
   </h1>
 </div>
@@ -13,39 +12,39 @@
 <div class="stat-grid">
 
   <div class="stat-card stat-card-blue">
-    <div class="stat-icon"><i class="fas fa-water"></i></div>
+    <div class="stat-icon"></div>
     <div class="stat-body">
       <div class="stat-label">Pontons</div>
       <div class="stat-value mono">{{ nb_pontons }}</div>
     </div>
-    <a href="{% url 'admin_pontons' %}" class="stat-link">Gérer <i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'admin_pontons' %}" class="stat-link">Gérer →</a>
   </div>
 
   <div class="stat-card stat-card-teal">
-    <div class="stat-icon"><i class="fas fa-ship"></i></div>
+    <div class="stat-icon"></div>
     <div class="stat-body">
       <div class="stat-label">Embarcations actives</div>
       <div class="stat-value mono">{{ nb_embarcations }}</div>
     </div>
-    <a href="{% url 'admin_embarcations' %}" class="stat-link">Gérer <i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'admin_embarcations' %}" class="stat-link">Gérer →</a>
   </div>
 
   <div class="stat-card stat-card-green">
-    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+    <div class="stat-icon"></div>
     <div class="stat-body">
       <div class="stat-label">Locations aujourd'hui</div>
       <div class="stat-value mono">{{ nb_locations_today }}</div>
     </div>
-    <a href="{% url 'admin_locations' %}" class="stat-link">Voir <i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'admin_locations' %}" class="stat-link">Voir →</a>
   </div>
 
   <div class="stat-card stat-card-amber">
-    <div class="stat-icon"><i class="fas fa-users"></i></div>
+    <div class="stat-icon"></div>
     <div class="stat-body">
       <div class="stat-label">Utilisateurs</div>
       <div class="stat-value mono">{{ nb_users }}</div>
     </div>
-    <a href="{% url 'admin_users' %}" class="stat-link">Gérer <i class="fas fa-arrow-right"></i></a>
+    <a href="{% url 'admin_users' %}" class="stat-link">Gérer →</a>
   </div>
 
 </div>
@@ -56,18 +55,14 @@
     <span class="card-header-title">Actions rapides</span>
   </div>
   <div class="card-body">
-    <div style="display:flex;flex-wrap:wrap;gap:.6rem;">
-      <a href="{% url 'admin_ponton_new' %}" class="btn btn-ghost btn-sm">
-        <i class="fas fa-plus"></i> Nouveau ponton
+    <div style="display:flex;flex-wrap:wrap;gap:.55rem;">
+      <a href="{% url 'admin_ponton_new' %}" class="btn btn-ghost btn-sm"> Nouveau ponton
       </a>
-      <a href="{% url 'admin_embarcation_new' %}" class="btn btn-ghost btn-sm">
-        <i class="fas fa-plus"></i> Nouvelle embarcation
+      <a href="{% url 'admin_embarcation_new' %}" class="btn btn-ghost btn-sm"> Nouvelle embarcation
       </a>
-      <a href="{% url 'admin_location_new' %}" class="btn btn-primary btn-sm">
-        <i class="fas fa-plus"></i> Nouvelle location
+      <a href="{% url 'admin_location_new' %}" class="btn btn-primary btn-sm"> Nouvelle location
       </a>
-      <a href="{% url 'admin_user_new' %}" class="btn btn-ghost btn-sm">
-        <i class="fas fa-plus"></i> Nouvel utilisateur
+      <a href="{% url 'admin_user_new' %}" class="btn btn-ghost btn-sm"> Nouvel utilisateur
       </a>
     </div>
   </div>
@@ -76,75 +71,84 @@
 <style>
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 1rem;
 }
 
 .stat-card {
+  background: var(--surface-2);
   border-radius: var(--radius);
   border: 1px solid;
-  padding: 1.2rem 1.3rem 1rem;
+  padding: 1.15rem 1.2rem .95rem;
   display: flex;
   flex-direction: column;
-  gap: .65rem;
+  gap: .6rem;
   transition: transform var(--t), box-shadow var(--t);
-  position: relative;
-  overflow: hidden;
 }
+.stat-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+
+/* Left accent bar per category */
+.stat-card { position: relative; padding-left: 1.4rem; }
 .stat-card::before {
   content: '';
   position: absolute;
-  top: 0; right: 0;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  opacity: .06;
-  transform: translate(20px, -20px);
+  top: .9rem; bottom: .9rem; left: 0;
+  width: 3px;
+  border-radius: 2px;
 }
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 
-.stat-card-blue  { background: linear-gradient(135deg, var(--surface-2), rgba(74,158,237,.04)); border-color: rgba(74,158,237,.18); }
+.stat-card-blue  { border-color: rgba(23,88,153,.2); }
+.stat-card-blue::before  { background: var(--info); }
 .stat-card-blue  .stat-icon { color: var(--info); }
-.stat-card-blue::before   { background: var(--info); }
 
-.stat-card-teal  { background: linear-gradient(135deg, var(--surface-2), rgba(62,207,184,.04)); border-color: rgba(62,207,184,.18); }
-.stat-card-teal  .stat-icon { color: var(--success); }
+.stat-card-teal  { border-color: rgba(29,122,82,.2); }
 .stat-card-teal::before  { background: var(--success); }
+.stat-card-teal  .stat-icon { color: var(--success); }
 
-.stat-card-green { background: linear-gradient(135deg, var(--surface-2), rgba(62,207,130,.04)); border-color: rgba(62,207,130,.18); }
-.stat-card-green .stat-icon { color: #3ecf82; }
-.stat-card-green::before { background: #3ecf82; }
+.stat-card-green { border-color: rgba(29,122,82,.2); }
+.stat-card-green::before { background: #2e9e65; }
+.stat-card-green .stat-icon { color: #2e9e65; }
 
-.stat-card-amber { background: linear-gradient(135deg, var(--surface-2), rgba(200,148,46,.05)); border-color: rgba(200,148,46,.2); }
-.stat-card-amber .stat-icon { color: var(--accent); }
+.stat-card-amber { border-color: rgba(192,54,30,.2); }
 .stat-card-amber::before { background: var(--accent); }
+.stat-card-amber .stat-icon { color: var(--accent); }
 
-.stat-icon { font-size: 1.2rem; }
+[data-theme="dark"] .stat-card-blue  { border-color: rgba(74,158,237,.18); }
+[data-theme="dark"] .stat-card-teal  { border-color: rgba(62,207,184,.18); }
+[data-theme="dark"] .stat-card-green { border-color: rgba(62,207,130,.18); }
+[data-theme="dark"] .stat-card-amber { border-color: rgba(212,137,31,.18); }
+
+.stat-icon { font-size: 1.1rem; }
 
 .stat-label {
-  font-size: .76rem;
+  font-size: .73rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: .06em;
-  font-weight: 600;
+  letter-spacing: .07em;
+  font-weight: 700;
+  font-family: var(--font-ui);
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: 700;
   color: var(--text);
   line-height: 1;
+  font-family: var(--mono);
 }
 
 .stat-link {
-  font-size: .76rem;
+  font-size: .74rem;
   color: var(--text-muted);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: .35rem;
+  gap: .32rem;
   transition: color var(--t);
+  font-weight: 600;
+  font-family: var(--font-ui);
 }
-.stat-link:hover { color: var(--text); }
-.stat-link i { font-size: .65rem; }
+.stat-link:hover { color: var(--accent); }
+.stat-link i { font-size: .62rem; }
 </style>
 {% endblock %}

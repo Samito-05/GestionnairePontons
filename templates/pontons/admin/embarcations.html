@@ -3,11 +3,9 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">
-    <i class="fas fa-ship" style="color:var(--accent);font-size:1rem;"></i>&nbsp; Embarcations
+  <h1 class="page-title">&nbsp; Embarcations
   </h1>
-  <a href="{% url 'admin_embarcation_new' %}" class="btn btn-primary btn-sm">
-    <i class="fas fa-plus"></i> Nouvelle embarcation
+  <a href="{% url 'admin_embarcation_new' %}" class="btn btn-primary btn-sm"> Nouvelle embarcation
   </a>
 </div>
 
@@ -29,7 +27,7 @@
       <tr>
         <td>
           <span style="display:inline-block;width:20px;height:20px;border-radius:50%;
-                       background:{{ emb.couleur }};border:2px solid rgba(255,255,255,.12);
+                       background:{{ emb.couleur }};border:2px solid var(--border-bright);
                        vertical-align:middle;"></span>
         </td>
         <td><span class="fw-600">{{ emb.nom }}</span></td>
@@ -53,13 +51,13 @@
         <td>
           <div style="display:flex;gap:.4rem;">
             <a href="{% url 'admin_embarcation_edit' emb.pk %}" class="btn btn-info btn-sm">
-              <i class="fas fa-edit"></i>
+              Modifier
             </a>
             <form method="post" action="{% url 'admin_embarcation_delete' emb.pk %}"
                   onsubmit="return confirm('Supprimer cette embarcation ?')">
               {% csrf_token %}
               <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-trash"></i>
+                Suppr.
               </button>
             </form>
           </div>

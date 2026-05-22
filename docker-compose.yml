@@ -7,7 +7,7 @@ services:
     env_file:
       - .env.production           # Create this from .env.example, never commit it
     volumes:
-      - db_data:/app/db.sqlite3   # Persist SQLite across container rebuilds
+      - db_data:/app/data          # Named volume → directory → db.sqlite3 lives inside
       - media_data:/app/media
 
 volumes:

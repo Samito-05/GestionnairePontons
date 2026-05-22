@@ -6,7 +6,6 @@ const CACHE_NAME = 'pontons-v3';
 
 const STATIC_ASSETS = [
   '/static/manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
 ];
 
 self.addEventListener('install', event => {

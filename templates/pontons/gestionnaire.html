@@ -175,20 +175,7 @@
 }
 .quick-input::placeholder { color: var(--text-dim); font-size: .76rem; }
 
-/* Clock tag (duplicated from base for inline use) */
-.clock-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .3rem .72rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: 20px;
-  font-family: var(--mono);
-  font-size: .8rem;
-  color: var(--text-muted);
-}
-.clock-tag i { font-size: .7rem; color: var(--accent); }
+/* .clock-tag defined in base.css */
 </style>
 {% endblock %}
 
@@ -306,6 +293,21 @@ function updateClock() {
   if (el) el.querySelector('span:last-child').textContent = txt;
 }
 setInterval(updateClock, 10000);
-setTimeout(() => location.reload(), 30000);
+
+// Track user activity — don't reload while typing notes
+let lastActivity = Date.now();
+['click', 'keydown', 'focus'].forEach(ev =>
+  document.addEventListener(ev, () => { lastActivity = Date.now(); }, true)
+);
+
+// Fetch status every 30s; reload only if user has been idle for 10s
+setInterval(function() {
+  fetch('/api/status/')
+    .then(r => r.json())
+    .then(() => {
+      if (Date.now() - lastActivity > 10000) location.reload();
+    })
+    .catch(() => {});
+}, 30000);
 </script>
 {% endblock %}

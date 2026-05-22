@@ -1,13 +1,33 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-=in4&s4g4v=*8v*gf81^v89(8a@xh@n3*5vu!k%_=-^=ovmb#c'
+# Load .env file (local dev only — prod uses real env vars)
+load_dotenv(BASE_DIR / '.env')
 
-DEBUG = True
+# ── Security ───────────────────────────────────────────────────────────────────
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']  # Required — no default, crash if missing
 
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+
+# ── Production security headers (active when DEBUG=False) ─────────────────────
+# NOTE: SECURE_SSL_REDIRECT is intentionally OFF — Cloudflare Tunnel terminates
+# TLS before traffic reaches this container (arrives as HTTP on 127.0.0.1:8000).
+# Cloudflare enforces HTTPS on its edge; Django must not redirect again.
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False             # Cloudflare Tunnel handles TLS
+    SECURE_HSTS_SECONDS = 31536000          # 1 year — tells browsers HTTPS-only
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Cloudflare sets this
+
+# ── Apps ───────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -71,6 +91,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

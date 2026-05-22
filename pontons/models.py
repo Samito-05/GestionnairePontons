@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from datetime import timedelta
 
@@ -69,6 +71,10 @@ class Location(models.Model):
         ordering = ['heure_debut']
         verbose_name = 'Location'
         verbose_name_plural = 'Locations'
+        indexes = [
+            models.Index(fields=['heure_debut']),
+            models.Index(fields=['embarcation', 'heure_debut']),
+        ]
 
     def __str__(self):
         return f"{self.embarcation.nom} — {self.heure_debut.strftime('%d/%m %H:%M')}"
@@ -116,3 +122,12 @@ class UserProfile(models.Model):
 
     def is_gestionnaire(self):
         return self.role in ('admin', 'gestionnaire') or self.user.is_superuser
+
+
+# ─── Signals ─────────────────────────────────────────────────────────────────
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Auto-create UserProfile for every new User."""
+    if created:
+        UserProfile.objects.get_or_create(user=instance)

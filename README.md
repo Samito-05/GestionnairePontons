@@ -344,6 +344,99 @@ GestionnairePontons/
 
 ---
 
+## Maintenance — Aide-memoire
+
+### Acces SSH au NAS
+
+```bash
+ssh admin@192.168.X.XXX        # IP locale du NAS (voir interface QNAP)
+cd /share/homes/admin/GestionnairePontons
+```
+
+### Etat de l'application
+
+```bash
+docker compose ps                   # Statut des conteneurs (web, tunnel)
+docker compose logs -f              # Logs en temps reel (Ctrl+C pour quitter)
+docker compose logs web --tail=50   # 50 dernieres lignes du serveur Django
+docker compose logs tunnel --tail=20 # Statut du tunnel Cloudflare
+```
+
+### Redemarrer
+
+```bash
+docker compose restart web          # Redemarrer le serveur (sans rebuild)
+docker compose restart tunnel       # Redemarrer le tunnel
+docker compose restart              # Tout redemarrer
+```
+
+### Mettre a jour l'application
+
+```bash
+# Telecharger la nouvelle version
+wget -O pontons.zip https://github.com/Samito-05/GestionnairePontons/archive/refs/heads/main.zip
+unzip -o pontons.zip
+cp -r GestionnairePontons-main/. .
+rm -rf GestionnairePontons-main pontons.zip
+
+# Reconstruire et relancer
+docker compose up -d --build
+docker compose exec web python manage.py migrate   # si nouvelles migrations
+```
+
+### Acceder a la base de donnees
+
+```bash
+# Shell Django interactif
+docker compose exec web python manage.py shell
+
+# Sauvegarder toutes les donnees
+docker compose exec web python manage.py dumpdata > backup_$(date +%Y%m%d_%H%M).json
+
+# Restaurer une sauvegarde
+docker compose exec web python manage.py loaddata backup_YYYYMMDD_HHMM.json
+```
+
+### Creer ou modifier un compte
+
+```bash
+# Nouveau superuser
+docker compose exec web python manage.py createsuperuser
+
+# Changer le mot de passe d'un utilisateur existant
+docker compose exec web python manage.py changepassword <nom_utilisateur>
+```
+
+### Modifier la configuration production
+
+```bash
+vi /share/homes/admin/GestionnairePontons/.env.production
+# Apres modification :
+docker compose restart web
+```
+
+### Arreter et relancer depuis zero
+
+```bash
+docker compose down              # Arrete les conteneurs (volumes conserves)
+docker compose up -d --build     # Repart avec rebuild de l'image
+```
+
+> Pour supprimer aussi les donnees (volumes) : `docker compose down -v`
+> Irreversible — toute la base de donnees est perdue.
+
+### Verifier la connectivite du tunnel
+
+```bash
+# Depuis le NAS : l'app repond localement
+curl -I http://127.0.0.1:8000
+
+# Depuis le navigateur : l'app repond via Cloudflare
+# https://pontons.MONDOMAINE.COM
+```
+
+---
+
 ## Licence
 
 Projet libre d'utilisation.

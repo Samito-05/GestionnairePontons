@@ -71,6 +71,20 @@
   border-color: rgba(62,207,184,.38);
 }
 
+/* Reserved */
+.emb-card-reserved {
+  border-color: rgba(142,94,14,.3);
+}
+[data-theme="dark"] .emb-card-reserved {
+  border-color: rgba(240,160,64,.25);
+}
+.emb-card-reserved:hover {
+  border-color: rgba(142,94,14,.5);
+}
+[data-theme="dark"] .emb-card-reserved:hover {
+  border-color: rgba(240,160,64,.45);
+}
+
 /* Rented */
 .emb-card-rented {
   border-color: rgba(192,54,30,.3);
@@ -90,6 +104,7 @@
   height: 3px;
 }
 .emb-card-available .emb-status-bar { background: var(--success); }
+.emb-card-reserved .emb-status-bar  { background: var(--warning); }
 .emb-card-rented .emb-status-bar    { background: var(--danger); }
 
 .emb-card-body { padding: 1rem 1.05rem; }
@@ -205,8 +220,8 @@
       <div class="emb-grid">
         {% for item in ponton_data.embarcations %}
 
-          {% if item.louee %}
-          <!-- ── RENTED ── -->
+          {% if item.statut == 'sortie' %}
+          <!-- ── SORTIE ── -->
           <div class="emb-card emb-card-rented">
             <div class="emb-status-bar"></div>
             <div class="emb-card-body">
@@ -236,8 +251,39 @@
             </div>
           </div>
 
+          {% elif item.statut == 'reservee' %}
+          <!-- ── RÉSERVÉE ── -->
+          <div class="emb-card emb-card-reserved">
+            <div class="emb-status-bar"></div>
+            <div class="emb-card-body">
+              <div class="emb-card-header">
+                <div class="emb-card-info">
+                  <div class="emb-name">
+                    <span class="color-dot" style="background:{{ item.embarcation.couleur }};flex-shrink:0;"></span>
+                    <span class="emb-name-text">{{ item.embarcation.nom }}</span>
+                  </div>
+                  <div class="emb-type">{{ item.embarcation.get_type_embarcation_display }}</div>
+                </div>
+                <span class="badge badge-warning">● Réservée</span>
+              </div>
+
+              <div class="retour-info">
+                <span>Jusqu'à <span class="retour-time">{{ item.retour }}</span></span>
+              </div>
+              {% if item.location.notes %}
+                <div class="retour-notes">{{ item.location.notes }}</div>
+              {% endif %}
+
+              <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning btn-sm btn-full"> Sortir
+                </button>
+              </form>
+            </div>
+          </div>
+
           {% else %}
-          <!-- ── AVAILABLE ── -->
+          <!-- ── DISPONIBLE ── -->
           <div class="emb-card emb-card-available">
             <div class="emb-status-bar"></div>
             <div class="emb-card-body">
@@ -256,7 +302,7 @@
                 {% csrf_token %}
                 <div class="quick-form">
                   <input type="text" name="notes" class="quick-input" placeholder="Notes (optionnel)">
-                  <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;"> Louer 1h
+                  <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;"> Réserver
                   </button>
                 </div>
               </form>

@@ -91,6 +91,7 @@ def gestionnaire(request):
             embs.append({
                 'embarcation': emb,
                 'louee': loc is not None,
+                'statut': loc.statut if loc else 'libre',
                 'location': loc,
                 'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
             })
@@ -123,10 +124,25 @@ def louer_embarcation(request, pk):
             gestionnaire=request.user,
             heure_debut=now,
             heure_fin=now + timedelta(hours=1),
+            statut='reservee',
             notes=request.POST.get('notes', ''),
         )
     retour = timezone.localtime(now + timedelta(hours=1)).strftime('%H:%M')
-    messages.success(request, f"{embarcation.nom} louée jusqu'à {retour}.")
+    messages.success(request, f"{embarcation.nom} réservée jusqu'à {retour}.")
+    return redirect('gestionnaire')
+
+
+@require_role('admin', 'gestionnaire')
+@require_POST
+def sortir_embarcation(request, pk):
+    embarcation = get_object_or_404(Embarcation, pk=pk)
+    loc = embarcation.location_en_cours()
+    if loc and loc.statut == 'reservee':
+        loc.statut = 'sortie'
+        loc.save()
+        messages.success(request, f"{embarcation.nom} est sortie.")
+    else:
+        messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
     return redirect('gestionnaire')
 
 
@@ -355,6 +371,7 @@ def api_status(request):
             'nom': emb.nom,
             'ponton': emb.ponton.nom,
             'louee': loc is not None,
+            'statut': loc.statut if loc else 'libre',
             'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
         })
     return JsonResponse({'status': data, 'now': timezone.localtime(now).strftime('%H:%M:%S')})

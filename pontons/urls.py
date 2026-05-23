@@ -8,6 +8,7 @@ urlpatterns = [
     # Gestionnaire
     path('gestionnaire/', views.gestionnaire, name='gestionnaire'),
     path('gestionnaire/louer/<int:pk>/', views.louer_embarcation, name='louer_embarcation'),
+    path('gestionnaire/sortir/<int:pk>/', views.sortir_embarcation, name='sortir_embarcation'),
     path('gestionnaire/retour/<int:pk>/', views.retour_embarcation, name='retour_embarcation'),
 
     # API

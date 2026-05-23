@@ -34,9 +34,12 @@ class EmbarcationAdmin(admin.ModelAdmin):
     couleur_preview.short_description = 'Couleur'
 
     def statut_live(self, obj):
-        if obj.est_louee_maintenant():
-            return format_html('<span style="color:red;font-weight:bold;">● Sortie</span>')
-        return format_html('<span style="color:green;">● Dispo</span>')
+        loc = obj.location_en_cours()
+        if loc is None:
+            return format_html('<span style="color:green;">● Dispo</span>')
+        if loc.statut == 'reservee':
+            return format_html('<span style="color:orange;font-weight:bold;">● Réservée</span>')
+        return format_html('<span style="color:red;font-weight:bold;">● Sortie</span>')
     statut_live.short_description = 'Statut'
 
 

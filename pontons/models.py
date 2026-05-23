@@ -60,10 +60,16 @@ class Embarcation(models.Model):
 
 
 class Location(models.Model):
+    STATUT_CHOICES = [
+        ('reservee', 'Réservée'),
+        ('sortie', 'Sortie'),
+    ]
+
     embarcation = models.ForeignKey(Embarcation, on_delete=models.CASCADE, related_name='locations')
     gestionnaire = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='locations')
     heure_debut = models.DateTimeField()
     heure_fin = models.DateTimeField()
+    statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='reservee')
     notes = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

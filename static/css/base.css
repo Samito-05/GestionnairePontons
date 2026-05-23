@@ -395,6 +395,13 @@ main { flex: 1; }
 }
 .btn-danger:hover { background: var(--danger-dim); }
 
+.btn-warning {
+  background: var(--warning);
+  color: #fff;
+  border-color: var(--warning);
+}
+.btn-warning:hover { filter: brightness(1.08); }
+
 .btn-success {
   background: var(--success);
   color: #fff;

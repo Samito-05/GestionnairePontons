@@ -275,7 +275,7 @@
           </div>
 
           {% elif item.statut == 'reservee' %}
-          <!-- ── RÉSERVÉE ── -->
+          <!-- ── TICKET VENDU ── -->
           <div class="emb-card emb-card-reserved">
             <div class="emb-status-bar"></div>
             <div class="emb-card-body">
@@ -287,7 +287,7 @@
                   </div>
                   <div class="emb-type">{{ item.embarcation.get_type_embarcation_display }}</div>
                 </div>
-                <span class="badge badge-warning">● Réservée</span>
+                <span class="badge badge-warning">● Ticket vendu</span>
               </div>
 
               {% if item.location.notes %}
@@ -297,12 +297,12 @@
               {% endif %}
 
               <div class="retour-info">
-                En attente de sortie
+                <span>Vendu à <span class="retour-time">{{ item.ticket_time }}</span> — en attente de mise à l'eau</span>
               </div>
 
               <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-warning btn-sm btn-full"> Sortir
+                <button type="submit" class="btn btn-warning btn-sm btn-full"> Mettre à l'eau
                 </button>
               </form>
             </div>
@@ -328,7 +328,7 @@
                 {% csrf_token %}
                 <div class="quick-form">
                   <input type="text" name="notes" class="quick-input" placeholder="Nom du client">
-                  <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;"> Réserver
+                  <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;"> Ticket 1h
                   </button>
                 </div>
               </form>

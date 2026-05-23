@@ -94,6 +94,7 @@ def gestionnaire(request):
                 'statut': loc.statut if loc else 'libre',
                 'location': loc,
                 'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
+                'ticket_time': timezone.localtime(loc.created_at).strftime('%H:%M') if (loc and loc.statut == 'reservee') else None,
             })
         embarcations_status.append({'ponton': ponton, 'embarcations': embs})
 
@@ -127,8 +128,7 @@ def louer_embarcation(request, pk):
             statut='reservee',
             notes=request.POST.get('notes', ''),
         )
-    retour = timezone.localtime(now + timedelta(hours=1)).strftime('%H:%M')
-    messages.success(request, f"{embarcation.nom} réservée jusqu'à {retour}.")
+    messages.success(request, f"Ticket vendu pour {embarcation.nom}. En attente de mise à l'eau.")
     return redirect('gestionnaire')
 
 

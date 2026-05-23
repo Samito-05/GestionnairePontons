@@ -138,9 +138,14 @@ def sortir_embarcation(request, pk):
     embarcation = get_object_or_404(Embarcation, pk=pk)
     loc = embarcation.location_en_cours()
     if loc and loc.statut == 'reservee':
+        now = timezone.now()
+        duration = loc.heure_fin - loc.heure_debut
+        loc.heure_debut = now
+        loc.heure_fin = now + duration
         loc.statut = 'sortie'
         loc.save()
-        messages.success(request, f"{embarcation.nom} est sortie.")
+        retour = timezone.localtime(loc.heure_fin).strftime('%H:%M')
+        messages.success(request, f"{embarcation.nom} est sortie — retour à {retour}.")
     else:
         messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
     return redirect('gestionnaire')

@@ -24,14 +24,14 @@ def build_planning_data(date_cible):
     ).select_related('embarcation', 'gestionnaire')
 
     # ── 2. Calculer la fenêtre temporelle dynamique ──────────────────────
+    # grid_end_h : minimum 20h fixe, s'étend si locations dépassent 20h
     if all_locs_today.exists():
         local_starts = [timezone.localtime(l.heure_debut) for l in all_locs_today]
         local_ends   = [timezone.localtime(l.heure_fin)   for l in all_locs_today]
         min_h = min(t.hour for t in local_starts)
         max_h = max(t.hour + (1 if t.minute > 0 else 0) for t in local_ends)
-        # Padding d'1h de chaque côté, limites absolues 6h–23h, min 3h de large
         grid_start_h = max(6,  min_h - 1)
-        grid_end_h   = min(23, max(max_h + 1, grid_start_h + 3))
+        grid_end_h   = min(23, max(max_h + 1, 20))
     else:
         grid_start_h = 13
         grid_end_h   = 20

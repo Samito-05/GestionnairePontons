@@ -191,6 +191,26 @@
 .quick-input::placeholder { color: var(--text-dim); font-size: .76rem; }
 
 /* .clock-tag defined in base.css */
+
+/* Client name badge */
+.client-name {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm);
+  padding: .25rem .55rem;
+  margin-bottom: .7rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.client-name i { color: var(--text-muted); font-size: .75rem; flex-shrink: 0; }
 </style>
 {% endblock %}
 
@@ -236,12 +256,15 @@
                 <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
               </div>
 
+              {% if item.location.notes %}
+                <div class="client-name">
+                  <i class="fa-solid fa-user"></i>{{ item.location.notes }}
+                </div>
+              {% endif %}
+
               <div class="retour-info">
                 <span>Retour à <span class="retour-time">{{ item.retour }}</span></span>
               </div>
-              {% if item.location.notes %}
-                <div class="retour-notes">{{ item.location.notes }}</div>
-              {% endif %}
 
               <form method="post" action="{% url 'retour_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
                 {% csrf_token %}
@@ -267,11 +290,10 @@
                 <span class="badge badge-warning">● Réservée</span>
               </div>
 
-              <div class="retour-info">
-                <span>Jusqu'à <span class="retour-time">{{ item.retour }}</span></span>
-              </div>
               {% if item.location.notes %}
-                <div class="retour-notes">{{ item.location.notes }}</div>
+                <div class="client-name">
+                  <i class="fa-solid fa-user"></i>{{ item.location.notes }}
+                </div>
               {% endif %}
 
               <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
@@ -301,7 +323,7 @@
               <form method="post" action="{% url 'louer_embarcation' item.embarcation.pk %}">
                 {% csrf_token %}
                 <div class="quick-form">
-                  <input type="text" name="notes" class="quick-input" placeholder="Notes (optionnel)">
+                  <input type="text" name="notes" class="quick-input" placeholder="Nom du client">
                   <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;"> Réserver
                   </button>
                 </div>

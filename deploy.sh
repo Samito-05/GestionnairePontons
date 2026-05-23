@@ -1,6 +1,6 @@
 #!/bin/sh
 # deploy.sh — pull latest from GitHub and restart
-# Usage: ./deploy.sh
+# Usage: sh deploy.sh
 # Run from: /share/homes/admin/GestionnairePontons
 
 set -e
@@ -16,17 +16,17 @@ wget -q -O "$TMP_ZIP" "$ZIP_URL"
 
 echo "==> Extracting..."
 rm -rf "$TMP_DIR"
-unzip -q "$TMP_ZIP" -d "$TMP_DIR"
+unzip -q -o "$TMP_ZIP" -d "$TMP_DIR"
 SRC="$TMP_DIR/GestionnairePontons-${BRANCH}"
 
 echo "==> Copying files..."
-cp -r "$SRC/pontons/"       ./pontons/
-cp -r "$SRC/templates/"     ./templates/
-cp -r "$SRC/static/"        ./static/
-cp -r "$SRC/config/"        ./config/
-cp    "$SRC/manage.py"      ./manage.py
+cp -r "$SRC/pontons/"         ./pontons/
+cp -r "$SRC/templates/"       ./templates/
+cp -r "$SRC/static/"          ./static/
+cp -r "$SRC/config/"          ./config/
+cp    "$SRC/manage.py"        ./manage.py
 cp    "$SRC/requirements.txt" ./requirements.txt
-cp    "$SRC/Dockerfile"     ./Dockerfile
+cp    "$SRC/Dockerfile"       ./Dockerfile
 cp    "$SRC/docker-compose.yml" ./docker-compose.yml
 # .env.production intentionally NOT overwritten
 
@@ -36,8 +36,11 @@ rm -rf "$TMP_ZIP" "$TMP_DIR"
 echo "==> Rebuilding and restarting..."
 docker compose up -d --build
 
+echo "==> Waiting for web container to be ready..."
+sleep 5
+
 echo "==> Running migrations..."
-docker exec $(docker compose ps -q web) python manage.py migrate
+docker compose exec web python manage.py migrate
 
 echo ""
 echo "Deploy complete."

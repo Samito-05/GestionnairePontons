@@ -401,6 +401,7 @@ main { flex: 1; }
   border-color: var(--warning);
 }
 .btn-warning:hover { filter: brightness(1.08); }
+[data-theme="dark"] .btn-warning { color: #1a1200; }
 
 .btn-success {
   background: var(--success);

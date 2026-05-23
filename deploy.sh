@@ -33,8 +33,8 @@ cp    "$SRC/docker-compose.yml" ./docker-compose.yml
 echo "==> Cleaning up..."
 rm -rf "$TMP_ZIP" "$TMP_DIR"
 
-echo "==> Restarting web container..."
-docker compose restart web
+echo "==> Rebuilding and restarting..."
+docker compose up -d --build
 
 echo "==> Running migrations..."
 docker exec $(docker compose ps -q web) python manage.py migrate

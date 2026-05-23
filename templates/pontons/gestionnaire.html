@@ -296,6 +296,10 @@
                 </div>
               {% endif %}
 
+              <div class="retour-info">
+                En attente de sortie
+              </div>
+
               <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-warning btn-sm btn-full"> Sortir

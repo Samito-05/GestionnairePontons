@@ -187,11 +187,10 @@ docker compose up -d --build tunnel
 ### Mise a jour
 
 ```bash
-git pull   # ou re-telecharger le ZIP et remplacer les fichiers
-
-docker compose up -d --build
-docker compose exec web python manage.py migrate   # si nouvelles migrations
+./deploy.sh
 ```
+
+Telecharge la derniere version, copie les fichiers, redémarre le container et joue les migrations. Ne touche pas `.env.production`.
 
 ### Commandes utiles
 
@@ -228,9 +227,10 @@ docker compose exec web python manage.py dumpdata > backup_$(date +%Y%m%d).json
 - Rafraichissement automatique toutes les 60 secondes
 
 ### Gestion rapide (gestionnaire)
-- Vue kanban par ponton : disponible (vert) / en sortie (rouge)
-- Louer en 1 clic (duree : 1 heure, champ notes optionnel)
+- Vue kanban par ponton : 3 etats — disponible (vert) / reservee (jaune) / sortie (rouge)
+- Workflow 2 etapes : **Reserver** (caisse, nom du client) → **Sortir** (ponton, chrono demarre au depart reel)
 - Retour anticipe en 1 clic
+- Nom du client affiche en evidence sur la carte (reservee et sortie)
 - Heure de retour prevue affichee en temps reel
 - Rafraichissement automatique toutes les 30 secondes
 
@@ -269,7 +269,7 @@ Ponton
     --> ForeignKey Ponton
 
     Location
-      heure_debut, heure_fin, notes, created_at
+      heure_debut, heure_fin, statut (reservee|sortie), notes, created_at
       --> ForeignKey Embarcation
       --> ForeignKey User (gestionnaire)
 
@@ -290,6 +290,7 @@ User (Django natif)
 | `/planning/?date=YYYY-MM-DD` | Public |
 | `/gestionnaire/` | Gestionnaire+ |
 | `/gestionnaire/louer/<id>/` | Gestionnaire+ |
+| `/gestionnaire/sortir/<id>/` | Gestionnaire+ |
 | `/gestionnaire/retour/<id>/` | Gestionnaire+ |
 | `/gestion/` | Admin |
 | `/gestion/pontons/` | Admin |
@@ -338,6 +339,7 @@ GestionnairePontons/
 ├── .env.production          # Configuration production reelle (gitignore, sur le serveur)
 ├── startup.ps1              # Script de demarrage Windows (developpement)
 ├── startup.bat
+├── deploy.sh                # Script de mise a jour production (NAS via SSH)
 ├── requirements.txt
 └── manage.py
 ```
@@ -373,15 +375,15 @@ docker compose restart              # Tout redemarrer
 ### Mettre a jour l'application
 
 ```bash
-# Telecharger la nouvelle version
-wget -O pontons.zip https://github.com/Samito-05/GestionnairePontons/archive/refs/heads/main.zip
-unzip -o pontons.zip
-cp -r GestionnairePontons-main/. .
-rm -rf GestionnairePontons-main pontons.zip
+./deploy.sh
+```
 
-# Reconstruire et relancer
-docker compose up -d --build
-docker compose exec web python manage.py migrate   # si nouvelles migrations
+Le script `deploy.sh` telecharge la derniere version depuis GitHub, copie les fichiers, redémarre le container et joue les migrations automatiquement. Il ne touche pas `.env.production`.
+
+**Installation initiale du script (une seule fois) :**
+```bash
+wget -q -O deploy.sh https://raw.githubusercontent.com/Samito-05/GestionnairePontons/main/deploy.sh
+chmod +x deploy.sh
 ```
 
 ### Acceder a la base de donnees

@@ -1,0 +1,48 @@
+<div id="mob-tile-{{ row.embarcation.pk }}" class="mob-tile {% if row.statut == 'sortie' %}mob-tile-rented{% elif row.statut == 'reservee' %}mob-tile-reserved{% else %}mob-tile-available{% endif %}">
+  <div class="mob-tile-rail" style="background:{{ row.embarcation.couleur }};"></div>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <div class="mob-tile-body">
+      <div class="mob-tile-name">{{ row.embarcation.nom }}</div>
+      <div class="mob-tile-status">
+        {% if row.statut == 'sortie' %}
+          <span style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
+          {% if row.retour %}<span class="mob-tile-retour">→ {{ row.retour }}</span>{% endif %}
+        {% elif row.statut == 'reservee' %}
+          <span style="color:var(--warning);">● Ticket</span>
+        {% else %}
+          <span style="color:var(--success);">● Dispo</span>
+        {% endif %}
+      </div>
+    </div>
+    {% if role == 'gestionnaire' or role == 'admin' %}
+    <div class="mob-tile-action">
+      {% if row.statut == 'sortie' %}
+        <form hx-post="{% url 'retour_embarcation' row.embarcation.pk %}"
+              hx-target="#mob-tile-{{ row.embarcation.pk }}"
+              hx-swap="outerHTML">{% csrf_token %}
+          <input type="hidden" name="_htmx_partial" value="planning_mob">
+          <input type="hidden" name="next" value="planning">
+          <button type="submit" class="btn btn-danger btn-sm">Retour</button>
+        </form>
+      {% elif row.statut == 'reservee' %}
+        <form hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}"
+              hx-target="#mob-tile-{{ row.embarcation.pk }}"
+              hx-swap="outerHTML">{% csrf_token %}
+          <input type="hidden" name="_htmx_partial" value="planning_mob">
+          <input type="hidden" name="next" value="planning">
+          <button type="submit" class="btn btn-warning btn-sm">Sortir</button>
+        </form>
+      {% else %}
+        <form hx-post="{% url 'louer_embarcation' row.embarcation.pk %}"
+              hx-target="#mob-tile-{{ row.embarcation.pk }}"
+              hx-swap="outerHTML">{% csrf_token %}
+          <input type="hidden" name="_htmx_partial" value="planning_mob">
+          <input type="hidden" name="notes" value="">
+          <input type="hidden" name="next" value="planning">
+          <button type="submit" class="btn btn-success btn-sm">Vente</button>
+        </form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>

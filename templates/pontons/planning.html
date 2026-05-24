@@ -674,41 +674,7 @@
         <div class="summary-card-head">{{ ponton_data.ponton.nom }}</div>
         <div class="summary-card-body">
           {% for row in ponton_data.rows %}
-          <div class="summary-row">
-            <div class="summary-emb-name">
-              <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
-              <span>{{ row.embarcation.nom }}</span>
-            </div>
-            {% if row.statut == 'sortie' %}
-              <div class="summary-action">
-                <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
-                {% if row.retour %}<span style="font-family:var(--mono);font-size:.72rem;color:var(--text-muted);">→ {{ row.retour }}</span>{% endif %}
-                {% if role == 'gestionnaire' or role == 'admin' %}
-                <form method="post" action="{% url 'retour_embarcation' row.embarcation.pk %}">{% csrf_token %}<input type="hidden" name="next" value="planning">
-                  <button type="submit" class="btn btn-danger btn-xs">Retour</button>
-                </form>
-                {% endif %}
-              </div>
-            {% elif row.statut == 'reservee' %}
-              <div class="summary-action">
-                <span class="badge badge-warning">● Ticket</span>
-                {% if role == 'gestionnaire' or role == 'admin' %}
-                <form method="post" action="{% url 'sortir_embarcation' row.embarcation.pk %}">{% csrf_token %}<input type="hidden" name="next" value="planning">
-                  <button type="submit" class="btn btn-warning btn-xs">Sortir</button>
-                </form>
-                {% endif %}
-              </div>
-            {% else %}
-              {% if role == 'gestionnaire' or role == 'admin' %}
-              <form method="post" action="{% url 'louer_embarcation' row.embarcation.pk %}">{% csrf_token %}<input type="hidden" name="next" value="planning">
-                <input type="hidden" name="notes" value="">
-                <button type="submit" class="btn btn-success btn-xs">Vente</button>
-              </form>
-              {% else %}
-              <span class="badge badge-success">● Dispo</span>
-              {% endif %}
-            {% endif %}
-          </div>
+          {% include 'pontons/_planning_summary_row.html' with row=row %}
           {% endfor %}
         </div>
       </div>
@@ -794,42 +760,7 @@
 
         <div class="mob-emb-grid">
           {% for row in ponton_data.rows %}
-          <div class="mob-tile {% if row.statut == 'sortie' %}mob-tile-rented{% elif row.statut == 'reservee' %}mob-tile-reserved{% else %}mob-tile-available{% endif %}">
-            <div class="mob-tile-rail" style="background:{{ row.embarcation.couleur }};"></div>
-            <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
-              <div class="mob-tile-body">
-                <div class="mob-tile-name">{{ row.embarcation.nom }}</div>
-                <div class="mob-tile-status">
-                  {% if row.statut == 'sortie' %}
-                    <span style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
-                    {% if row.retour %}<span class="mob-tile-retour">→ {{ row.retour }}</span>{% endif %}
-                  {% elif row.statut == 'reservee' %}
-                    <span style="color:var(--warning);">● Ticket</span>
-                  {% else %}
-                    <span style="color:var(--success);">● Dispo</span>
-                  {% endif %}
-                </div>
-              </div>
-              {% if role == 'gestionnaire' or role == 'admin' %}
-              <div class="mob-tile-action">
-                {% if row.statut == 'sortie' %}
-                  <form method="post" action="{% url 'retour_embarcation' row.embarcation.pk %}">{% csrf_token %}<input type="hidden" name="next" value="planning">
-                    <button type="submit" class="btn btn-danger btn-sm">Retour</button>
-                  </form>
-                {% elif row.statut == 'reservee' %}
-                  <form method="post" action="{% url 'sortir_embarcation' row.embarcation.pk %}">{% csrf_token %}<input type="hidden" name="next" value="planning">
-                    <button type="submit" class="btn btn-warning btn-sm">Sortir</button>
-                  </form>
-                {% else %}
-                  <form method="post" action="{% url 'louer_embarcation' row.embarcation.pk %}">{% csrf_token %}<input type="hidden" name="next" value="planning">
-                    <input type="hidden" name="notes" value="">
-                    <button type="submit" class="btn btn-success btn-sm">Vente</button>
-                  </form>
-                {% endif %}
-              </div>
-              {% endif %}
-            </div>
-          </div>
+          {% include 'pontons/_planning_mob_tile.html' with row=row %}
           {% endfor %}
         </div>
 

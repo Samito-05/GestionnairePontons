@@ -268,8 +268,7 @@
 
               <form method="post" action="{% url 'retour_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm btn-full"> Retour anticipé
-                </button>
+                <button type="submit" class="btn btn-danger btn-sm btn-full">Retour</button>
               </form>
             </div>
           </div>
@@ -297,13 +296,12 @@
               {% endif %}
 
               <div class="retour-info">
-                <span>Vendu à <span class="retour-time">{{ item.ticket_time }}</span> — en attente de mise à l'eau</span>
+                <span>Vendu à <span class="retour-time">{{ item.ticket_time }}</span></span>
               </div>
 
               <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-warning btn-sm btn-full"> Mettre à l'eau
-                </button>
+                <button type="submit" class="btn btn-warning btn-sm btn-full">Sortir</button>
               </form>
             </div>
           </div>
@@ -328,8 +326,7 @@
                 {% csrf_token %}
                 <div class="quick-form">
                   <input type="text" name="notes" class="quick-input" placeholder="Nom du client">
-                  <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;"> Ticket 1h
-                  </button>
+                  <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;">Vente</button>
                 </div>
               </form>
             </div>

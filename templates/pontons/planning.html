@@ -694,7 +694,7 @@
                 <span class="badge badge-warning">● Ticket</span>
                 {% if role == 'gestionnaire' or role == 'admin' %}
                 <form method="post" action="{% url 'sortir_embarcation' row.embarcation.pk %}">{% csrf_token %}
-                  <button type="submit" class="btn btn-warning btn-xs">À l'eau</button>
+                  <button type="submit" class="btn btn-warning btn-xs">Sortir</button>
                 </form>
                 {% endif %}
               </div>
@@ -702,7 +702,7 @@
               {% if role == 'gestionnaire' or role == 'admin' %}
               <form method="post" action="{% url 'louer_embarcation' row.embarcation.pk %}">{% csrf_token %}
                 <input type="hidden" name="notes" value="">
-                <button type="submit" class="btn btn-success btn-xs">Ticket</button>
+                <button type="submit" class="btn btn-success btn-xs">Vente</button>
               </form>
               {% else %}
               <span class="badge badge-success">● Dispo</span>
@@ -818,12 +818,12 @@
                   </form>
                 {% elif row.statut == 'reservee' %}
                   <form method="post" action="{% url 'sortir_embarcation' row.embarcation.pk %}">{% csrf_token %}
-                    <button type="submit" class="btn btn-warning btn-sm">À l'eau</button>
+                    <button type="submit" class="btn btn-warning btn-sm">Sortir</button>
                   </form>
                 {% else %}
                   <form method="post" action="{% url 'louer_embarcation' row.embarcation.pk %}">{% csrf_token %}
                     <input type="hidden" name="notes" value="">
-                    <button type="submit" class="btn btn-success btn-sm">Ticket 1h</button>
+                    <button type="submit" class="btn btn-success btn-sm">Vente</button>
                   </form>
                 {% endif %}
               </div>

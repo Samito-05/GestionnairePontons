@@ -117,9 +117,10 @@ def louer_embarcation(request, pk):
             heure_debut__lt=now + timedelta(hours=1),
             heure_fin__gt=now,
         )
+        next_url = request.POST.get('next', 'gestionnaire')
         if overlap.exists():
             messages.warning(request, f"{embarcation.nom} est déjà en location sur ce créneau.")
-            return redirect('gestionnaire')
+            return redirect(next_url)
         Location.objects.create(
             embarcation=embarcation,
             gestionnaire=request.user,
@@ -129,12 +130,13 @@ def louer_embarcation(request, pk):
             notes=request.POST.get('notes', ''),
         )
     messages.success(request, f"Ticket vendu pour {embarcation.nom}. En attente de mise à l'eau.")
-    return redirect('gestionnaire')
+    return redirect(next_url)
 
 
 @require_role('admin', 'gestionnaire')
 @require_POST
 def sortir_embarcation(request, pk):
+    next_url = request.POST.get('next', 'gestionnaire')
     embarcation = get_object_or_404(Embarcation, pk=pk)
     loc = embarcation.location_en_cours()
     if loc and loc.statut == 'reservee':
@@ -148,12 +150,13 @@ def sortir_embarcation(request, pk):
         messages.success(request, f"{embarcation.nom} est sortie — retour à {retour}.")
     else:
         messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
-    return redirect('gestionnaire')
+    return redirect(next_url)
 
 
 @require_role('admin', 'gestionnaire')
 @require_POST
 def retour_embarcation(request, pk):
+    next_url = request.POST.get('next', 'gestionnaire')
     embarcation = get_object_or_404(Embarcation, pk=pk)
     loc = embarcation.location_en_cours()
     if loc:
@@ -162,7 +165,7 @@ def retour_embarcation(request, pk):
         messages.success(request, f"{embarcation.nom} est de retour.")
     else:
         messages.info(request, f"{embarcation.nom} n'est pas en location.")
-    return redirect('gestionnaire')
+    return redirect(next_url)
 
 
 # ─── Vues Admin ───────────────────────────────────────────────────────────────

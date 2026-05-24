@@ -118,6 +118,9 @@
 .emb-tile-action form { margin: 0; }
 .emb-tile-action .btn { width: 100%; justify-content: center; font-size: .74rem; padding: .28rem .5rem; }
 
+/* HTMX loading state */
+.emb-tile.htmx-request { opacity: .5; pointer-events: none; transition: opacity .1s; }
+
 /* Input for vente */
 .emb-tile-input {
   width: 100%;
@@ -163,68 +166,7 @@
 
       <div class="emb-grid">
         {% for item in ponton_data.embarcations %}
-
-          {% if item.statut == 'sortie' %}
-          <div class="emb-tile emb-tile-rented">
-            <div class="emb-tile-rail" style="background:var(--danger);"></div>
-            <div class="emb-tile-content">
-              <div class="emb-tile-body">
-                <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
-                <div class="emb-tile-meta">
-                  <span class="emb-tile-status" style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
-                  <span class="emb-tile-info">→ {{ item.retour }}</span>
-                </div>
-                {% if item.location.notes %}<div class="emb-tile-client">{{ item.location.notes }}</div>{% endif %}
-              </div>
-              <div class="emb-tile-action">
-                <form method="post" action="{% url 'retour_embarcation' item.embarcation.pk %}">{% csrf_token %}
-                  <button type="submit" class="btn btn-danger btn-sm">Retour</button>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          {% elif item.statut == 'reservee' %}
-          <div class="emb-tile emb-tile-reserved">
-            <div class="emb-tile-rail" style="background:var(--warning);"></div>
-            <div class="emb-tile-content">
-              <div class="emb-tile-body">
-                <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
-                <div class="emb-tile-meta">
-                  <span class="emb-tile-status" style="color:var(--warning);">● Ticket</span>
-                  <span class="emb-tile-info">{{ item.ticket_time }}</span>
-                </div>
-                {% if item.location.notes %}<div class="emb-tile-client">{{ item.location.notes }}</div>{% endif %}
-              </div>
-              <div class="emb-tile-action">
-                <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}">{% csrf_token %}
-                  <button type="submit" class="btn btn-warning btn-sm">Sortir</button>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          {% else %}
-          <div class="emb-tile">
-            <div class="emb-tile-rail" style="background:{{ item.embarcation.couleur }};"></div>
-            <div class="emb-tile-content">
-              <div class="emb-tile-body">
-                <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
-                <div class="emb-tile-meta">
-                  <span class="emb-tile-status" style="color:var(--success);">● Dispo</span>
-                  <span class="emb-tile-type">{{ item.embarcation.get_type_embarcation_display }}</span>
-                </div>
-              </div>
-              <div class="emb-tile-action">
-                <form method="post" action="{% url 'louer_embarcation' item.embarcation.pk %}">{% csrf_token %}
-                  <input type="text" name="notes" class="emb-tile-input" placeholder="Client (optionnel)">
-                  <button type="submit" class="btn btn-success btn-sm">Vente</button>
-                </form>
-              </div>
-            </div>
-          </div>
-          {% endif %}
-
+          {% include 'pontons/_gestionnaire_tile.html' with item=item %}
         {% empty %}
           <div style="color:var(--text-dim);font-size:.85rem;grid-column:1/-1;">
             Aucune embarcation sur ce ponton.
@@ -246,6 +188,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
 <script>
 function updateClock() {
   const now = new Date();

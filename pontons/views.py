@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Prefetch
@@ -40,6 +41,26 @@ def require_role(*roles):
             return view_func(request, *args, **kwargs)
         return _wrapped
     return decorator
+
+
+def _build_tile_item(embarcation):
+    """Build item dict for gestionnaire tile partial (used by HTMX responses)."""
+    loc = embarcation.location_en_cours()
+    return {
+        'embarcation': embarcation,
+        'statut':      loc.statut if loc else None,
+        'location':    loc,
+        'retour':      timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
+        'ticket_time': timezone.localtime(loc.created_at).strftime('%H:%M')
+                       if (loc and loc.statut == 'reservee') else None,
+    }
+
+
+def _tile_response(request, embarcation):
+    """Return rendered tile HTML for an HTMX swap."""
+    item = _build_tile_item(embarcation)
+    html = render_to_string('pontons/_gestionnaire_tile.html', {'item': item}, request=request)
+    return HttpResponse(html)
 
 
 # ─── Vue Planning ──────────────────────────────────────────────────────────────
@@ -119,6 +140,8 @@ def louer_embarcation(request, pk):
         )
         next_url = request.POST.get('next', 'gestionnaire')
         if overlap.exists():
+            if request.headers.get('HX-Request'):
+                return _tile_response(request, embarcation)
             messages.warning(request, f"{embarcation.nom} est déjà en location sur ce créneau.")
             return redirect(next_url)
         Location.objects.create(
@@ -129,6 +152,8 @@ def louer_embarcation(request, pk):
             statut='reservee',
             notes=request.POST.get('notes', ''),
         )
+    if request.headers.get('HX-Request'):
+        return _tile_response(request, embarcation)
     messages.success(request, f"Ticket vendu pour {embarcation.nom}. En attente de mise à l'eau.")
     return redirect(next_url)
 
@@ -150,6 +175,8 @@ def sortir_embarcation(request, pk):
         messages.success(request, f"{embarcation.nom} est sortie — retour à {retour}.")
     else:
         messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
+    if request.headers.get('HX-Request'):
+        return _tile_response(request, embarcation)
     return redirect(next_url)
 
 
@@ -165,6 +192,8 @@ def retour_embarcation(request, pk):
         messages.success(request, f"{embarcation.nom} est de retour.")
     else:
         messages.info(request, f"{embarcation.nom} n'est pas en location.")
+    if request.headers.get('HX-Request'):
+        return _tile_response(request, embarcation)
     return redirect(next_url)
 
 

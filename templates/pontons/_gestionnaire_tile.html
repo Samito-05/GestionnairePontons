@@ -1,0 +1,69 @@
+{% if item.statut == 'sortie' %}
+<div id="tile-{{ item.embarcation.pk }}" class="emb-tile emb-tile-rented">
+  <div class="emb-tile-rail" style="background:var(--danger);"></div>
+  <div class="emb-tile-content">
+    <div class="emb-tile-body">
+      <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
+      <div class="emb-tile-meta">
+        <span class="emb-tile-status" style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
+        <span class="emb-tile-info">→ {{ item.retour }}</span>
+      </div>
+      {% if item.location.notes %}<div class="emb-tile-client">{{ item.location.notes }}</div>{% endif %}
+    </div>
+    <div class="emb-tile-action">
+      <form hx-post="{% url 'retour_embarcation' item.embarcation.pk %}"
+            hx-target="#tile-{{ item.embarcation.pk }}"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm">Retour</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% elif item.statut == 'reservee' %}
+<div id="tile-{{ item.embarcation.pk }}" class="emb-tile emb-tile-reserved">
+  <div class="emb-tile-rail" style="background:var(--warning);"></div>
+  <div class="emb-tile-content">
+    <div class="emb-tile-body">
+      <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
+      <div class="emb-tile-meta">
+        <span class="emb-tile-status" style="color:var(--warning);">● Ticket</span>
+        <span class="emb-tile-info">{{ item.ticket_time }}</span>
+      </div>
+      {% if item.location.notes %}<div class="emb-tile-client">{{ item.location.notes }}</div>{% endif %}
+    </div>
+    <div class="emb-tile-action">
+      <form hx-post="{% url 'sortir_embarcation' item.embarcation.pk %}"
+            hx-target="#tile-{{ item.embarcation.pk }}"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning btn-sm">Sortir</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div id="tile-{{ item.embarcation.pk }}" class="emb-tile">
+  <div class="emb-tile-rail" style="background:{{ item.embarcation.couleur }};"></div>
+  <div class="emb-tile-content">
+    <div class="emb-tile-body">
+      <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
+      <div class="emb-tile-meta">
+        <span class="emb-tile-status" style="color:var(--success);">● Dispo</span>
+        <span class="emb-tile-type">{{ item.embarcation.get_type_embarcation_display }}</span>
+      </div>
+    </div>
+    <div class="emb-tile-action">
+      <form hx-post="{% url 'louer_embarcation' item.embarcation.pk %}"
+            hx-target="#tile-{{ item.embarcation.pk }}"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="text" name="notes" class="emb-tile-input" placeholder="Client (optionnel)">
+        <button type="submit" class="btn btn-success btn-sm">Vente</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}

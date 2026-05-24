@@ -86,12 +86,15 @@ def build_planning_data(date_cible):
                 left_pct  = (start_min - GRID_START) / GRID_SPAN * 100
                 width_pct = (end_min - start_min)    / GRID_SPAN * 100
 
+                # Blocs "vente" (réservé, pas encore sorti) → gris
+                is_vente = getattr(loc, 'statut', 'sortie') == 'reservee'
+                block_color = '#6e8394' if is_vente else emb.couleur
                 blocks.append({
                     'loc':        loc,
                     'left_pct':   f'{left_pct:.4f}',
                     'width_pct':  f'{width_pct:.4f}',
-                    'color':      emb.couleur,
-                    'text_color': _text_color(emb.couleur),
+                    'color':      block_color,
+                    'text_color': _text_color(block_color),
                     'label':      f"{ld.strftime('%H:%M')}–{lf.strftime('%H:%M')}",
                 })
             rows.append({

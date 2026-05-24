@@ -9,208 +9,132 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
+.gest-title { font-size: 1.15rem; }
 
-.gest-title {
-  font-size: 1.15rem;
-}
-.gest-title i { color: var(--accent); }
-
-.ponton-section { margin-bottom: 2.5rem; }
+.ponton-section { margin-bottom: 2rem; }
 
 .ponton-section-title {
-  font-size: .92rem;
+  font-size: .82rem;
   font-family: var(--font-display);
-  color: var(--text);
+  color: var(--accent);
   font-weight: 700;
-  margin-bottom: 1rem;
-  padding-bottom: .52rem;
-  border-bottom: 2px solid var(--border-bright);
+  margin-bottom: .6rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
   display: flex;
   align-items: center;
-  gap: .5rem;
-}
-.ponton-section-title::before {
-  content: '';
-  display: block;
-  width: 3px;
-  height: 15px;
-  background: var(--accent);
-  border-radius: 2px;
-  flex-shrink: 0;
+  gap: .45rem;
 }
 
+/* ── Tile grid — same as mobile planning ── */
 .emb-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
-  gap: 1rem;
-}
-
-/* Base card */
-.emb-card {
-  border-radius: var(--radius);
-  border: 1px solid;
-  overflow: hidden;
-  background: var(--surface-2);
-  transition: transform var(--t), box-shadow var(--t);
-}
-.emb-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-
-/* Available */
-.emb-card-available {
-  border-color: rgba(29,122,82,.3);
-}
-[data-theme="dark"] .emb-card-available {
-  border-color: rgba(62,207,184,.2);
-}
-.emb-card-available:hover {
-  border-color: rgba(29,122,82,.5);
-}
-[data-theme="dark"] .emb-card-available:hover {
-  border-color: rgba(62,207,184,.38);
-}
-
-/* Reserved */
-.emb-card-reserved {
-  border-color: rgba(142,94,14,.3);
-}
-[data-theme="dark"] .emb-card-reserved {
-  border-color: rgba(240,160,64,.25);
-}
-.emb-card-reserved:hover {
-  border-color: rgba(142,94,14,.5);
-}
-[data-theme="dark"] .emb-card-reserved:hover {
-  border-color: rgba(240,160,64,.45);
-}
-
-/* Rented */
-.emb-card-rented {
-  border-color: rgba(192,54,30,.3);
-}
-[data-theme="dark"] .emb-card-rented {
-  border-color: rgba(226,89,107,.2);
-}
-.emb-card-rented:hover {
-  border-color: rgba(192,54,30,.5);
-}
-[data-theme="dark"] .emb-card-rented:hover {
-  border-color: rgba(226,89,107,.38);
-}
-
-/* Status bar at top */
-.emb-status-bar {
-  height: 3px;
-}
-.emb-card-available .emb-status-bar { background: var(--success); }
-.emb-card-reserved .emb-status-bar  { background: var(--warning); }
-.emb-card-rented .emb-status-bar    { background: var(--danger); }
-
-.emb-card-body { padding: 1rem 1.05rem; }
-
-.emb-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: .5rem;
-  margin-bottom: .8rem;
-}
-
-.emb-card-info { flex: 1; min-width: 0; }
-
-.emb-name {
-  font-weight: 700;
-  font-size: .9rem;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: .44rem;
-  overflow: hidden;
-}
-.emb-name-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.emb-type {
-  font-size: .74rem;
-  color: var(--text-muted);
-  margin-top: .18rem;
-}
-
-/* Retour info */
-.retour-info {
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  font-size: .78rem;
-  color: var(--text-muted);
-  margin-bottom: .8rem;
-}
-.retour-time {
-  font-family: var(--mono);
-  font-size: .8rem;
-  color: var(--text);
-  font-weight: 600;
-}
-.retour-notes {
-  font-size: .75rem;
-  color: var(--text-muted);
-  font-style: italic;
-  margin-top: .2rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Quick action form */
-.quick-form {
-  display: flex;
+  grid-template-columns: 1fr 1fr;
   gap: .45rem;
-  align-items: stretch;
 }
 
-.quick-input {
+.emb-tile {
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+.emb-tile-rented   { background: var(--danger-dim);  border-color: rgba(192,54,30,.25); }
+.emb-tile-reserved { background: var(--warning-dim); border-color: rgba(142,94,14,.25); }
+[data-theme="dark"] .emb-tile-rented   { border-color: rgba(226,89,107,.2); }
+[data-theme="dark"] .emb-tile-reserved { border-color: rgba(240,160,64,.2); }
+
+.emb-tile-rail { width: 4px; flex-shrink: 0; }
+
+.emb-tile-content {
   flex: 1;
   min-width: 0;
-  background: var(--surface-3) !important;
-  border: 1px solid var(--border-bright) !important;
-  border-radius: var(--radius-sm) !important;
-  color: var(--text) !important;
-  font-family: var(--font-ui) !important;
-  font-size: .8rem !important;
-  padding: .4rem .68rem !important;
-  outline: none;
-  transition: border-color var(--t), box-shadow var(--t);
+  display: flex;
+  flex-direction: column;
 }
-.quick-input:focus {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--accent-dim) !important;
+
+.emb-tile-body {
+  padding: .44rem .58rem .36rem;
+  display: flex;
+  flex-direction: column;
+  gap: .14rem;
 }
-.quick-input::placeholder { color: var(--text-dim); font-size: .76rem; }
 
-/* .clock-tag defined in base.css */
-
-/* Client name badge */
-.client-name {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
+.emb-tile-name {
   font-size: .8rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.emb-tile-meta {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  flex-wrap: wrap;
+}
+
+.emb-tile-type {
+  font-size: .67rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.emb-tile-status {
+  font-size: .67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.emb-tile-info {
+  font-family: var(--mono);
+  font-size: .7rem;
+  color: var(--text-muted);
+}
+
+.emb-tile-client {
+  font-size: .72rem;
   font-weight: 600;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Action section */
+.emb-tile-action {
+  padding: .32rem .55rem .44rem;
+  border-top: 1px solid var(--border);
+}
+.emb-tile-action form { margin: 0; }
+.emb-tile-action .btn { width: 100%; justify-content: center; font-size: .74rem; padding: .28rem .5rem; }
+
+/* Input for vente */
+.emb-tile-input {
+  width: 100%;
   background: var(--surface-3);
   border: 1px solid var(--border-bright);
   border-radius: var(--radius-sm);
-  padding: .25rem .55rem;
-  margin-bottom: .7rem;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: .76rem;
+  padding: .32rem .55rem;
+  outline: none;
+  margin-bottom: .3rem;
+  transition: border-color var(--t);
+  box-sizing: border-box;
 }
-.client-name i { color: var(--text-muted); font-size: .75rem; flex-shrink: 0; }
+.emb-tile-input:focus { border-color: var(--accent); }
+.emb-tile-input::placeholder { color: var(--text-dim); }
 </style>
 {% endblock %}
 
@@ -241,94 +165,62 @@
         {% for item in ponton_data.embarcations %}
 
           {% if item.statut == 'sortie' %}
-          <!-- ── SORTIE ── -->
-          <div class="emb-card emb-card-rented">
-            <div class="emb-status-bar"></div>
-            <div class="emb-card-body">
-              <div class="emb-card-header">
-                <div class="emb-card-info">
-                  <div class="emb-name">
-                    <span class="color-dot" style="background:{{ item.embarcation.couleur }};flex-shrink:0;"></span>
-                    <span class="emb-name-text">{{ item.embarcation.nom }}</span>
-                  </div>
-                  <div class="emb-type">{{ item.embarcation.get_type_embarcation_display }}</div>
+          <div class="emb-tile emb-tile-rented">
+            <div class="emb-tile-rail" style="background:var(--danger);"></div>
+            <div class="emb-tile-content">
+              <div class="emb-tile-body">
+                <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
+                <div class="emb-tile-meta">
+                  <span class="emb-tile-status" style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
+                  <span class="emb-tile-info">→ {{ item.retour }}</span>
                 </div>
-                <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
+                {% if item.location.notes %}<div class="emb-tile-client">{{ item.location.notes }}</div>{% endif %}
               </div>
-
-              {% if item.location.notes %}
-                <div class="client-name">
-                  <i class="fa-solid fa-user"></i>{{ item.location.notes }}
-                </div>
-              {% endif %}
-
-              <div class="retour-info">
-                <span>Retour à <span class="retour-time">{{ item.retour }}</span></span>
+              <div class="emb-tile-action">
+                <form method="post" action="{% url 'retour_embarcation' item.embarcation.pk %}">{% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Retour</button>
+                </form>
               </div>
-
-              <form method="post" action="{% url 'retour_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm btn-full">Retour</button>
-              </form>
             </div>
           </div>
 
           {% elif item.statut == 'reservee' %}
-          <!-- ── TICKET VENDU ── -->
-          <div class="emb-card emb-card-reserved">
-            <div class="emb-status-bar"></div>
-            <div class="emb-card-body">
-              <div class="emb-card-header">
-                <div class="emb-card-info">
-                  <div class="emb-name">
-                    <span class="color-dot" style="background:{{ item.embarcation.couleur }};flex-shrink:0;"></span>
-                    <span class="emb-name-text">{{ item.embarcation.nom }}</span>
-                  </div>
-                  <div class="emb-type">{{ item.embarcation.get_type_embarcation_display }}</div>
+          <div class="emb-tile emb-tile-reserved">
+            <div class="emb-tile-rail" style="background:var(--warning);"></div>
+            <div class="emb-tile-content">
+              <div class="emb-tile-body">
+                <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
+                <div class="emb-tile-meta">
+                  <span class="emb-tile-status" style="color:var(--warning);">● Ticket</span>
+                  <span class="emb-tile-info">{{ item.ticket_time }}</span>
                 </div>
-                <span class="badge badge-warning">● Ticket vendu</span>
+                {% if item.location.notes %}<div class="emb-tile-client">{{ item.location.notes }}</div>{% endif %}
               </div>
-
-              {% if item.location.notes %}
-                <div class="client-name">
-                  <i class="fa-solid fa-user"></i>{{ item.location.notes }}
-                </div>
-              {% endif %}
-
-              <div class="retour-info">
-                <span>Vendu à <span class="retour-time">{{ item.ticket_time }}</span></span>
+              <div class="emb-tile-action">
+                <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}">{% csrf_token %}
+                  <button type="submit" class="btn btn-warning btn-sm">Sortir</button>
+                </form>
               </div>
-
-              <form method="post" action="{% url 'sortir_embarcation' item.embarcation.pk %}" style="margin-top:.8rem;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-warning btn-sm btn-full">Sortir</button>
-              </form>
             </div>
           </div>
 
           {% else %}
-          <!-- ── DISPONIBLE ── -->
-          <div class="emb-card emb-card-available">
-            <div class="emb-status-bar"></div>
-            <div class="emb-card-body">
-              <div class="emb-card-header">
-                <div class="emb-card-info">
-                  <div class="emb-name">
-                    <span class="color-dot" style="background:{{ item.embarcation.couleur }};flex-shrink:0;"></span>
-                    <span class="emb-name-text">{{ item.embarcation.nom }}</span>
-                  </div>
-                  <div class="emb-type">{{ item.embarcation.get_type_embarcation_display }}</div>
+          <div class="emb-tile">
+            <div class="emb-tile-rail" style="background:{{ item.embarcation.couleur }};"></div>
+            <div class="emb-tile-content">
+              <div class="emb-tile-body">
+                <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
+                <div class="emb-tile-meta">
+                  <span class="emb-tile-status" style="color:var(--success);">● Dispo</span>
+                  <span class="emb-tile-type">{{ item.embarcation.get_type_embarcation_display }}</span>
                 </div>
-                <span class="badge badge-success">● Disponible</span>
               </div>
-
-              <form method="post" action="{% url 'louer_embarcation' item.embarcation.pk %}">
-                {% csrf_token %}
-                <div class="quick-form">
-                  <input type="text" name="notes" class="quick-input" placeholder="Nom du client">
-                  <button type="submit" class="btn btn-success btn-sm" style="flex-shrink:0;">Vente</button>
-                </div>
-              </form>
+              <div class="emb-tile-action">
+                <form method="post" action="{% url 'louer_embarcation' item.embarcation.pk %}">{% csrf_token %}
+                  <input type="text" name="notes" class="emb-tile-input" placeholder="Client (optionnel)">
+                  <button type="submit" class="btn btn-success btn-sm">Vente</button>
+                </form>
+              </div>
             </div>
           </div>
           {% endif %}

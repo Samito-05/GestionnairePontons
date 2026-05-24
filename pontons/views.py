@@ -63,6 +63,29 @@ def _tile_response(request, embarcation):
     return HttpResponse(html)
 
 
+def _build_planning_row(embarcation):
+    """Build row dict for planning page partial (summary + mob tile)."""
+    loc = embarcation.location_en_cours()
+    return {
+        'embarcation': embarcation,
+        'blocks': [],
+        'est_louee_maintenant': loc is not None,
+        'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
+        'statut': loc.statut if loc else None,
+        'location_pk': loc.pk if loc else None,
+    }
+
+
+def _planning_htmx_response(request, embarcation, partial):
+    """Return rendered planning partial HTML for an HTMX swap."""
+    row = _build_planning_row(embarcation)
+    if partial == 'planning_summary':
+        html = render_to_string('pontons/_planning_summary_row.html', {'row': row}, request=request)
+    else:
+        html = render_to_string('pontons/_planning_mob_tile.html', {'row': row}, request=request)
+    return HttpResponse(html)
+
+
 # ─── Vue Planning ──────────────────────────────────────────────────────────────
 
 def planning(request):
@@ -141,6 +164,9 @@ def louer_embarcation(request, pk):
         next_url = request.POST.get('next', 'gestionnaire')
         if overlap.exists():
             if request.headers.get('HX-Request'):
+                partial = request.POST.get('_htmx_partial', 'gestionnaire')
+                if partial in ('planning_summary', 'planning_mob'):
+                    return _planning_htmx_response(request, embarcation, partial)
                 return _tile_response(request, embarcation)
             messages.warning(request, f"{embarcation.nom} est déjà en location sur ce créneau.")
             return redirect(next_url)
@@ -153,6 +179,9 @@ def louer_embarcation(request, pk):
             notes=request.POST.get('notes', ''),
         )
     if request.headers.get('HX-Request'):
+        partial = request.POST.get('_htmx_partial', 'gestionnaire')
+        if partial in ('planning_summary', 'planning_mob'):
+            return _planning_htmx_response(request, embarcation, partial)
         return _tile_response(request, embarcation)
     messages.success(request, f"Ticket vendu pour {embarcation.nom}. En attente de mise à l'eau.")
     return redirect(next_url)
@@ -176,6 +205,9 @@ def sortir_embarcation(request, pk):
     else:
         messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
     if request.headers.get('HX-Request'):
+        partial = request.POST.get('_htmx_partial', 'gestionnaire')
+        if partial in ('planning_summary', 'planning_mob'):
+            return _planning_htmx_response(request, embarcation, partial)
         return _tile_response(request, embarcation)
     return redirect(next_url)
 
@@ -193,6 +225,9 @@ def retour_embarcation(request, pk):
     else:
         messages.info(request, f"{embarcation.nom} n'est pas en location.")
     if request.headers.get('HX-Request'):
+        partial = request.POST.get('_htmx_partial', 'gestionnaire')
+        if partial in ('planning_summary', 'planning_mob'):
+            return _planning_htmx_response(request, embarcation, partial)
         return _tile_response(request, embarcation)
     return redirect(next_url)
 

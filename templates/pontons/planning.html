@@ -331,6 +331,15 @@
   border-color: rgba(226,89,107,.2);
 }
 
+/* Reserved tile */
+.mob-tile-reserved {
+  background: var(--warning-dim);
+  border-color: rgba(142,94,14,.25);
+}
+[data-theme="dark"] .mob-tile-reserved {
+  border-color: rgba(240,160,64,.2);
+}
+
 /* Available tile */
 .mob-tile-available {
   background: var(--surface-2);
@@ -506,6 +515,32 @@
   .tl-wrap         { display: none !important; }
   .desktop-summary { display: none !important; }
 }
+
+/* ══════════════════════════════════════════════
+   QUICK ACTION BUTTONS (planning inline)
+══════════════════════════════════════════════ */
+.btn-xs {
+  font-size: .7rem;
+  padding: .18rem .52rem;
+  line-height: 1.4;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.summary-action {
+  display: flex;
+  align-items: center;
+  gap: .38rem;
+  flex-shrink: 0;
+}
+
+/* Mobile tile action row */
+.mob-tile-action {
+  padding: .32rem .55rem .42rem;
+  border-top: 1px solid var(--border);
+}
+.mob-tile-action form { margin: 0; }
+.mob-tile-action .btn { width: 100%; justify-content: center; font-size: .72rem; padding: .26rem .5rem; }
 </style>
 {% endblock %}
 
@@ -551,8 +586,12 @@
         Disponible
       </div>
       <div class="legend-item">
+        <span class="legend-dot" style="background:var(--warning);"></span>
+        Ticket vendu
+      </div>
+      <div class="legend-item">
         <span class="legend-dot" style="background:var(--danger);"></span>
-        En location
+        En sortie
       </div>
       <div class="legend-item">
         <span class="legend-line"></span>
@@ -640,15 +679,34 @@
               <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
               <span>{{ row.embarcation.nom }}</span>
             </div>
-            {% if row.est_louee_maintenant %}
-              <div style="display:flex;align-items:center;gap:.35rem;">
+            {% if row.statut == 'sortie' %}
+              <div class="summary-action">
                 <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
-                {% if row.retour %}
-                  <span style="font-family:var(--mono);font-size:.72rem;color:var(--text-muted);">-> {{ row.retour }}</span>
+                {% if row.retour %}<span style="font-family:var(--mono);font-size:.72rem;color:var(--text-muted);">→ {{ row.retour }}</span>{% endif %}
+                {% if role == 'gestionnaire' or role == 'admin' %}
+                <form method="post" action="{% url 'retour_embarcation' row.embarcation.pk %}">{% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-xs">Retour</button>
+                </form>
+                {% endif %}
+              </div>
+            {% elif row.statut == 'reservee' %}
+              <div class="summary-action">
+                <span class="badge badge-warning">● Ticket</span>
+                {% if role == 'gestionnaire' or role == 'admin' %}
+                <form method="post" action="{% url 'sortir_embarcation' row.embarcation.pk %}">{% csrf_token %}
+                  <button type="submit" class="btn btn-warning btn-xs">À l'eau</button>
+                </form>
                 {% endif %}
               </div>
             {% else %}
+              {% if role == 'gestionnaire' or role == 'admin' %}
+              <form method="post" action="{% url 'louer_embarcation' row.embarcation.pk %}">{% csrf_token %}
+                <input type="hidden" name="notes" value="">
+                <button type="submit" class="btn btn-success btn-xs">Ticket</button>
+              </form>
+              {% else %}
               <span class="badge badge-success">● Dispo</span>
+              {% endif %}
             {% endif %}
           </div>
           {% endfor %}
@@ -736,20 +794,40 @@
 
         <div class="mob-emb-grid">
           {% for row in ponton_data.rows %}
-          <div class="mob-tile {% if row.est_louee_maintenant %}mob-tile-rented{% else %}mob-tile-available{% endif %}">
+          <div class="mob-tile {% if row.statut == 'sortie' %}mob-tile-rented{% elif row.statut == 'reservee' %}mob-tile-reserved{% else %}mob-tile-available{% endif %}">
             <div class="mob-tile-rail" style="background:{{ row.embarcation.couleur }};"></div>
-            <div class="mob-tile-body">
-              <div class="mob-tile-name">{{ row.embarcation.nom }}</div>
-              <div class="mob-tile-status">
-                {% if row.est_louee_maintenant %}
-                  <span style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
-                  {% if row.retour %}
-                    <span class="mob-tile-retour">-> {{ row.retour }}</span>
+            <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+              <div class="mob-tile-body">
+                <div class="mob-tile-name">{{ row.embarcation.nom }}</div>
+                <div class="mob-tile-status">
+                  {% if row.statut == 'sortie' %}
+                    <span style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
+                    {% if row.retour %}<span class="mob-tile-retour">→ {{ row.retour }}</span>{% endif %}
+                  {% elif row.statut == 'reservee' %}
+                    <span style="color:var(--warning);">● Ticket</span>
+                  {% else %}
+                    <span style="color:var(--success);">● Dispo</span>
                   {% endif %}
+                </div>
+              </div>
+              {% if role == 'gestionnaire' or role == 'admin' %}
+              <div class="mob-tile-action">
+                {% if row.statut == 'sortie' %}
+                  <form method="post" action="{% url 'retour_embarcation' row.embarcation.pk %}">{% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Retour</button>
+                  </form>
+                {% elif row.statut == 'reservee' %}
+                  <form method="post" action="{% url 'sortir_embarcation' row.embarcation.pk %}">{% csrf_token %}
+                    <button type="submit" class="btn btn-warning btn-sm">À l'eau</button>
+                  </form>
                 {% else %}
-                  <span style="color:var(--success);">● Dispo</span>
+                  <form method="post" action="{% url 'louer_embarcation' row.embarcation.pk %}">{% csrf_token %}
+                    <input type="hidden" name="notes" value="">
+                    <button type="submit" class="btn btn-success btn-sm">Ticket 1h</button>
+                  </form>
                 {% endif %}
               </div>
+              {% endif %}
             </div>
           </div>
           {% endfor %}

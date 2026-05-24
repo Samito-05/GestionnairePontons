@@ -68,6 +68,7 @@ def build_planning_data(date_cible):
             blocks = []
             is_rented_now = False
             retour_time   = None
+            current_loc   = None
             for loc in sorted(loc_by_emb.get(emb.id, []), key=lambda l: l.heure_debut):
                 ld = timezone.localtime(loc.heure_debut)
                 lf = timezone.localtime(loc.heure_fin)
@@ -75,6 +76,7 @@ def build_planning_data(date_cible):
                 if loc.heure_debut <= now < loc.heure_fin:
                     is_rented_now = True
                     retour_time   = lf.strftime('%H:%M')
+                    current_loc   = loc
 
                 start_min = max(ld.hour * 60 + ld.minute, GRID_START)
                 end_min   = min(lf.hour * 60 + lf.minute, GRID_END)
@@ -97,6 +99,8 @@ def build_planning_data(date_cible):
                 'blocks':               blocks,
                 'est_louee_maintenant': is_rented_now,
                 'retour':               retour_time,
+                'statut':               current_loc.statut if current_loc else None,
+                'location_pk':          current_loc.pk if current_loc else None,
             })
         planning.append({'ponton': ponton, 'rows': rows})
 

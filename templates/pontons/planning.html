@@ -92,8 +92,8 @@
 .tl-row:last-child { border-bottom: none; }
 
 .tl-label {
-  width: 155px;
-  min-width: 155px;
+  width: 180px;
+  min-width: 180px;
   padding: .28rem .65rem;
   display: flex;
   flex-direction: column;
@@ -153,7 +153,10 @@
 }
 
 /* Embarcation row */
-.tl-row-emb { height: 46px; }
+.tl-row-emb { height: 56px; }
+
+.tl-label-btns { padding-left: 14px; margin-top: 1px; }
+.tl-label-btns form { margin: 0; }
 .tl-row-emb .tl-label { background: var(--surface-2); }
 .tl-row-emb:hover .tl-label { background: var(--surface-3); }
 .tl-row-emb:hover { background: var(--surface-3); }
@@ -197,50 +200,6 @@
   box-shadow: 0 0 6px var(--danger-dim);
 }
 
-/* ══════════════════════════════════════════════
-   DESKTOP SUMMARY CARDS
-══════════════════════════════════════════════ */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.summary-card {
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius);
-}
-
-.summary-card-head {
-  padding: .6rem 1rem;
-  border-bottom: 1px solid var(--border);
-  font-size: .8rem;
-  font-weight: 700;
-  color: var(--accent);
-  font-family: var(--font-display);
-  letter-spacing: .01em;
-}
-
-.summary-card-body { padding: .65rem 1rem; }
-
-.summary-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-  padding: .36rem 0;
-  border-bottom: 1px solid var(--border);
-}
-.summary-row:last-child { border-bottom: none; }
-
-.summary-emb-name {
-  display: flex;
-  align-items: center;
-  gap: .44rem;
-  font-size: .82rem;
-}
 
 /* ══════════════════════════════════════════════
    MOBILE PLANNING
@@ -512,8 +471,7 @@
   .mob-view-toggle { display: none !important; }
 }
 @media (max-width: 768px) {
-  .tl-wrap         { display: none !important; }
-  .desktop-summary { display: none !important; }
+  .tl-wrap { display: none !important; }
 }
 
 /* ══════════════════════════════════════════════
@@ -638,17 +596,7 @@
 
         {% for row in ponton_data.rows %}
         <div class="tl-row tl-row-emb">
-          <div class="tl-label">
-            <div style="display:flex;align-items:center;gap:.35rem;overflow:hidden;">
-              <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
-              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.8rem;">
-                {{ row.embarcation.nom }}
-              </span>
-            </div>
-            <div style="font-size:.67rem;color:var(--text-muted);padding-left:14px;font-family:var(--font-ui);">
-              {{ row.embarcation.get_type_embarcation_display }}
-            </div>
-          </div>
+          {% include 'pontons/_planning_tl_label.html' with row=row %}
           <div class="tl-track">
             {% for m in marks %}
               <div class="{% if m.is_hour %}grid-h{% else %}grid-hh{% endif %}" style="left:{{ m.pct }}%"></div>
@@ -666,20 +614,6 @@
       {% endfor %}
 
     </div><!-- /tl-wrap -->
-
-    <!-- Desktop summary -->
-    <div class="summary-grid desktop-summary">
-      {% for ponton_data in planning_data %}
-      <div class="summary-card">
-        <div class="summary-card-head">{{ ponton_data.ponton.nom }}</div>
-        <div class="summary-card-body">
-          {% for row in ponton_data.rows %}
-          {% include 'pontons/_planning_summary_row.html' with row=row %}
-          {% endfor %}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
 
     <!-- ════════════════════════════════════════
          MOBILE — VIEW TOGGLE

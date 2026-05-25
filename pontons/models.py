@@ -23,7 +23,7 @@ class Ponton(models.Model):
 
 class Embarcation(models.Model):
     TYPE_CHOICES = [
-        ('pedalo', 'Pédaleau'),
+        ('pedalo', 'Pédalo'),
         ('kayak', 'Kayak'),
         ('canoe', 'Canoë'),
         ('barque', 'Barque'),

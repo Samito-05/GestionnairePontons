@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nom', models.CharField(max_length=100)),
-                ('type_embarcation', models.CharField(choices=[('pedalo', 'Pédaleau'), ('kayak', 'Kayak'), ('canoe', 'Canoë'), ('barque', 'Barque'), ('sup', 'Stand Up Paddle'), ('autre', 'Autre')], default='pedalo', max_length=20)),
+                ('type_embarcation', models.CharField(choices=[('pedalo', 'Pédalo'), ('kayak', 'Kayak'), ('canoe', 'Canoë'), ('barque', 'Barque'), ('sup', 'Stand Up Paddle'), ('autre', 'Autre')], default='pedalo', max_length=20)),
                 ('couleur', models.CharField(default='#3273dc', help_text='Couleur hex ex: #3273dc', max_length=7)),
                 ('actif', models.BooleanField(default=True)),
                 ('ordre', models.PositiveIntegerField(default=0)),

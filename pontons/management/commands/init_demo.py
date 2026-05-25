@@ -23,9 +23,9 @@ class Command(BaseCommand):
 
         # Embarcations
         embarcations_data = [
-            ('Pédaleau 1', 'pedalo', p1, '#3273dc', 1),
-            ('Pédaleau 2', 'pedalo', p1, '#209cee', 2),
-            ('Pédaleau 3', 'pedalo', p1, '#00d1b2', 3),
+            ('Pédalo 1', 'pedalo', p1, '#3273dc', 1),
+            ('Pédalo 2', 'pedalo', p1, '#209cee', 2),
+            ('Pédalo 3', 'pedalo', p1, '#00d1b2', 3),
             ('Kayak Rouge', 'kayak', p1, '#ff3860', 4),
             ('Kayak Vert', 'kayak', p1, '#23d160', 5),
             ('Canoë 1', 'canoe', p2, '#ff6b35', 1),

@@ -203,12 +203,14 @@ def sortir_embarcation(request, pk):
         loc.statut = 'sortie'
         loc.save()
         retour = timezone.localtime(loc.heure_fin).strftime('%H:%M')
-        messages.success(request, f"{embarcation.nom} est sortie — retour à {retour}.")
+        if not request.headers.get('HX-Request'):
+            messages.success(request, f"{embarcation.nom} est sortie — retour à {retour}.")
     else:
-        messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
+        if not request.headers.get('HX-Request'):
+            messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
-        if partial in ('planning_summary', 'planning_mob'):
+        if partial in ('planning_summary', 'planning_mob', 'planning_tl'):
             return _planning_htmx_response(request, embarcation, partial)
         return _tile_response(request, embarcation)
     return redirect(next_url)
@@ -223,12 +225,14 @@ def retour_embarcation(request, pk):
     if loc:
         loc.heure_fin = timezone.now()
         loc.save()
-        messages.success(request, f"{embarcation.nom} est de retour.")
+        if not request.headers.get('HX-Request'):
+            messages.success(request, f"{embarcation.nom} est de retour.")
     else:
-        messages.info(request, f"{embarcation.nom} n'est pas en location.")
+        if not request.headers.get('HX-Request'):
+            messages.info(request, f"{embarcation.nom} n'est pas en location.")
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
-        if partial in ('planning_summary', 'planning_mob'):
+        if partial in ('planning_summary', 'planning_mob', 'planning_tl'):
             return _planning_htmx_response(request, embarcation, partial)
         return _tile_response(request, embarcation)
     return redirect(next_url)

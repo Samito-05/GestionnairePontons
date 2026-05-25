@@ -182,7 +182,7 @@ def louer_embarcation(request, pk):
         )
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
-        if partial in ('planning_summary', 'planning_mob'):
+        if partial in ('planning_summary', 'planning_mob', 'planning_tl'):
             return _planning_htmx_response(request, embarcation, partial)
         return _tile_response(request, embarcation)
     messages.success(request, f"Ticket vendu pour {embarcation.nom}. En attente de mise à l'eau.")

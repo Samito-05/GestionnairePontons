@@ -376,8 +376,8 @@
 .mob-tl-row:last-child { border-bottom: none; }
 
 .mob-tl-label {
-  width: 88px;
-  min-width: 88px;
+  width: 140px;
+  min-width: 140px;
   padding: .22rem .5rem;
   display: flex;
   flex-direction: column;
@@ -427,7 +427,7 @@
 }
 
 /* Embarcation row */
-.mob-tl-row-emb { height: 38px; }
+.mob-tl-row-emb { height: 44px; }
 .mob-tl-row-emb .mob-tl-label { background: var(--surface-2); }
 
 /* Tick labels on axis */
@@ -644,14 +644,7 @@
 
           {% for row in ponton_data.rows %}
           <div class="mob-tl-row mob-tl-row-emb">
-            <div class="mob-tl-label">
-              <div style="display:flex;align-items:center;gap:.3rem;overflow:hidden;">
-                <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.72rem;">
-                  {{ row.embarcation.nom }}
-                </span>
-              </div>
-            </div>
+            {% include 'pontons/_planning_mob_tl_label.html' with row=row %}
             <div class="mob-tl-track">
               {% for m in marks %}
                 <div class="{% if m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>

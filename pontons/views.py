@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
-from datetime import timedelta, datetime, date
+from datetime import timedelta, date
 
 from .models import Ponton, Embarcation, Location, UserProfile
 from .forms import (
@@ -314,9 +314,8 @@ def admin_embarcations(request):
     embarcations = Embarcation.objects.select_related('ponton').annotate(
         est_louee_now=Exists(
             Location.objects.filter(
-                embarcation=OuterRef('pk'),
-                heure_debut__lte=now,
-                heure_fin__gt=now,
+                Q(embarcation=OuterRef('pk'), statut='reservee', heure_debut__date=now.date()) |
+                Q(embarcation=OuterRef('pk'), statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
             )
         )
     )
@@ -449,7 +448,10 @@ def api_status(request):
     now = timezone.now()
     current_locs = {
         loc.embarcation_id: loc
-        for loc in Location.objects.filter(heure_debut__lte=now, heure_fin__gt=now)
+        for loc in Location.objects.filter(
+            Q(statut='reservee', heure_debut__date=now.date()) |
+            Q(statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
+        )
     }
     data = []
     for emb in Embarcation.objects.filter(actif=True).select_related('ponton'):

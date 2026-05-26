@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django import forms
 from django.utils import timezone as tz
 from .models import Embarcation, Location, Ponton, UserProfile
@@ -67,7 +69,6 @@ class LocationForm(forms.ModelForm):
             cleaned['heure_fin'] = fin
 
         if debut and not fin:
-            from datetime import timedelta
             cleaned['heure_fin'] = debut + timedelta(hours=1)
             fin = cleaned['heure_fin']
 

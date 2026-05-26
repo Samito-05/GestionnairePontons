@@ -113,18 +113,6 @@ class Location(models.Model):
     def duree_minutes(self):
         return int((self.heure_fin - self.heure_debut).total_seconds() / 60)
 
-    @property
-    def slot_debut(self):
-        """Index dans la grille 13h–20h par tranches de 30 min."""
-        h = self.heure_debut.hour
-        m = self.heure_debut.minute
-        return (h - 13) * 2 + (1 if m >= 30 else 0)
-
-    @property
-    def slot_duree(self):
-        return max(1, self.duree_minutes // 30)
-
-
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('admin', 'Administrateur'),

@@ -297,7 +297,7 @@
 #tl-container.tl-fullscreen .fs-btn .icon-expand   { display: none; }
 #tl-container.tl-fullscreen .fs-btn .icon-compress { display: flex; }
 
-body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
+body.tl-fs-active { overflow: hidden; }
 
 /* Mobile timeline toolbar */
 .mob-tl-toolbar {
@@ -572,25 +572,6 @@ body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
 }
 
 /* ══════════════════════════════════════════════
-   MOBILE — TIMELINE FULLSCREEN
-══════════════════════════════════════════════ */
-.mob-tl-outer.mob-tl-fullscreen {
-  position: fixed !important;
-  inset: 0;
-  z-index: 9999;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  border: none !important;
-  display: flex !important;
-  flex-direction: column;
-  overflow: hidden;
-}
-.mob-tl-outer.mob-tl-fullscreen .mob-tl-toolbar { flex-shrink: 0; border-radius: 0; }
-.mob-tl-outer.mob-tl-fullscreen #mob-tl-scroll  { flex: 1; overflow: auto; }
-.mob-tl-outer.mob-tl-fullscreen .fs-btn .icon-expand   { display: none; }
-.mob-tl-outer.mob-tl-fullscreen .fs-btn .icon-compress { display: flex; }
-
-/* ══════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════ */
 @media (min-width: 769px) {
@@ -600,6 +581,7 @@ body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
 }
 @media (max-width: 768px) {
   .tl-wrap { display: none !important; }
+  #tl-container .tl-toolbar { display: none !important; }
 }
 
 /* ══════════════════════════════════════════════
@@ -747,10 +729,6 @@ body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
     <div id="mob-tl-outer" class="mob-tl-outer" style="display:none;">
       <div class="mob-tl-toolbar" style="justify-content:space-between;">
         <span style="font-family:var(--mono);font-size:.68rem;color:var(--text-muted);">{{ grid_start_h }}h–{{ grid_end_h }}h</span>
-        <button class="fs-btn" onclick="toggleMobTlFullscreen()" title="Plein écran">
-          <svg class="icon-expand" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
-          <svg class="icon-compress" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
-        </button>
       </div>
       <div id="mob-tl-scroll" class="mob-tl-scroll">
         <div id="mob-tl-inner" class="mob-tl-inner">
@@ -910,10 +888,6 @@ function applyMobView(view) {
   const btnG   = document.getElementById('btn-mob-grid');
   const btnTl  = document.getElementById('btn-mob-tl');
   if (!grid) return; // desktop — nothing to do
-  if (isGrid && tl.classList.contains('mob-tl-fullscreen')) {
-    tl.classList.remove('mob-tl-fullscreen');
-    document.body.classList.remove('mob-tl-fs-active');
-  }
   grid.style.display  = isGrid ? '' : 'none';
   tl.style.display    = isGrid ? 'none' : '';
   btnG.classList.toggle('active',  isGrid);
@@ -968,23 +942,8 @@ function toggleTlFullscreen() {
   if (isFs) drawNowLine();
 }
 
-// ── Mobile timeline fullscreen ────────────────────────────────
-function toggleMobTlFullscreen() {
-  const outer = document.getElementById('mob-tl-outer');
-  if (!outer) return;
-  const isFs = outer.classList.toggle('mob-tl-fullscreen');
-  document.body.classList.toggle('mob-tl-fs-active', isFs);
-  if (isFs) {
-    initMobTlWidth();
-    drawMobTlNow();
-    requestAnimationFrame(scrollMobTlToNow);
-  }
-}
-
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
-    const outer = document.getElementById('mob-tl-outer');
-    if (outer && outer.classList.contains('mob-tl-fullscreen')) toggleMobTlFullscreen();
     const container = document.getElementById('tl-container');
     if (container && container.classList.contains('tl-fullscreen')) toggleTlFullscreen();
   }

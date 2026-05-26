@@ -199,6 +199,79 @@
 
 
 /* ══════════════════════════════════════════════
+   FULLSCREEN BUTTON (desktop + mobile shared)
+══════════════════════════════════════════════ */
+.fs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: .26rem .44rem;
+  font-size: .69rem;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  transition: background .12s, color .12s, border-color .12s;
+  white-space: nowrap;
+  line-height: 1;
+}
+.fs-btn:hover {
+  background: var(--surface-3);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.fs-btn .icon-compress { display: none; }
+
+/* Desktop fullscreen container */
+#tl-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+#tl-container .tl-wrap { margin-bottom: 0; }
+#tl-container > .fs-btn {
+  position: absolute;
+  top: 7px;
+  right: 14px;
+  z-index: 15;
+  background: var(--surface);
+}
+#tl-container.tl-fullscreen {
+  position: fixed !important;
+  inset: 0;
+  z-index: 9999;
+  margin: 0 !important;
+  background: var(--surface-2);
+  overflow: auto;
+  padding: 0;
+}
+#tl-container.tl-fullscreen .tl-wrap {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  margin-bottom: 0;
+}
+#tl-container.tl-fullscreen > .fs-btn { top: 5px; right: 10px; }
+#tl-container.tl-fullscreen .fs-btn .icon-expand   { display: none; }
+#tl-container.tl-fullscreen .fs-btn .icon-compress { display: flex; }
+body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
+
+/* Mobile timeline toolbar */
+.mob-tl-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: .28rem .45rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════
    MOBILE PLANNING
 ══════════════════════════════════════════════ */
 .mob-ponton-label {
@@ -460,6 +533,25 @@
 }
 
 /* ══════════════════════════════════════════════
+   MOBILE — TIMELINE FULLSCREEN
+══════════════════════════════════════════════ */
+.mob-tl-outer.mob-tl-fullscreen {
+  position: fixed !important;
+  inset: 0;
+  z-index: 9999;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mob-tl-outer.mob-tl-fullscreen .mob-tl-toolbar { flex-shrink: 0; border-radius: 0; }
+.mob-tl-outer.mob-tl-fullscreen #mob-tl-scroll  { flex: 1; overflow: auto; }
+.mob-tl-outer.mob-tl-fullscreen .fs-btn .icon-expand   { display: none; }
+.mob-tl-outer.mob-tl-fullscreen .fs-btn .icon-compress { display: flex; }
+
+/* ══════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════ */
 @media (min-width: 769px) {
@@ -560,11 +652,18 @@
     <!-- ════════════════════════════════════════
          DESKTOP TIMELINE
     ════════════════════════════════════════ -->
-    <div class="tl-wrap">
+    <div id="tl-container">
+      <button class="fs-btn" onclick="toggleTlFullscreen()" title="Plein écran">
+        <svg class="icon-expand" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
+        <svg class="icon-compress" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
+      </button>
+      <div class="tl-wrap">
 
       <!-- Axis -->
       <div class="tl-row tl-row-axis">
-        <div class="tl-label">{{ grid_start_h }}h → {{ grid_end_h }}h</div>
+        <div class="tl-label">
+          {{ grid_start_h }}h → {{ grid_end_h }}h
+        </div>
         <div class="tl-track">
           {% for m in marks %}{% if m.is_hour %}
             <span class="hour-tick {% if forloop.last %}hour-tick-last{% endif %}"
@@ -590,6 +689,7 @@
       {% endfor %}
 
     </div><!-- /tl-wrap -->
+    </div><!-- /tl-container -->
 
     <!-- ════════════════════════════════════════
          MOBILE — VIEW TOGGLE
@@ -603,12 +703,20 @@
          MOBILE — TIMELINE VIEW
     ════════════════════════════════════════ -->
     <div id="mob-tl-outer" class="mob-tl-outer" style="display:none;">
+      <div class="mob-tl-toolbar">
+        <button class="fs-btn" onclick="toggleMobTlFullscreen()" title="Plein écran">
+          <svg class="icon-expand" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
+          <svg class="icon-compress" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
+        </button>
+      </div>
       <div id="mob-tl-scroll" class="mob-tl-scroll">
         <div id="mob-tl-inner" class="mob-tl-inner">
 
           <!-- Axis -->
           <div class="mob-tl-row mob-tl-row-axis">
-            <div class="mob-tl-label">{{ grid_start_h }}h–{{ grid_end_h }}h</div>
+            <div class="mob-tl-label">
+              {{ grid_start_h }}h–{{ grid_end_h }}h
+            </div>
             <div class="mob-tl-track" id="mob-tl-axis-track">
               {% for m in marks %}{% if m.show_mobile %}
                 <span class="mob-tl-tick {% if forloop.last %}mob-tl-tick-last{% endif %}"
@@ -759,6 +867,10 @@ function applyMobView(view) {
   const btnG   = document.getElementById('btn-mob-grid');
   const btnTl  = document.getElementById('btn-mob-tl');
   if (!grid) return; // desktop — nothing to do
+  if (isGrid && tl.classList.contains('mob-tl-fullscreen')) {
+    tl.classList.remove('mob-tl-fullscreen');
+    document.body.classList.remove('mob-tl-fs-active');
+  }
   grid.style.display  = isGrid ? '' : 'none';
   tl.style.display    = isGrid ? 'none' : '';
   btnG.classList.toggle('active',  isGrid);
@@ -802,6 +914,48 @@ document.addEventListener('visibilitychange', function() {
   } else {
     lastFocusTime = Date.now();
   }
+});
+
+// ── Timeline fullscreen (desktop) ────────────────────────────
+function toggleTlFullscreen() {
+  const container = document.getElementById('tl-container');
+  if (!container) return;
+  const isFs = container.classList.toggle('tl-fullscreen');
+  document.body.classList.toggle('tl-fs-active', isFs);
+  if (isFs) drawNowLine();
+}
+
+// ── Mobile timeline fullscreen ────────────────────────────────
+function toggleMobTlFullscreen() {
+  const outer = document.getElementById('mob-tl-outer');
+  if (!outer) return;
+  const isFs = outer.classList.toggle('mob-tl-fullscreen');
+  document.body.classList.toggle('mob-tl-fs-active', isFs);
+  if (isFs) {
+    initMobTlWidth();
+    drawMobTlNow();
+    requestAnimationFrame(scrollMobTlToNow);
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const outer = document.getElementById('mob-tl-outer');
+    if (outer && outer.classList.contains('mob-tl-fullscreen')) toggleMobTlFullscreen();
+    const container = document.getElementById('tl-container');
+    if (container && container.classList.contains('tl-fullscreen')) toggleTlFullscreen();
+  }
+});
+
+window.addEventListener('orientationchange', function() {
+  setTimeout(function() {
+    const outer = document.getElementById('mob-tl-outer');
+    if (outer && outer.style.display !== 'none') {
+      initMobTlWidth();
+      drawMobTlNow();
+      requestAnimationFrame(scrollMobTlToNow);
+    }
+  }, 300);
 });
 
 // Re-draw now-line and fix narrow blocks after any HTMX row swap

@@ -4,19 +4,19 @@
     <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.8rem;flex:1;min-width:0;">{{ row.embarcation.nom }}</span>
     {% if role == 'gestionnaire' or role == 'admin' %}
       {% if row.statut == 'sortie' %}
-      <form hx-post="{% url 'retour_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" style="margin:0;flex-shrink:0;">{% csrf_token %}
+      <form hx-post="{% url 'retour_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{grid_start:GRID_START_H,grid_end:GRID_END_H}" style="margin:0;flex-shrink:0;">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_tl">
         <input type="hidden" name="next" value="planning">
         <button type="submit" class="btn btn-danger btn-xs">Retour</button>
       </form>
       {% elif row.statut == 'reservee' %}
-      <form hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" style="margin:0;flex-shrink:0;">{% csrf_token %}
+      <form hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{grid_start:GRID_START_H,grid_end:GRID_END_H}" style="margin:0;flex-shrink:0;">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_tl">
         <input type="hidden" name="next" value="planning">
         <button type="submit" class="btn btn-warning btn-xs">Sortir</button>
       </form>
       {% else %}
-      <form hx-post="{% url 'louer_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" style="margin:0;flex-shrink:0;">{% csrf_token %}
+      <form hx-post="{% url 'louer_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{grid_start:GRID_START_H,grid_end:GRID_END_H}" style="margin:0;flex-shrink:0;">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_tl">
         <input type="hidden" name="notes" value="">
         <input type="hidden" name="next" value="planning">

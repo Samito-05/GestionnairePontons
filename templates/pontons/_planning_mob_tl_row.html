@@ -1,22 +1,29 @@
-<div id="mob-tl-row-{{ row.embarcation.pk }}" class="mob-tl-row mob-tl-row-emb">
+<div id="mob-tl-row-{{ row.embarcation.pk }}" class="mob-tl-row mob-tl-row-emb{% if row.statut == 'reservee' %} is-reserved{% endif %}">
   {% include 'pontons/_planning_mob_tl_label.html' with row=row %}
   <div class="mob-tl-track">
     {% for m in marks %}
       <div class="{% if m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
     {% endfor %}
     {% for block in row.blocks %}
+      {% if block.is_reserved %}
+      <div class="reserved-block"
+           style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;"
+           title="{{ block.label }}"></div>
+      {% else %}
       <div class="rental-block"
            style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};color:{{ block.text_color }};"
            title="{{ block.label }}">
         {{ block.label }}
       </div>
+      {% endif %}
     {% endfor %}
   </div>
-  {% if row.statut == 'sortie' or row.statut == 'reservee' %}
+  {% if row.statut == 'sortie' %}
   <span style="display:none"
         hx-get="{% url 'planning_row_partial' row.embarcation.pk %}?partial=planning_mob_tl"
         hx-trigger="every 20s"
         hx-target="#mob-tl-row-{{ row.embarcation.pk }}"
-        hx-swap="outerHTML"></span>
+        hx-swap="outerHTML"
+        hx-vals="js:{grid_start:GRID_START_H,grid_end:GRID_END_H}"></span>
   {% endif %}
 </div>

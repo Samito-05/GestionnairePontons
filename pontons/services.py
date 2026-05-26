@@ -11,12 +11,13 @@ def _text_color(hex_color):
     return '#000000' if luminance > 0.5 else '#ffffff'
 
 
-def build_planning_data(date_cible):
+def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
     """Construit le planning avec positionnement CSS.
 
     La fenêtre temporelle (grid_start_h → grid_end_h) est calculée
     dynamiquement depuis les locations du jour, avec un fallback 13h–20h.
-    Ainsi une location créée à n'importe quelle heure reste visible.
+    Passer force_grid_start/force_grid_end pour préserver les bornes
+    d'une page déjà chargée (évite le décalage visuel sur swap HTMX).
     """
     # ── 1. Récupérer TOUTES les locations du jour (sans filtre horaire) ──
     all_locs_today = Location.objects.filter(
@@ -24,8 +25,10 @@ def build_planning_data(date_cible):
     ).select_related('embarcation', 'gestionnaire')
 
     # ── 2. Calculer la fenêtre temporelle dynamique ──────────────────────
-    # grid_end_h : minimum 20h fixe, s'étend si locations dépassent 20h
-    if all_locs_today.exists():
+    if force_grid_start is not None and force_grid_end is not None:
+        grid_start_h = int(force_grid_start)
+        grid_end_h   = int(force_grid_end)
+    elif all_locs_today.exists():
         local_starts = [timezone.localtime(l.heure_debut) for l in all_locs_today]
         local_ends   = [timezone.localtime(l.heure_fin)   for l in all_locs_today]
         min_h = min(t.hour for t in local_starts)
@@ -73,9 +76,15 @@ def build_planning_data(date_cible):
                 ld = timezone.localtime(loc.heure_debut)
                 lf = timezone.localtime(loc.heure_fin)
 
-                if loc.heure_debut <= now < loc.heure_fin:
+                # reservee: actif toute la journée (pas d'expiration horaire)
+                # sortie: actif dans la fenêtre heure_debut–heure_fin
+                is_active = (
+                    loc.statut == 'reservee' or
+                    (loc.statut == 'sortie' and loc.heure_debut <= now < loc.heure_fin)
+                )
+                if is_active:
                     is_rented_now = True
-                    retour_time   = lf.strftime('%H:%M')
+                    retour_time   = lf.strftime('%H:%M') if loc.statut == 'sortie' else None
                     current_loc   = loc
 
                 start_min = max(ld.hour * 60 + ld.minute, GRID_START)
@@ -84,18 +93,23 @@ def build_planning_data(date_cible):
                     continue
 
                 left_pct  = (start_min - GRID_START) / GRID_SPAN * 100
-                width_pct = (end_min - start_min)    / GRID_SPAN * 100
 
-                # Blocs "vente" (réservé, pas encore sorti) → gris
-                is_vente = getattr(loc, 'statut', 'sortie') == 'reservee'
-                block_color = '#6e8394' if is_vente else emb.couleur
+                is_reserved = loc.statut == 'reservee'
+                # Resa via gestionnaire (is_manual=False) : bloc jusqu'à fin de grille
+                # Resa manuelle (is_manual=True) : bloc exact heure_debut–heure_fin
+                if is_reserved and not loc.is_manual:
+                    width_pct = 100.0 - left_pct
+                else:
+                    width_pct = (end_min - start_min) / GRID_SPAN * 100
+
                 blocks.append({
-                    'loc':        loc,
-                    'left_pct':   f'{left_pct:.4f}',
-                    'width_pct':  f'{width_pct:.4f}',
-                    'color':      block_color,
-                    'text_color': _text_color(block_color),
-                    'label':      f"{ld.strftime('%H:%M')}–{lf.strftime('%H:%M')}",
+                    'loc':         loc,
+                    'left_pct':    f'{left_pct:.4f}',
+                    'width_pct':   f'{width_pct:.4f}',
+                    'color':       emb.couleur,
+                    'text_color':  _text_color(emb.couleur),
+                    'label':       f"{ld.strftime('%H:%M')}–{lf.strftime('%H:%M')}",
+                    'is_reserved': is_reserved,
                 })
             rows.append({
                 'embarcation':          emb,

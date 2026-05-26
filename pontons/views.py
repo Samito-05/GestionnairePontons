@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Prefetch
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from datetime import timedelta, datetime, date
 
 from .models import Ponton, Embarcation, Location, UserProfile
@@ -50,7 +50,7 @@ def _build_tile_item(embarcation):
         'embarcation': embarcation,
         'statut':      loc.statut if loc else None,
         'location':    loc,
-        'retour':      timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
+        'retour':      timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
         'ticket_time': timezone.localtime(loc.created_at).strftime('%H:%M')
                        if (loc and loc.statut == 'reservee') else None,
     }
@@ -70,15 +70,27 @@ def _build_planning_row(embarcation):
         'embarcation': embarcation,
         'blocks': [],
         'est_louee_maintenant': loc is not None,
-        'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
+        'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
         'statut': loc.statut if loc else None,
         'location_pk': loc.pk if loc else None,
     }
 
 
 def _planning_htmx_response(request, embarcation, partial):
-    """Return full row/tile HTML (with real blocks) for HTMX swap."""
-    marks, planning_data, _, _, _ = build_planning_data(date.today())
+    """Return full row/tile HTML (with real blocks) for HTMX swap.
+
+    Reads grid_start/grid_end from the request so the partial uses the
+    same grid bounds as the already-rendered page (prevents visual offset).
+    """
+    gs = request.POST.get('grid_start') or request.GET.get('grid_start')
+    ge = request.POST.get('grid_end')   or request.GET.get('grid_end')
+    try:
+        force_start = int(gs) if gs else None
+        force_end   = int(ge) if ge else None
+    except (ValueError, TypeError):
+        force_start = force_end = None
+
+    marks, planning_data, _, _, _ = build_planning_data(date.today(), force_start, force_end)
 
     row = None
     for ponton_data in planning_data:
@@ -139,7 +151,8 @@ def planning(request):
 def gestionnaire(request):
     now = timezone.now()
     active_locs_qs = Location.objects.filter(
-        heure_debut__lte=now, heure_fin__gt=now
+        Q(statut='reservee', heure_debut__date=now.date()) |
+        Q(statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
     ).select_related('gestionnaire')
     pontons = Ponton.objects.filter(actif=True).prefetch_related(
         Prefetch(
@@ -160,7 +173,7 @@ def gestionnaire(request):
                 'louee': loc is not None,
                 'statut': loc.statut if loc else 'libre',
                 'location': loc,
-                'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
+                'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
                 'ticket_time': timezone.localtime(loc.created_at).strftime('%H:%M') if (loc and loc.statut == 'reservee') else None,
             })
         embarcations_status.append({'ponton': ponton, 'embarcations': embs})
@@ -180,9 +193,8 @@ def louer_embarcation(request, pk):
             Embarcation.objects.select_for_update(), pk=pk, actif=True
         )
         overlap = Location.objects.filter(
-            embarcation=embarcation,
-            heure_debut__lt=now + timedelta(hours=1),
-            heure_fin__gt=now,
+            Q(embarcation=embarcation, statut='reservee', heure_debut__date=now.date()) |
+            Q(embarcation=embarcation, statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
         )
         next_url = request.POST.get('next', 'gestionnaire')
         if overlap.exists():
@@ -206,7 +218,6 @@ def louer_embarcation(request, pk):
         if partial in ('planning_mob', 'planning_tl', 'planning_mob_tl'):
             return _planning_htmx_response(request, embarcation, partial)
         return _tile_response(request, embarcation)
-    messages.success(request, f"Ticket vendu pour {embarcation.nom}. En attente de mise à l'eau.")
     return redirect(next_url)
 
 
@@ -223,12 +234,6 @@ def sortir_embarcation(request, pk):
         loc.heure_fin = now + duration
         loc.statut = 'sortie'
         loc.save()
-        retour = timezone.localtime(loc.heure_fin).strftime('%H:%M')
-        if not request.headers.get('HX-Request'):
-            messages.success(request, f"{embarcation.nom} est sortie — retour à {retour}.")
-    else:
-        if not request.headers.get('HX-Request'):
-            messages.info(request, f"{embarcation.nom} n'est pas en état réservée.")
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
         if partial in ('planning_mob', 'planning_tl', 'planning_mob_tl'):
@@ -246,11 +251,6 @@ def retour_embarcation(request, pk):
     if loc:
         loc.heure_fin = timezone.now()
         loc.save()
-        if not request.headers.get('HX-Request'):
-            messages.success(request, f"{embarcation.nom} est de retour.")
-    else:
-        if not request.headers.get('HX-Request'):
-            messages.info(request, f"{embarcation.nom} n'est pas en location.")
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
         if partial in ('planning_mob', 'planning_tl', 'planning_mob_tl'):
@@ -284,7 +284,6 @@ def admin_ponton_new(request):
     form = PontonForm(request.POST or None)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Ponton créé.')
         return redirect('admin_pontons')
     return render(request, 'pontons/admin/ponton_form.html', {'form': form, 'titre': 'Nouveau ponton'})
 
@@ -295,7 +294,6 @@ def admin_ponton_edit(request, pk):
     form = PontonForm(request.POST or None, instance=ponton)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Ponton mis à jour.')
         return redirect('admin_pontons')
     return render(request, 'pontons/admin/ponton_form.html', {'form': form, 'titre': 'Modifier le ponton'})
 
@@ -305,7 +303,6 @@ def admin_ponton_edit(request, pk):
 def admin_ponton_delete(request, pk):
     ponton = get_object_or_404(Ponton, pk=pk)
     ponton.delete()
-    messages.success(request, 'Ponton supprimé.')
     return redirect('admin_pontons')
 
 
@@ -331,7 +328,6 @@ def admin_embarcation_new(request):
     form = EmbarcationForm(request.POST or None)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Embarcation créée.')
         return redirect('admin_embarcations')
     return render(request, 'pontons/admin/embarcation_form.html', {'form': form, 'titre': 'Nouvelle embarcation'})
 
@@ -342,7 +338,6 @@ def admin_embarcation_edit(request, pk):
     form = EmbarcationForm(request.POST or None, instance=emb)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Embarcation mise à jour.')
         return redirect('admin_embarcations')
     return render(request, 'pontons/admin/embarcation_form.html', {'form': form, 'titre': "Modifier l'embarcation"})
 
@@ -352,7 +347,6 @@ def admin_embarcation_edit(request, pk):
 def admin_embarcation_delete(request, pk):
     emb = get_object_or_404(Embarcation, pk=pk)
     emb.delete()
-    messages.success(request, 'Embarcation supprimée.')
     return redirect('admin_embarcations')
 
 
@@ -380,12 +374,12 @@ def admin_locations(request):
 
 @require_role('admin')
 def admin_location_new(request):
-    form = LocationForm(request.POST or None)
+    form = LocationForm(request.POST or None, initial={'statut': 'sortie'})
     if form.is_valid():
         loc = form.save(commit=False)
         loc.gestionnaire = request.user
+        loc.is_manual = True
         loc.save()
-        messages.success(request, 'Location créée.')
         return redirect('admin_locations')
     return render(request, 'pontons/admin/location_form.html', {'form': form, 'titre': 'Nouvelle location'})
 
@@ -396,7 +390,6 @@ def admin_location_edit(request, pk):
     form = LocationForm(request.POST or None, instance=loc)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Location mise à jour.')
         return redirect('admin_locations')
     return render(request, 'pontons/admin/location_form.html', {'form': form, 'titre': 'Modifier la location'})
 
@@ -406,7 +399,6 @@ def admin_location_edit(request, pk):
 def admin_location_delete(request, pk):
     loc = get_object_or_404(Location, pk=pk)
     loc.delete()
-    messages.success(request, 'Location supprimée.')
     return redirect('admin_locations')
 
 
@@ -423,7 +415,6 @@ def admin_user_new(request):
     form = UserCreateForm(request.POST or None)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Utilisateur créé.')
         return redirect('admin_users')
     return render(request, 'pontons/admin/user_form.html', {'form': form, 'titre': 'Nouvel utilisateur'})
 
@@ -435,7 +426,6 @@ def admin_user_edit(request, pk):
     form = UserProfileForm(request.POST or None, instance=profile)
     if form.is_valid():
         form.save()
-        messages.success(request, 'Rôle mis à jour.')
         return redirect('admin_users')
     return render(request, 'pontons/admin/user_form.html', {
         'form': form, 'titre': f'Modifier {user.username}', 'edit_user': user,
@@ -450,7 +440,6 @@ def admin_user_delete(request, pk):
         messages.error(request, 'Vous ne pouvez pas supprimer votre propre compte.')
         return redirect('admin_users')
     user.delete()
-    messages.success(request, 'Utilisateur supprimé.')
     return redirect('admin_users')
 
 
@@ -471,6 +460,6 @@ def api_status(request):
             'ponton': emb.ponton.nom,
             'louee': loc is not None,
             'statut': loc.statut if loc else 'libre',
-            'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if loc else None,
+            'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
         })
     return JsonResponse({'status': data, 'now': timezone.localtime(now).strftime('%H:%M:%S')})

@@ -162,6 +162,24 @@
 .grid-h  { position: absolute; top:0; bottom:0; width:1px; background: var(--border-bright); pointer-events:none; }
 .grid-hh { position: absolute; top:0; bottom:0; width:1px; background: var(--border); pointer-events:none; }
 
+/* Reserved block — ticket vendu, pas encore sorti (positionné depuis heure_debut) */
+.reserved-block {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0px, transparent 5px,
+    rgba(110,131,148,.18) 5px, rgba(110,131,148,.18) 6px
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-left: 2px solid rgba(110,131,148,.4);
+}
+.tl-row-emb.is-reserved .tl-label,
+.mob-tl-row-emb.is-reserved .mob-tl-label {
+  background: rgba(110,131,148,.07);
+}
+
 /* Rental block */
 .rental-block {
   position: absolute;
@@ -225,50 +243,71 @@
   border-color: var(--accent);
 }
 .fs-btn .icon-compress { display: none; }
+.fs-btn-text { font-size: .69rem; }
+@media (max-width: 768px) { .fs-btn-text { display: none; } }
 
 /* Desktop fullscreen container */
 #tl-container {
-  position: relative;
   margin-bottom: 1.5rem;
 }
-#tl-container .tl-wrap { margin-bottom: 0; }
-#tl-container > .fs-btn {
-  position: absolute;
-  top: 7px;
-  right: 14px;
-  z-index: 15;
+
+/* Desktop + mobile shared toolbar */
+.tl-toolbar,
+.mob-tl-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: .24rem .5rem;
   background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-bottom: 1px solid var(--border);
 }
+.tl-toolbar {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+#tl-container .tl-wrap {
+  margin-bottom: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+}
+
+/* Desktop fullscreen */
 #tl-container.tl-fullscreen {
   position: fixed !important;
   inset: 0;
   z-index: 9999;
   margin: 0 !important;
-  background: var(--surface-2);
-  overflow: auto;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#tl-container.tl-fullscreen .tl-toolbar {
+  flex-shrink: 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
 }
 #tl-container.tl-fullscreen .tl-wrap {
+  flex: 1;
+  overflow: auto;
   border-radius: 0;
-  border-left: none;
-  border-right: none;
-  border-top: none;
-  margin-bottom: 0;
+  border: none;
 }
-#tl-container.tl-fullscreen > .fs-btn { top: 5px; right: 10px; }
 #tl-container.tl-fullscreen .fs-btn .icon-expand   { display: none; }
 #tl-container.tl-fullscreen .fs-btn .icon-compress { display: flex; }
+
 body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
 
 /* Mobile timeline toolbar */
 .mob-tl-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: .28rem .45rem;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
+  border-radius: 0;
   flex-shrink: 0;
+}
+.mob-tl-outer .mob-tl-toolbar {
+  border-left: none;
+  border-right: none;
+  border-top: none;
 }
 
 /* ══════════════════════════════════════════════
@@ -653,10 +692,13 @@ body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
          DESKTOP TIMELINE
     ════════════════════════════════════════ -->
     <div id="tl-container">
-      <button class="fs-btn" onclick="toggleTlFullscreen()" title="Plein écran">
-        <svg class="icon-expand" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
-        <svg class="icon-compress" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
-      </button>
+      <div class="tl-toolbar">
+        <button class="fs-btn" onclick="toggleTlFullscreen()" title="Plein écran">
+          <svg class="icon-expand" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
+          <svg class="icon-compress" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
+          <span class="fs-btn-text">Plein écran</span>
+        </button>
+      </div>
       <div class="tl-wrap">
 
       <!-- Axis -->
@@ -703,10 +745,11 @@ body.tl-fs-active, body.mob-tl-fs-active { overflow: hidden; }
          MOBILE — TIMELINE VIEW
     ════════════════════════════════════════ -->
     <div id="mob-tl-outer" class="mob-tl-outer" style="display:none;">
-      <div class="mob-tl-toolbar">
+      <div class="mob-tl-toolbar" style="justify-content:space-between;">
+        <span style="font-family:var(--mono);font-size:.68rem;color:var(--text-muted);">{{ grid_start_h }}h–{{ grid_end_h }}h</span>
         <button class="fs-btn" onclick="toggleMobTlFullscreen()" title="Plein écran">
-          <svg class="icon-expand" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
-          <svg class="icon-compress" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
+          <svg class="icon-expand" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
+          <svg class="icon-compress" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
         </button>
       </div>
       <div id="mob-tl-scroll" class="mob-tl-scroll">

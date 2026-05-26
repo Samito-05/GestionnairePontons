@@ -31,7 +31,7 @@ class EmbarcationForm(forms.ModelForm):
 class LocationForm(forms.ModelForm):
     class Meta:
         model = Location
-        fields = ['embarcation', 'heure_debut', 'heure_fin', 'notes']
+        fields = ['embarcation', 'heure_debut', 'heure_fin', 'statut', 'notes']
         widgets = {
             'embarcation': forms.Select(attrs={'class': 'select is-fullwidth'}),
             'heure_debut': forms.DateTimeInput(
@@ -42,6 +42,7 @@ class LocationForm(forms.ModelForm):
                 attrs={'class': 'input', 'type': 'datetime-local'},
                 format='%Y-%m-%dT%H:%M',
             ),
+            'statut': forms.Select(attrs={'class': 'select is-fullwidth'}),
             'notes': forms.TextInput(attrs={'class': 'input', 'placeholder': 'Notes…'}),
         }
 

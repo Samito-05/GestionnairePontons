@@ -50,13 +50,31 @@ class Embarcation(models.Model):
         if hasattr(self, 'est_louee_now'):
             return self.est_louee_now
         now = timezone.now()
-        return self.locations.filter(heure_debut__lte=now, heure_fin__gt=now).exists()
+        # reservee: pas d'expiration temporelle (valide toute la journée jusqu'au sortir)
+        # sortie: actif tant que dans la fenêtre heure_debut–heure_fin
+        return (
+            self.locations.filter(statut='reservee', heure_debut__date=now.date()).exists() or
+            self.locations.filter(statut='sortie', heure_debut__lte=now, heure_fin__gt=now).exists()
+        )
 
     def location_en_cours(self):
         if hasattr(self, 'locations_actives'):
+            # prefetch déjà filtré (voir gestionnaire view)
+            for loc in self.locations_actives:
+                if loc.statut == 'reservee':
+                    return loc
             return self.locations_actives[0] if self.locations_actives else None
         now = timezone.now()
-        return self.locations.filter(heure_debut__lte=now, heure_fin__gt=now).first()
+        # reservee d'aujourd'hui prime — pas de contrainte horaire
+        loc = self.locations.filter(
+            statut='reservee', heure_debut__date=now.date()
+        ).order_by('-created_at').first()
+        if loc:
+            return loc
+        # sortie active maintenant
+        return self.locations.filter(
+            statut='sortie', heure_debut__lte=now, heure_fin__gt=now
+        ).first()
 
 
 class Location(models.Model):
@@ -70,6 +88,7 @@ class Location(models.Model):
     heure_debut = models.DateTimeField()
     heure_fin = models.DateTimeField()
     statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='reservee')
+    is_manual = models.BooleanField(default=False, help_text='Créée manuellement via admin (heure_fin fixe)')
     notes = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

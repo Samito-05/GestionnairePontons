@@ -77,15 +77,36 @@ def _build_planning_row(embarcation):
 
 
 def _planning_htmx_response(request, embarcation, partial):
-    """Return rendered planning partial HTML for an HTMX swap."""
-    row = _build_planning_row(embarcation)
+    """Return full row/tile HTML (with real blocks) for HTMX swap."""
+    marks, planning_data, _, _, _ = build_planning_data(date.today())
+
+    row = None
+    for ponton_data in planning_data:
+        for r in ponton_data['rows']:
+            if r['embarcation'].pk == embarcation.pk:
+                row = r
+                break
+        if row:
+            break
+
+    if row is None:
+        row = _build_planning_row(embarcation)
+
+    ctx = {'row': row, 'marks': marks}
     if partial == 'planning_tl':
-        html = render_to_string('pontons/_planning_tl_label.html', {'row': row}, request=request)
+        html = render_to_string('pontons/_planning_tl_row.html', ctx, request=request)
     elif partial == 'planning_mob_tl':
-        html = render_to_string('pontons/_planning_mob_tl_label.html', {'row': row}, request=request)
+        html = render_to_string('pontons/_planning_mob_tl_row.html', ctx, request=request)
     else:
-        html = render_to_string('pontons/_planning_mob_tile.html', {'row': row}, request=request)
+        html = render_to_string('pontons/_planning_mob_tile.html', ctx, request=request)
     return HttpResponse(html)
+
+
+def planning_row_partial(request, pk):
+    """GET endpoint for HTMX polling — refreshes a single embarcation row."""
+    embarcation = get_object_or_404(Embarcation, pk=pk, actif=True)
+    partial = request.GET.get('partial', 'planning_tl')
+    return _planning_htmx_response(request, embarcation, partial)
 
 
 # ─── Vue Planning ──────────────────────────────────────────────────────────────

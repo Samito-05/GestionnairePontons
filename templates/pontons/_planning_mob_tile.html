@@ -45,4 +45,11 @@
     </div>
     {% endif %}
   </div>
+  {% if row.statut == 'sortie' or row.statut == 'reservee' %}
+  <span style="display:none"
+        hx-get="{% url 'planning_row_partial' row.embarcation.pk %}?partial=planning_mob"
+        hx-trigger="every 20s"
+        hx-target="#mob-tile-{{ row.embarcation.pk }}"
+        hx-swap="outerHTML"></span>
+  {% endif %}
 </div>

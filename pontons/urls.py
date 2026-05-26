@@ -11,6 +11,9 @@ urlpatterns = [
     path('gestionnaire/sortir/<int:pk>/', views.sortir_embarcation, name='sortir_embarcation'),
     path('gestionnaire/retour/<int:pk>/', views.retour_embarcation, name='retour_embarcation'),
 
+    # Planning HTMX partials
+    path('planning/row/<int:pk>/', views.planning_row_partial, name='planning_row_partial'),
+
     # API
     path('api/status/', views.api_status, name='api_status'),
 

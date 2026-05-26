@@ -1,0 +1,22 @@
+<div id="tl-row-{{ row.embarcation.pk }}" class="tl-row tl-row-emb">
+  {% include 'pontons/_planning_tl_label.html' with row=row %}
+  <div class="tl-track">
+    {% for m in marks %}
+      <div class="{% if m.is_hour %}grid-h{% else %}grid-hh{% endif %}" style="left:{{ m.pct }}%"></div>
+    {% endfor %}
+    {% for block in row.blocks %}
+      <div class="rental-block"
+           style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};color:{{ block.text_color }};"
+           title="{{ block.label }}">
+        {{ block.label }}
+      </div>
+    {% endfor %}
+  </div>
+  {% if row.statut == 'sortie' or row.statut == 'reservee' %}
+  <span style="display:none"
+        hx-get="{% url 'planning_row_partial' row.embarcation.pk %}?partial=planning_tl"
+        hx-trigger="every 20s"
+        hx-target="#tl-row-{{ row.embarcation.pk }}"
+        hx-swap="outerHTML"></span>
+  {% endif %}
+</div>

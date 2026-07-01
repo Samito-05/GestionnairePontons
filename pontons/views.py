@@ -94,7 +94,7 @@ def _planning_htmx_response(request, embarcation, partial):
     except (ValueError, TypeError):
         force_start = force_end = None
 
-    marks, planning_data, _, _, _ = build_planning_data(date.today(), force_start, force_end)
+    marks, planning_data, _, _, _ = build_planning_data(timezone.localdate(), force_start, force_end)
 
     row = None
     for ponton_data in planning_data:
@@ -130,9 +130,9 @@ def planning_row_partial(request, pk):
 def planning(request):
     date_str = request.GET.get('date')
     try:
-        date_cible = date.fromisoformat(date_str) if date_str else date.today()
+        date_cible = date.fromisoformat(date_str) if date_str else timezone.localdate()
     except ValueError:
-        date_cible = date.today()
+        date_cible = timezone.localdate()
 
     marks, planning_data, grid_start_h, grid_end_h, grid_span = build_planning_data(date_cible)
 
@@ -155,7 +155,7 @@ def planning(request):
 def gestionnaire(request):
     now = timezone.now()
     active_locs_qs = Location.objects.filter(
-        Q(statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+        Q(statut='reservee', heure_debut__date=timezone.localdate(), returned_at__isnull=True) |
         Q(statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
     ).select_related('gestionnaire')
     pontons = Ponton.objects.filter(actif=True).prefetch_related(
@@ -199,7 +199,7 @@ def louer_embarcation(request, pk):
             Embarcation.objects.select_for_update(), pk=pk, actif=True
         )
         overlap = Location.objects.filter(
-            Q(embarcation=embarcation, statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+            Q(embarcation=embarcation, statut='reservee', heure_debut__date=timezone.localdate(), returned_at__isnull=True) |
             Q(embarcation=embarcation, statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
         )
         next_url = request.POST.get('next', 'gestionnaire')
@@ -274,7 +274,7 @@ def admin_dashboard(request):
     return render(request, 'pontons/admin/dashboard.html', {
         'nb_pontons': Ponton.objects.count(),
         'nb_embarcations': Embarcation.objects.filter(actif=True).count(),
-        'nb_locations_today': Location.objects.filter(heure_debut__date=date.today()).count(),
+        'nb_locations_today': Location.objects.filter(heure_debut__date=timezone.localdate()).count(),
         'nb_users': User.objects.count(),
     })
 
@@ -322,7 +322,7 @@ def admin_embarcations(request):
     embarcations = Embarcation.objects.select_related('ponton').annotate(
         est_louee_now=Exists(
             Location.objects.filter(
-                Q(embarcation=OuterRef('pk'), statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+                Q(embarcation=OuterRef('pk'), statut='reservee', heure_debut__date=timezone.localdate(), returned_at__isnull=True) |
                 Q(embarcation=OuterRef('pk'), statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
             )
         )
@@ -363,9 +363,9 @@ def admin_embarcation_delete(request, pk):
 def admin_locations(request):
     date_str = request.GET.get('date')
     try:
-        date_cible = date.fromisoformat(date_str) if date_str else date.today()
+        date_cible = date.fromisoformat(date_str) if date_str else timezone.localdate()
     except ValueError:
-        date_cible = date.today()
+        date_cible = timezone.localdate()
 
     locations = Location.objects.filter(
         heure_debut__date=date_cible
@@ -457,7 +457,7 @@ def api_status(request):
     current_locs = {
         loc.embarcation_id: loc
         for loc in Location.objects.filter(
-            Q(statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+            Q(statut='reservee', heure_debut__date=timezone.localdate(), returned_at__isnull=True) |
             Q(statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
         )
     }

@@ -101,13 +101,23 @@
   border-right: 1px solid var(--border-bright);
   flex-shrink: 0;
   font-size: .79rem;
+  /* Colonne fixe pendant le scroll horizontal 24h */
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background: var(--surface-2);
+}
+
+/* Piste large 24h — largeur pilotée par JS via #tl-inner (≈4h visibles) */
+#tl-inner {
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
 }
 
 .tl-track {
   position: relative;
   flex: 1;
-  min-width: 560px;
-  margin-right: 10px;
   overflow: visible;
 }
 
@@ -123,6 +133,7 @@
   color: var(--text-muted);
   border-right-color: transparent;
   font-family: var(--mono);
+  background: var(--surface);
 }
 
 .hour-tick {
@@ -150,6 +161,7 @@
   color: var(--accent);
   font-family: var(--font-display);
   border-right-color: var(--border-bright);
+  background: var(--surface);
 }
 
 /* Embarcation row */
@@ -700,6 +712,7 @@ body.tl-fs-active { overflow: hidden; }
         </button>
       </div>
       <div class="tl-wrap">
+      <div id="tl-inner">
 
       <!-- Axis -->
       <div class="tl-row tl-row-axis">
@@ -730,6 +743,7 @@ body.tl-fs-active { overflow: hidden; }
         {% endfor %}
       {% endfor %}
 
+    </div><!-- /tl-inner -->
     </div><!-- /tl-wrap -->
     </div><!-- /tl-container -->
 
@@ -811,20 +825,32 @@ body.tl-fs-active { overflow: hidden; }
 
 {% block extra_js %}
 <script>
-// Grid bounds from server — dynamic based on actual rental data
+// Grille fixe 24h — le viewport scrolle, centré sur maintenant (±2h visibles)
 const GRID_START_H = {{ grid_start_h }};
 const GRID_END_H   = {{ grid_end_h }};
 const GRID_DUR     = {{ grid_span }};  // minutes
+const IS_TODAY     = '{{ date_cible|date:"Y-m-d" }}' === '{% now "Y-m-d" %}';
+const VISIBLE_H    = 4;    // heures visibles dans le viewport (now ±2h)
+const TL_LABEL_W   = 170;  // px — matches .tl-label width in CSS
 
 function timeToPct(h, m) {
   return ((h - GRID_START_H) * 60 + m) / GRID_DUR * 100;
 }
 
+// Heure cible du centrage : maintenant si aujourd'hui, sinon 13h
+function centerHours() {
+  if (IS_TODAY) {
+    const n = new Date();
+    return n.getHours() + n.getMinutes() / 60;
+  }
+  return 13;
+}
+
 function drawNowLine() {
+  document.querySelectorAll('.now-line, .mini-bar-now').forEach(el => el.remove());
+  if (!IS_TODAY) return;
   const now = new Date();
   const h = now.getHours(), m = now.getMinutes();
-
-  document.querySelectorAll('.now-line, .mini-bar-now').forEach(el => el.remove());
   if (h < GRID_START_H || h >= GRID_END_H) return;
 
   const pct = timeToPct(h, m).toFixed(4);
@@ -845,8 +871,9 @@ function drawNowLine() {
 }
 
 function adjustNarrowBlocks() {
+  // Seuil en px réels (la piste 24h est large — le % ne veut plus rien dire)
   document.querySelectorAll('.rental-block').forEach(b => {
-    b.classList.toggle('is-narrow', parseFloat(b.style.width) < 4);
+    b.classList.toggle('is-narrow', b.offsetWidth < 52);
   });
 }
 
@@ -857,14 +884,36 @@ function updateClock() {
   if (el) el.querySelector('span:last-child').textContent = txt;
 }
 
+// ── Desktop timeline : piste large 24h + centrage sur maintenant ──
+function initTlWidth() {
+  const wrap  = document.querySelector('.tl-wrap');
+  const inner = document.getElementById('tl-inner');
+  if (!wrap || !inner) return;
+  const spanH  = (GRID_END_H - GRID_START_H);
+  const trackW = (wrap.clientWidth - TL_LABEL_W) * (spanH / VISIBLE_H);
+  inner.style.width = (TL_LABEL_W + trackW) + 'px';
+}
+
+function scrollTlToCenter() {
+  const wrap  = document.querySelector('.tl-wrap');
+  const inner = document.getElementById('tl-inner');
+  if (!wrap || !inner) return;
+  const trackW  = inner.offsetWidth - TL_LABEL_W;
+  const px      = timeToPct(centerHours(), 0) / 100 * trackW;
+  const halfView = (wrap.clientWidth - TL_LABEL_W) / 2;
+  wrap.scrollLeft = Math.max(0, px - halfView);
+}
+
 // ── Mobile timeline setup ─────────────────────────────────────
 const MOB_TL_KEY     = 'planning_mob_view'; // 'grid' | 'timeline'
-const MOB_LABEL_W    = 88;  // px — matches .mob-tl-label width in CSS
+const MOB_LABEL_W    = 140; // px — matches .mob-tl-label width in CSS
 const MOB_TL_MIN_W   = 900; // px minimum track width
 
 function getMobTlWidth() {
-  // 3× viewport so ±1h centered is comfortably visible; never less than MIN
-  return Math.max(MOB_TL_MIN_W, window.innerWidth * 3);
+  // Piste 24h : ~4h visibles par écran (now ±2h)
+  const spanH  = (GRID_END_H - GRID_START_H);
+  const trackW = (window.innerWidth - MOB_LABEL_W) * (spanH / VISIBLE_H);
+  return Math.max(MOB_TL_MIN_W, MOB_LABEL_W + trackW);
 }
 
 function initMobTlWidth() {
@@ -875,6 +924,7 @@ function initMobTlWidth() {
 
 function drawMobTlNow() {
   document.querySelectorAll('.mob-tl-now').forEach(el => el.remove());
+  if (!IS_TODAY) return;
   const now = new Date();
   const h = now.getHours(), m = now.getMinutes();
   if (h < GRID_START_H || h >= GRID_END_H) return;
@@ -891,12 +941,10 @@ function scrollMobTlToNow() {
   const scroll = document.getElementById('mob-tl-scroll');
   const inner  = document.getElementById('mob-tl-inner');
   if (!scroll || !inner) return;
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
   const totalTrackW = inner.offsetWidth - MOB_LABEL_W;
-  const nowPx = timeToPct(h, m) / 100 * totalTrackW;
+  const nowPx = timeToPct(centerHours(), 0) / 100 * totalTrackW;
   const halfView = (window.innerWidth - MOB_LABEL_W) / 2;
-  scroll.scrollLeft = MOB_LABEL_W + Math.max(0, nowPx - halfView);
+  scroll.scrollLeft = Math.max(0, nowPx - halfView);
 }
 
 function applyMobView(view) {
@@ -919,6 +967,8 @@ function applyMobView(view) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initTlWidth();
+  scrollTlToCenter();
   drawNowLine();
   adjustNarrowBlocks();
 
@@ -957,7 +1007,10 @@ function toggleTlFullscreen() {
   if (!container) return;
   const isFs = container.classList.toggle('tl-fullscreen');
   document.body.classList.toggle('tl-fs-active', isFs);
-  if (isFs) drawNowLine();
+  // Largeur du viewport change → recalcule la piste et recentre
+  initTlWidth();
+  scrollTlToCenter();
+  drawNowLine();
 }
 
 document.addEventListener('keydown', function(e) {
@@ -965,6 +1018,17 @@ document.addEventListener('keydown', function(e) {
     const container = document.getElementById('tl-container');
     if (container && container.classList.contains('tl-fullscreen')) toggleTlFullscreen();
   }
+});
+
+// Redimensionnement : recalcule la largeur de piste desktop et recentre
+let tlResizeTimer = null;
+window.addEventListener('resize', function() {
+  clearTimeout(tlResizeTimer);
+  tlResizeTimer = setTimeout(function() {
+    initTlWidth();
+    scrollTlToCenter();
+    drawNowLine();
+  }, 150);
 });
 
 window.addEventListener('orientationchange', function() {

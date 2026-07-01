@@ -50,10 +50,12 @@ class Embarcation(models.Model):
         if hasattr(self, 'est_louee_now'):
             return self.est_louee_now
         now = timezone.now()
+        # localdate() : date en TZ locale — now.date() serait la date UTC (bug autour de minuit)
+        today = timezone.localdate()
         # reservee: pas d'expiration temporelle (valide toute la journée jusqu'au sortir)
         # sortie: actif tant que non retournée (returned_at) — dépassement inclus
         return (
-            self.locations.filter(statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True).exists() or
+            self.locations.filter(statut='reservee', heure_debut__date=today, returned_at__isnull=True).exists() or
             self.locations.filter(statut='sortie', heure_debut__lte=now, returned_at__isnull=True).exists()
         )
 
@@ -66,8 +68,9 @@ class Embarcation(models.Model):
             return self.locations_actives[0] if self.locations_actives else None
         now = timezone.now()
         # reservee d'aujourd'hui prime — pas de contrainte horaire
+        # (localdate — pas now.date() qui renvoie la date UTC)
         loc = self.locations.filter(
-            statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True
+            statut='reservee', heure_debut__date=timezone.localdate(), returned_at__isnull=True
         ).order_by('-created_at').first()
         if loc:
             return loc

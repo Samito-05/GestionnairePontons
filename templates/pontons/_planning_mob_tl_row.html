@@ -2,7 +2,7 @@
   {% include 'pontons/_planning_mob_tl_label.html' with row=row %}
   <div class="mob-tl-track">
     {% for m in marks %}
-      <div class="{% if m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
+      <div class="{% if m.is_midnight %}mob-tl-gh grid-day{% elif m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
     {% endfor %}
     {% for block in row.blocks %}
       {% if block.is_overtime %}
@@ -28,6 +28,6 @@
         hx-trigger="every 20s"
         hx-target="#mob-tl-row-{{ row.embarcation.pk }}"
         hx-swap="outerHTML"
-        hx-vals="js:{grid_start:GRID_START_H,grid_end:GRID_END_H}"></span>
+        hx-vals="js:{window_start: WINDOW_START_ISO}"></span>
   {% endif %}
 </div>

@@ -174,6 +174,13 @@
 .grid-h  { position: absolute; top:0; bottom:0; width:1px; background: var(--border-bright); pointer-events:none; }
 .grid-hh { position: absolute; top:0; bottom:0; width:1px; background: var(--border); pointer-events:none; }
 
+/* Séparateur de jour (minuit) — la fenêtre 24h glissante traverse minuit */
+.grid-day { width: 2px; background: var(--accent); opacity: .55; }
+.hour-tick-day {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* Reserved block — ticket vendu, pas encore sorti (positionné depuis heure_debut) */
 .reserved-block {
   position: absolute;
@@ -717,12 +724,12 @@ body.tl-fs-active { overflow: hidden; }
       <!-- Axis -->
       <div class="tl-row tl-row-axis">
         <div class="tl-label">
-          {{ grid_start_h }}h → {{ grid_end_h }}h
+          {{ window_start|date:"G\h" }} → {{ window_end|date:"G\h" }}
         </div>
         <div class="tl-track">
           {% for m in marks %}{% if m.is_hour %}
-            <span class="hour-tick {% if forloop.last %}hour-tick-last{% endif %}"
-                  style="left:{{ m.pct }}%">{{ m.label }}</span>
+            <span class="hour-tick {% if m.is_midnight %}hour-tick-day{% endif %} {% if forloop.last %}hour-tick-last{% endif %}"
+                  style="left:{{ m.pct }}%">{% if m.is_midnight %}{{ m.date_label }}{% else %}{{ m.label }}{% endif %}</span>
           {% endif %}{% endfor %}
         </div>
       </div>
@@ -733,7 +740,7 @@ body.tl-fs-active { overflow: hidden; }
           <div class="tl-label">{{ ponton_data.ponton.nom }}</div>
           <div class="tl-track">
             {% for m in marks %}
-              <div class="{% if m.is_hour %}grid-h{% else %}grid-hh{% endif %}" style="left:{{ m.pct }}%"></div>
+              <div class="{% if m.is_midnight %}grid-h grid-day{% elif m.is_hour %}grid-h{% else %}grid-hh{% endif %}" style="left:{{ m.pct }}%"></div>
             {% endfor %}
           </div>
         </div>
@@ -760,7 +767,7 @@ body.tl-fs-active { overflow: hidden; }
     ════════════════════════════════════════ -->
     <div id="mob-tl-outer" class="mob-tl-outer" style="display:none;">
       <div class="mob-tl-toolbar" style="justify-content:space-between;">
-        <span style="font-family:var(--mono);font-size:.68rem;color:var(--text-muted);">{{ grid_start_h }}h–{{ grid_end_h }}h</span>
+        <span style="font-family:var(--mono);font-size:.68rem;color:var(--text-muted);">{{ window_start|date:"d/m G\h" }} → {{ window_end|date:"d/m G\h" }}</span>
       </div>
       <div id="mob-tl-scroll" class="mob-tl-scroll">
         <div id="mob-tl-inner" class="mob-tl-inner">
@@ -768,12 +775,12 @@ body.tl-fs-active { overflow: hidden; }
           <!-- Axis -->
           <div class="mob-tl-row mob-tl-row-axis">
             <div class="mob-tl-label">
-              {{ grid_start_h }}h–{{ grid_end_h }}h
+              {{ window_start|date:"G\h" }} → {{ window_end|date:"G\h" }}
             </div>
             <div class="mob-tl-track" id="mob-tl-axis-track">
               {% for m in marks %}{% if m.show_mobile %}
-                <span class="mob-tl-tick {% if forloop.last %}mob-tl-tick-last{% endif %}"
-                      style="left:{{ m.pct }}%">{{ m.label }}</span>
+                <span class="mob-tl-tick {% if m.is_midnight %}hour-tick-day{% endif %} {% if forloop.last %}mob-tl-tick-last{% endif %}"
+                      style="left:{{ m.pct }}%">{% if m.is_midnight %}{{ m.date_label }}{% else %}{{ m.label }}{% endif %}</span>
               {% endif %}{% endfor %}
             </div>
           </div>
@@ -784,7 +791,7 @@ body.tl-fs-active { overflow: hidden; }
             <div class="mob-tl-label">{{ ponton_data.ponton.nom }}</div>
             <div class="mob-tl-track">
               {% for m in marks %}
-                <div class="{% if m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
+                <div class="{% if m.is_midnight %}mob-tl-gh grid-day{% elif m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
               {% endfor %}
             </div>
           </div>
@@ -825,35 +832,30 @@ body.tl-fs-active { overflow: hidden; }
 
 {% block extra_js %}
 <script>
-// Grille fixe 24h — le viewport scrolle, centré sur maintenant (±2h visibles)
-const GRID_START_H = {{ grid_start_h }};
-const GRID_END_H   = {{ grid_end_h }};
-const GRID_DUR     = {{ grid_span }};  // minutes
-const IS_TODAY     = '{{ date_cible|date:"Y-m-d" }}' === '{% now "Y-m-d" %}';
-const VISIBLE_H    = 4;    // heures visibles dans le viewport (now ±2h)
-const TL_LABEL_W   = 170;  // px — matches .tl-label width in CSS
+// Fenêtre GLISSANTE 24h (now ±12h, traverse minuit) — viewport ~4h centré sur now
+const WINDOW_START_MS  = {{ window_start_ms }};
+const WINDOW_START_ISO = '{{ window_start_iso }}';
+const GRID_DUR   = {{ grid_span }};  // minutes (1440)
+const VISIBLE_H  = 4;    // heures visibles dans le viewport (now ±2h)
+const TL_LABEL_W = 170;  // px — matches .tl-label width in CSS
 
-function timeToPct(h, m) {
-  return ((h - GRID_START_H) * 60 + m) / GRID_DUR * 100;
+// Position % dans la fenêtre pour un timestamp ms
+function timeToPct(ms) {
+  return (ms - WINDOW_START_MS) / 60000 / GRID_DUR * 100;
 }
 
-// Heure cible du centrage : maintenant si aujourd'hui, sinon 13h
-function centerHours() {
-  if (IS_TODAY) {
-    const n = new Date();
-    return n.getHours() + n.getMinutes() / 60;
-  }
-  return 13;
+// Cible du centrage : maintenant si dans la fenêtre, sinon milieu (fenêtre passée)
+function centerPct() {
+  const p = timeToPct(Date.now());
+  return (p >= 0 && p <= 100) ? p : 50;
 }
 
 function drawNowLine() {
   document.querySelectorAll('.now-line, .mini-bar-now').forEach(el => el.remove());
-  if (!IS_TODAY) return;
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
-  if (h < GRID_START_H || h >= GRID_END_H) return;
+  const p = timeToPct(Date.now());
+  if (p < 0 || p > 100) return;
 
-  const pct = timeToPct(h, m).toFixed(4);
+  const pct = p.toFixed(4);
 
   document.querySelectorAll('.tl-track').forEach(track => {
     const line = document.createElement('div');
@@ -889,7 +891,7 @@ function initTlWidth() {
   const wrap  = document.querySelector('.tl-wrap');
   const inner = document.getElementById('tl-inner');
   if (!wrap || !inner) return;
-  const spanH  = (GRID_END_H - GRID_START_H);
+  const spanH  = GRID_DUR / 60;
   const trackW = (wrap.clientWidth - TL_LABEL_W) * (spanH / VISIBLE_H);
   inner.style.width = (TL_LABEL_W + trackW) + 'px';
 }
@@ -899,7 +901,7 @@ function scrollTlToCenter() {
   const inner = document.getElementById('tl-inner');
   if (!wrap || !inner) return;
   const trackW  = inner.offsetWidth - TL_LABEL_W;
-  const px      = timeToPct(centerHours(), 0) / 100 * trackW;
+  const px      = centerPct() / 100 * trackW;
   const halfView = (wrap.clientWidth - TL_LABEL_W) / 2;
   wrap.scrollLeft = Math.max(0, px - halfView);
 }
@@ -911,7 +913,7 @@ const MOB_TL_MIN_W   = 900; // px minimum track width
 
 function getMobTlWidth() {
   // Piste 24h : ~4h visibles par écran (now ±2h)
-  const spanH  = (GRID_END_H - GRID_START_H);
+  const spanH  = GRID_DUR / 60;
   const trackW = (window.innerWidth - MOB_LABEL_W) * (spanH / VISIBLE_H);
   return Math.max(MOB_TL_MIN_W, MOB_LABEL_W + trackW);
 }
@@ -924,11 +926,9 @@ function initMobTlWidth() {
 
 function drawMobTlNow() {
   document.querySelectorAll('.mob-tl-now').forEach(el => el.remove());
-  if (!IS_TODAY) return;
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
-  if (h < GRID_START_H || h >= GRID_END_H) return;
-  const pct = timeToPct(h, m).toFixed(4) + '%';
+  const p = timeToPct(Date.now());
+  if (p < 0 || p > 100) return;
+  const pct = p.toFixed(4) + '%';
   document.querySelectorAll('#mob-tl-inner .mob-tl-track').forEach(track => {
     const line = document.createElement('div');
     line.className = 'mob-tl-now';
@@ -942,7 +942,7 @@ function scrollMobTlToNow() {
   const inner  = document.getElementById('mob-tl-inner');
   if (!scroll || !inner) return;
   const totalTrackW = inner.offsetWidth - MOB_LABEL_W;
-  const nowPx = timeToPct(centerHours(), 0) / 100 * totalTrackW;
+  const nowPx = centerPct() / 100 * totalTrackW;
   const halfView = (window.innerWidth - MOB_LABEL_W) / 2;
   scroll.scrollLeft = Math.max(0, nowPx - halfView);
 }

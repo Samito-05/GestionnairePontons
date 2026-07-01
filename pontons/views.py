@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 
 from .models import Ponton, Embarcation, Location, UserProfile
 from .forms import (
@@ -83,18 +83,20 @@ def _build_planning_row(embarcation):
 def _planning_htmx_response(request, embarcation, partial):
     """Return full row/tile HTML (with real blocks) for HTMX swap.
 
-    Reads grid_start/grid_end from the request so the partial uses the
-    same grid bounds as the already-rendered page (prevents visual offset).
+    Reads window_start from the request so the partial uses the same
+    rolling window as the already-rendered page (prevents visual offset).
     """
-    gs = request.POST.get('grid_start') or request.GET.get('grid_start')
-    ge = request.POST.get('grid_end')   or request.GET.get('grid_end')
-    try:
-        force_start = int(gs) if gs else None
-        force_end   = int(ge) if ge else None
-    except (ValueError, TypeError):
-        force_start = force_end = None
+    ws = request.POST.get('window_start') or request.GET.get('window_start')
+    force_ws = None
+    if ws:
+        try:
+            force_ws = datetime.fromisoformat(ws)
+            if timezone.is_naive(force_ws):
+                force_ws = timezone.make_aware(force_ws)
+        except ValueError:
+            force_ws = None
 
-    marks, planning_data, _, _, _ = build_planning_data(timezone.localdate(), force_start, force_end)
+    marks, planning_data, _, _, _ = build_planning_data(None, force_ws)
 
     row = None
     for ponton_data in planning_data:
@@ -134,18 +136,20 @@ def planning(request):
     except ValueError:
         date_cible = timezone.localdate()
 
-    marks, planning_data, grid_start_h, grid_end_h, grid_span = build_planning_data(date_cible)
+    marks, planning_data, window_start, window_end, grid_span = build_planning_data(date_cible)
 
     return render(request, 'pontons/planning.html', {
-        'marks':         marks,
-        'planning_data': planning_data,
-        'date_cible':    date_cible,
-        'date_prev':     date_cible - timedelta(days=1),
-        'date_next':     date_cible + timedelta(days=1),
-        'now':           timezone.localtime(timezone.now()),
-        'grid_start_h':  grid_start_h,
-        'grid_end_h':    grid_end_h,
-        'grid_span':     grid_span,
+        'marks':            marks,
+        'planning_data':    planning_data,
+        'date_cible':       date_cible,
+        'date_prev':        date_cible - timedelta(days=1),
+        'date_next':        date_cible + timedelta(days=1),
+        'now':              timezone.localtime(timezone.now()),
+        'window_start':     window_start,
+        'window_end':       window_end,
+        'window_start_iso': window_start.isoformat(),
+        'window_start_ms':  int(window_start.timestamp() * 1000),
+        'grid_span':        grid_span,
     })
 
 

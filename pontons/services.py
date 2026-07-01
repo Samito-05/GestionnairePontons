@@ -1,3 +1,6 @@
+from datetime import datetime, time, timedelta
+
+from django.db.models import Q
 from django.utils import timezone
 
 from .models import Ponton, Location
@@ -11,53 +14,71 @@ def _text_color(hex_color):
     return '#000000' if luminance > 0.5 else '#ffffff'
 
 
-def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
+def build_planning_data(date_cible=None, force_window_start=None):
     """Construit le planning avec positionnement CSS.
 
-    Fenêtre temporelle fixe 0h → 24h ; le viewport (scroll horizontal côté
-    client) est centré sur « maintenant » avec ±2h visibles.
-    Passer force_grid_start/force_grid_end pour préserver les bornes
+    Fenêtre GLISSANTE de 24h : maintenant ±12h (traverse minuit).
+    Pour une autre date que aujourd'hui : centrée sur 13h ce jour-là.
+    Passer force_window_start (datetime aware) pour préserver la fenêtre
     d'une page déjà chargée (évite le décalage visuel sur swap HTMX).
+
+    Retourne (marks, planning, window_start, window_end, grid_span_minutes).
     """
     now = timezone.now()
+    today = timezone.localdate()
 
-    # ── 1. Récupérer TOUTES les locations du jour (sans filtre horaire) ──
-    all_locs_today = Location.objects.filter(
-        heure_debut__date=date_cible,
+    # ── 1. Fenêtre glissante, alignée sur l'heure pleine ─────────────────
+    if force_window_start is not None:
+        window_start = timezone.localtime(force_window_start).replace(
+            minute=0, second=0, microsecond=0)
+    else:
+        if date_cible is None or date_cible == today:
+            center = timezone.localtime(now)
+        else:
+            center = timezone.make_aware(datetime.combine(date_cible, time(13, 0)))
+        window_start = center.replace(minute=0, second=0, microsecond=0) - timedelta(hours=12)
+    window_end = window_start + timedelta(hours=24)
+
+    GRID_SPAN = 24 * 60  # minutes
+
+    def _offset_min(dt):
+        """Minutes depuis le début de fenêtre (peut sortir de [0, 1440])."""
+        return (dt - window_start).total_seconds() / 60
+
+    # ── 2. Locations chevauchant la fenêtre ──────────────────────────────
+    all_locs = Location.objects.filter(
+        heure_debut__lt=window_end,
+    ).filter(
+        Q(heure_fin__gt=window_start) |
+        Q(returned_at__gt=window_start) |
+        Q(statut='sortie', returned_at__isnull=True)
     ).select_related('embarcation', 'gestionnaire')
 
-    # ── 2. Fenêtre temporelle : 24h fixe (0h → 24h) ──────────────────────
-    # force_grid_start/end conservés pour compat (pages déjà chargées / HTMX)
-    if force_grid_start is not None and force_grid_end is not None:
-        grid_start_h = int(force_grid_start)
-        grid_end_h   = int(force_grid_end)
-    else:
-        grid_start_h = 0
-        grid_end_h   = 24
-
-    GRID_START = grid_start_h * 60
-    GRID_END   = grid_end_h   * 60
-    GRID_SPAN  = GRID_END - GRID_START
-
-    # ── 3. Graduations : heures pleines + demi-heures ────────────────────
+    # ── 3. Graduations : heures + demi-heures, séparateur de jour à minuit ─
     marks = []
-    # Mobile : label toutes les 2h sur 24h (grille large, ~2 labels par écran)
-    step_mobile = max(1, round((grid_end_h - grid_start_h) / 12))
-    for h in range(grid_start_h, grid_end_h + 1):
-        pct = (h * 60 - GRID_START) / GRID_SPAN * 100
-        show_mobile = ((h - grid_start_h) % step_mobile == 0) or (h == grid_end_h)
-        marks.append({'label': f'{h}h', 'pct': f'{pct:.4f}',
-                      'is_hour': True, 'show_mobile': show_mobile})
-        if h < grid_end_h:
-            half_pct = ((h * 60 + 30) - GRID_START) / GRID_SPAN * 100
-            marks.append({'label': '', 'pct': f'{half_pct:.4f}',
-                          'is_hour': False, 'show_mobile': False})
+    for i in range(25):
+        t = timezone.localtime(window_start + timedelta(hours=i))
+        pct = i / 24 * 100
+        is_midnight = (t.hour == 0)
+        marks.append({
+            'label':       f'{t.hour}h',
+            'date_label':  t.strftime('%d/%m'),
+            'pct':         f'{pct:.4f}',
+            'is_hour':     True,
+            'is_midnight': is_midnight,
+            # Mobile : label toutes les 2h ; minuit toujours visible
+            'show_mobile': (i % 2 == 0) or is_midnight,
+        })
+        if i < 24:
+            half_pct = (i + 0.5) / 24 * 100
+            marks.append({'label': '', 'date_label': '', 'pct': f'{half_pct:.4f}',
+                          'is_hour': False, 'is_midnight': False, 'show_mobile': False})
 
     # ── 4. Construire le planning par ponton/embarcation ─────────────────
     pontons = Ponton.objects.filter(actif=True).prefetch_related('embarcations')
 
     loc_by_emb = {}
-    for loc in all_locs_today:
+    for loc in all_locs:
         loc_by_emb.setdefault(loc.embarcation_id, []).append(loc)
 
     planning = []
@@ -78,10 +99,10 @@ def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
                     fin_effective = loc.returned_at
                 lf = timezone.localtime(fin_effective)
 
-                # reservee: actif toute la journée (pas d'expiration horaire)
+                # reservee: actif toute la journée locale tant que non sortie/retournée
                 # sortie: actif tant que non retournée (dépassement inclus)
                 is_active = loc.returned_at is None and (
-                    loc.statut == 'reservee' or
+                    (loc.statut == 'reservee' and ld.date() == today) or
                     (loc.statut == 'sortie' and loc.heure_debut <= now)
                 )
                 if is_active:
@@ -92,14 +113,17 @@ def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
                         overtime     = True
                         overtime_min = loc.overtime_minutes
 
-                start_min = max(ld.hour * 60 + ld.minute, GRID_START)
-                end_min   = min(lf.hour * 60 + lf.minute, GRID_END)
-
                 is_reserved = loc.statut == 'reservee'
+
+                start_min = max(_offset_min(loc.heure_debut), 0)
+                end_min   = min(_offset_min(fin_effective), GRID_SPAN)
+                # Resa gestionnaire active : la bande court jusqu'à la fin de fenêtre,
+                # même si son heure_fin nominale est déjà sortie de la fenêtre
+                if is_reserved and not loc.is_manual and is_active:
+                    end_min = GRID_SPAN
+
                 if end_min > start_min:
-                    left_pct = (start_min - GRID_START) / GRID_SPAN * 100
-                    # Resa via gestionnaire (is_manual=False) : bloc jusqu'à fin de grille
-                    # Resa manuelle (is_manual=True) : bloc exact heure_debut–heure_fin
+                    left_pct = start_min / GRID_SPAN * 100
                     if is_reserved and not loc.is_manual:
                         width_pct = 100.0 - left_pct
                     else:
@@ -120,15 +144,14 @@ def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
                 ot_end_dt = None
                 if loc.statut == 'sortie':
                     if loc.returned_at is None and now > loc.heure_fin:
-                        ot_end_dt = now                # dépassement en cours
+                        ot_end_dt = now                 # dépassement en cours
                     elif loc.returned_at and loc.returned_at > loc.heure_fin:
                         ot_end_dt = loc.returned_at     # retour tardif (historique)
                 if ot_end_dt:
-                    ote = timezone.localtime(ot_end_dt)
-                    ot_start = max(lf.hour * 60 + lf.minute, GRID_START)
-                    ot_end   = min(ote.hour * 60 + ote.minute, GRID_END)
+                    ot_start = max(_offset_min(loc.heure_fin), 0)
+                    ot_end   = min(_offset_min(ot_end_dt), GRID_SPAN)
                     if ot_end > ot_start:
-                        ot_left  = (ot_start - GRID_START) / GRID_SPAN * 100
+                        ot_left  = ot_start / GRID_SPAN * 100
                         ot_width = (ot_end - ot_start) / GRID_SPAN * 100
                         ot_mins  = int((ot_end_dt - loc.heure_fin).total_seconds() / 60)
                         blocks.append({
@@ -153,4 +176,4 @@ def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
             })
         planning.append({'ponton': ponton, 'rows': rows})
 
-    return marks, planning, grid_start_h, grid_end_h, GRID_SPAN
+    return marks, planning, window_start, window_end, GRID_SPAN

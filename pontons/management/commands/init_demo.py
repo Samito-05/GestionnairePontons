@@ -44,20 +44,37 @@ class Command(BaseCommand):
             embs.append(emb)
 
         # Utilisateurs
-        if not User.objects.filter(username='admin').exists():
-            admin = User.objects.create_superuser('admin', 'admin@pontons.local', 'admin123')
-            UserProfile.objects.create(user=admin, role='admin')
+        # Utilisateurs de démo — idempotent : crée si absent, force toujours le rôle.
+        # Le signal post_save crée déjà un UserProfile ; update_or_create l'ajuste.
+        admin, created = User.objects.get_or_create(
+            username='admin',
+            defaults={'email': 'admin@pontons.local', 'is_staff': True, 'is_superuser': True},
+        )
+        if created:
+            admin.set_password('admin123')
+            admin.save()
             self.stdout.write('  Superuser admin créé (mdp: admin123)')
+        UserProfile.objects.update_or_create(user=admin, defaults={'role': 'admin'})
 
-        if not User.objects.filter(username='gestionnaire1').exists():
-            g1 = User.objects.create_user('gestionnaire1', password='gest123', first_name='Jean', last_name='Dupont')
-            UserProfile.objects.create(user=g1, role='gestionnaire')
+        g1, created = User.objects.get_or_create(
+            username='gestionnaire1',
+            defaults={'first_name': 'Jean', 'last_name': 'Dupont'},
+        )
+        if created:
+            g1.set_password('gest123')
+            g1.save()
             self.stdout.write('  Gestionnaire gestionnaire1 créé (mdp: gest123)')
+        UserProfile.objects.update_or_create(user=g1, defaults={'role': 'gestionnaire'})
 
-        if not User.objects.filter(username='visiteur1').exists():
-            v1 = User.objects.create_user('visiteur1', password='visit123', first_name='Marie', last_name='Martin')
-            UserProfile.objects.create(user=v1, role='visiteur')
+        v1, created = User.objects.get_or_create(
+            username='visiteur1',
+            defaults={'first_name': 'Marie', 'last_name': 'Martin'},
+        )
+        if created:
+            v1.set_password('visit123')
+            v1.save()
             self.stdout.write('  Visiteur visiteur1 créé (mdp: visit123)')
+        UserProfile.objects.update_or_create(user=v1, defaults={'role': 'visiteur'})
 
         # Locations de démo pour aujourd'hui
         now = timezone.now()

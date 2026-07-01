@@ -5,7 +5,11 @@
       <div class="{% if m.is_hour %}mob-tl-gh{% else %}mob-tl-ghh{% endif %}" style="left:{{ m.pct }}%"></div>
     {% endfor %}
     {% for block in row.blocks %}
-      {% if block.is_reserved %}
+      {% if block.is_overtime %}
+      <div class="overtime-block"
+           style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;"
+           title="{{ block.label }}"></div>
+      {% elif block.is_reserved %}
       <div class="reserved-block"
            style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;"
            title="{{ block.label }}"></div>

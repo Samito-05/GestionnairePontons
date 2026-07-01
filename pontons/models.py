@@ -51,10 +51,10 @@ class Embarcation(models.Model):
             return self.est_louee_now
         now = timezone.now()
         # reservee: pas d'expiration temporelle (valide toute la journée jusqu'au sortir)
-        # sortie: actif tant que dans la fenêtre heure_debut–heure_fin
+        # sortie: actif tant que non retournée (returned_at) — dépassement inclus
         return (
-            self.locations.filter(statut='reservee', heure_debut__date=now.date()).exists() or
-            self.locations.filter(statut='sortie', heure_debut__lte=now, heure_fin__gt=now).exists()
+            self.locations.filter(statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True).exists() or
+            self.locations.filter(statut='sortie', heure_debut__lte=now, returned_at__isnull=True).exists()
         )
 
     def location_en_cours(self):
@@ -67,13 +67,13 @@ class Embarcation(models.Model):
         now = timezone.now()
         # reservee d'aujourd'hui prime — pas de contrainte horaire
         loc = self.locations.filter(
-            statut='reservee', heure_debut__date=now.date()
+            statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True
         ).order_by('-created_at').first()
         if loc:
             return loc
-        # sortie active maintenant
+        # sortie active — reste sortie jusqu'au retour effectif (dépassement inclus)
         return self.locations.filter(
-            statut='sortie', heure_debut__lte=now, heure_fin__gt=now
+            statut='sortie', heure_debut__lte=now, returned_at__isnull=True
         ).first()
 
 
@@ -89,6 +89,7 @@ class Location(models.Model):
     heure_fin = models.DateTimeField()
     statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='reservee')
     is_manual = models.BooleanField(default=False, help_text='Créée manuellement via admin (heure_fin fixe)')
+    returned_at = models.DateTimeField(null=True, blank=True, help_text='Retour effectif — null tant que non retournée (dépassement possible)')
     notes = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -112,6 +113,19 @@ class Location(models.Model):
     @property
     def duree_minutes(self):
         return int((self.heure_fin - self.heure_debut).total_seconds() / 60)
+
+    def is_overtime(self):
+        """True si sortie non retournée et l'heure de fin prévue est dépassée."""
+        return bool(
+            self.statut == 'sortie' and self.returned_at is None
+            and self.heure_fin and timezone.now() > self.heure_fin
+        )
+
+    @property
+    def overtime_minutes(self):
+        if not self.is_overtime():
+            return 0
+        return int((timezone.now() - self.heure_fin).total_seconds() / 60)
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [

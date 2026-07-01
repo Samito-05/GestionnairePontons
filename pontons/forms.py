@@ -124,5 +124,8 @@ class UserCreateForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
-            UserProfile.objects.create(user=user, role=self.cleaned_data['role'])
+            # Le signal post_save a déjà créé un UserProfile — on fixe le rôle
+            UserProfile.objects.update_or_create(
+                user=user, defaults={'role': self.cleaned_data['role']}
+            )
         return user

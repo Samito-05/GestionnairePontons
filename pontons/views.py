@@ -51,6 +51,8 @@ def _build_tile_item(embarcation):
         'statut':      loc.statut if loc else None,
         'location':    loc,
         'retour':      timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
+        'overtime':    loc.is_overtime() if loc else False,
+        'overtime_min': loc.overtime_minutes if loc else 0,
         'ticket_time': timezone.localtime(loc.created_at).strftime('%H:%M')
                        if (loc and loc.statut == 'reservee') else None,
     }
@@ -71,6 +73,8 @@ def _build_planning_row(embarcation):
         'blocks': [],
         'est_louee_maintenant': loc is not None,
         'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
+        'overtime': loc.is_overtime() if loc else False,
+        'overtime_min': loc.overtime_minutes if loc else 0,
         'statut': loc.statut if loc else None,
         'location_pk': loc.pk if loc else None,
     }
@@ -151,8 +155,8 @@ def planning(request):
 def gestionnaire(request):
     now = timezone.now()
     active_locs_qs = Location.objects.filter(
-        Q(statut='reservee', heure_debut__date=now.date()) |
-        Q(statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
+        Q(statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+        Q(statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
     ).select_related('gestionnaire')
     pontons = Ponton.objects.filter(actif=True).prefetch_related(
         Prefetch(
@@ -174,6 +178,8 @@ def gestionnaire(request):
                 'statut': loc.statut if loc else 'libre',
                 'location': loc,
                 'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
+                'overtime': loc.is_overtime() if loc else False,
+                'overtime_min': loc.overtime_minutes if loc else 0,
                 'ticket_time': timezone.localtime(loc.created_at).strftime('%H:%M') if (loc and loc.statut == 'reservee') else None,
             })
         embarcations_status.append({'ponton': ponton, 'embarcations': embs})
@@ -193,8 +199,8 @@ def louer_embarcation(request, pk):
             Embarcation.objects.select_for_update(), pk=pk, actif=True
         )
         overlap = Location.objects.filter(
-            Q(embarcation=embarcation, statut='reservee', heure_debut__date=now.date()) |
-            Q(embarcation=embarcation, statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
+            Q(embarcation=embarcation, statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+            Q(embarcation=embarcation, statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
         )
         next_url = request.POST.get('next', 'gestionnaire')
         if overlap.exists():
@@ -249,7 +255,9 @@ def retour_embarcation(request, pk):
     embarcation = get_object_or_404(Embarcation, pk=pk)
     loc = embarcation.location_en_cours()
     if loc:
-        loc.heure_fin = timezone.now()
+        # Retour effectif : marque returned_at. On ne touche PAS heure_fin
+        # pour préserver le bloc prévu + le dépassement éventuel dans l'historique.
+        loc.returned_at = timezone.now()
         loc.save()
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
@@ -314,8 +322,8 @@ def admin_embarcations(request):
     embarcations = Embarcation.objects.select_related('ponton').annotate(
         est_louee_now=Exists(
             Location.objects.filter(
-                Q(embarcation=OuterRef('pk'), statut='reservee', heure_debut__date=now.date()) |
-                Q(embarcation=OuterRef('pk'), statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
+                Q(embarcation=OuterRef('pk'), statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+                Q(embarcation=OuterRef('pk'), statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
             )
         )
     )
@@ -449,8 +457,8 @@ def api_status(request):
     current_locs = {
         loc.embarcation_id: loc
         for loc in Location.objects.filter(
-            Q(statut='reservee', heure_debut__date=now.date()) |
-            Q(statut='sortie', heure_debut__lte=now, heure_fin__gt=now)
+            Q(statut='reservee', heure_debut__date=now.date(), returned_at__isnull=True) |
+            Q(statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
         )
     }
     data = []
@@ -463,5 +471,6 @@ def api_status(request):
             'louee': loc is not None,
             'statut': loc.statut if loc else 'libre',
             'retour': timezone.localtime(loc.heure_fin).strftime('%H:%M') if (loc and loc.statut == 'sortie') else None,
+            'overtime': loc.is_overtime() if loc else False,
         })
     return JsonResponse({'status': data, 'now': timezone.localtime(now).strftime('%H:%M:%S')})

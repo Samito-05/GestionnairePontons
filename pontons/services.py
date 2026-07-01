@@ -14,8 +14,8 @@ def _text_color(hex_color):
 def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
     """Construit le planning avec positionnement CSS.
 
-    La fenêtre temporelle (grid_start_h → grid_end_h) est calculée
-    dynamiquement depuis les locations du jour, avec un fallback 13h–20h.
+    Fenêtre temporelle fixe 0h → 24h ; le viewport (scroll horizontal côté
+    client) est centré sur « maintenant » avec ±2h visibles.
     Passer force_grid_start/force_grid_end pour préserver les bornes
     d'une page déjà chargée (évite le décalage visuel sur swap HTMX).
     """
@@ -26,29 +26,14 @@ def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
         heure_debut__date=date_cible,
     ).select_related('embarcation', 'gestionnaire')
 
-    def _effective_end(loc):
-        """Fin réelle pour le calcul de fenêtre : étend au dépassement live
-        (sortie non retournée, fin dépassée) ou au retour tardif historique."""
-        if loc.statut == 'sortie' and loc.returned_at is None and now > loc.heure_fin:
-            return now
-        if loc.returned_at and loc.returned_at > loc.heure_fin:
-            return loc.returned_at
-        return loc.heure_fin
-
-    # ── 2. Calculer la fenêtre temporelle dynamique ──────────────────────
+    # ── 2. Fenêtre temporelle : 24h fixe (0h → 24h) ──────────────────────
+    # force_grid_start/end conservés pour compat (pages déjà chargées / HTMX)
     if force_grid_start is not None and force_grid_end is not None:
         grid_start_h = int(force_grid_start)
         grid_end_h   = int(force_grid_end)
-    elif all_locs_today.exists():
-        local_starts = [timezone.localtime(l.heure_debut) for l in all_locs_today]
-        local_ends   = [timezone.localtime(_effective_end(l)) for l in all_locs_today]
-        min_h = min(t.hour for t in local_starts)
-        max_h = max(t.hour + (1 if t.minute > 0 else 0) for t in local_ends)
-        grid_start_h = max(6,  min_h - 1)
-        grid_end_h   = min(23, max(max_h + 1, 20))
     else:
-        grid_start_h = 13
-        grid_end_h   = 20
+        grid_start_h = 0
+        grid_end_h   = 24
 
     GRID_START = grid_start_h * 60
     GRID_END   = grid_end_h   * 60
@@ -56,7 +41,8 @@ def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
 
     # ── 3. Graduations : heures pleines + demi-heures ────────────────────
     marks = []
-    step_mobile = max(1, round((grid_end_h - grid_start_h) / 4))
+    # Mobile : label toutes les 2h sur 24h (grille large, ~2 labels par écran)
+    step_mobile = max(1, round((grid_end_h - grid_start_h) / 12))
     for h in range(grid_start_h, grid_end_h + 1):
         pct = (h * 60 - GRID_START) / GRID_SPAN * 100
         show_mobile = ((h - grid_start_h) % step_mobile == 0) or (h == grid_end_h)
@@ -86,7 +72,11 @@ def build_planning_data(date_cible, force_grid_start=None, force_grid_end=None):
             current_loc   = None
             for loc in sorted(loc_by_emb.get(emb.id, []), key=lambda l: l.heure_debut):
                 ld = timezone.localtime(loc.heure_debut)
-                lf = timezone.localtime(loc.heure_fin)
+                # Retour anticipé : le bloc s'arrête au retour réel
+                fin_effective = loc.heure_fin
+                if loc.statut == 'sortie' and loc.returned_at and loc.returned_at < loc.heure_fin:
+                    fin_effective = loc.returned_at
+                lf = timezone.localtime(fin_effective)
 
                 # reservee: actif toute la journée (pas d'expiration horaire)
                 # sortie: actif tant que non retournée (dépassement inclus)

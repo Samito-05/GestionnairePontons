@@ -5,8 +5,13 @@
       <div class="mob-tile-name">{{ row.embarcation.nom }}</div>
       <div class="mob-tile-status">
         {% if row.statut == 'sortie' %}
+          {% if row.overtime %}
+          <span style="color:var(--danger);"><span class="pulse">●</span> Retard</span>
+          <span class="mob-tile-retour" style="color:var(--danger);font-weight:700;">+{{ row.overtime_min }} min</span>
+          {% else %}
           <span style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
           {% if row.retour %}<span class="mob-tile-retour">→ {{ row.retour }}</span>{% endif %}
+          {% endif %}
         {% elif row.statut == 'reservee' %}
           <span style="color:var(--warning);">● Ticket</span>
         {% else %}

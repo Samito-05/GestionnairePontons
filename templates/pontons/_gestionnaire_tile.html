@@ -1,12 +1,17 @@
 {% if item.statut == 'sortie' %}
-<div id="tile-{{ item.embarcation.pk }}" class="emb-tile emb-tile-rented">
+<div id="tile-{{ item.embarcation.pk }}" class="emb-tile emb-tile-rented{% if item.overtime %} emb-tile-overtime{% endif %}">
   <div class="emb-tile-rail" style="background:var(--danger);"></div>
   <div class="emb-tile-content">
     <div class="emb-tile-body">
       <div class="emb-tile-name">{{ item.embarcation.nom }}</div>
       <div class="emb-tile-meta">
+        {% if item.overtime %}
+        <span class="emb-tile-status" style="color:var(--danger);"><span class="pulse">●</span> Retard</span>
+        <span class="emb-tile-info" style="color:var(--danger);font-weight:700;">+{{ item.overtime_min }} min</span>
+        {% else %}
         <span class="emb-tile-status" style="color:var(--danger);"><span class="pulse">●</span> Sortie</span>
         <span class="emb-tile-info">→ {{ item.retour }}</span>
+        {% endif %}
       </div>
       {% if item.location.notes %}<div class="emb-tile-client">{{ item.location.notes }}</div>{% endif %}
     </div>

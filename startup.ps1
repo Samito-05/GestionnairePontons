@@ -52,12 +52,13 @@ if (-not $SkipInstall) {
 
 if ($ResetDatabase) {
     Write-Step "Resetting SQLite database"
-    $DbPath = Join-Path $ProjectRoot "db.sqlite3"
+    # La base vit dans data/db.sqlite3 (voir DATABASES dans settings.py)
+    $DbPath = Join-Path $ProjectRoot "data\db.sqlite3"
     if (Test-Path $DbPath) {
         Remove-Item $DbPath -Force
-        Write-Host "Removed db.sqlite3"
+        Write-Host "Removed data\db.sqlite3"
     } else {
-        Write-Host "No db.sqlite3 file found"
+        Write-Host "No data\db.sqlite3 file found"
     }
 }
 

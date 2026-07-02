@@ -192,6 +192,12 @@ docker compose up -d --build tunnel
 
 `git pull` (via conteneur Docker `alpine/git`, le NAS n'a pas git installe), rebuild, redemarre le container et joue les migrations. Ne touche pas `.env.production` (gitignore).
 
+> **Migration conteneur non-root (une seule fois)** — le conteneur tourne desormais avec l'utilisateur `app` (non-root). Si les volumes datent d'une version precedente (fichiers appartenant a root), corriger les permissions une fois :
+> ```bash
+> docker compose run --rm --user root web chown -R app:app /app/data /app/media
+> docker compose restart web
+> ```
+
 ### Commandes utiles
 
 ```bash
@@ -201,7 +207,7 @@ docker compose restart web                          # Redemarrer sans rebuild
 docker compose down                                 # Arreter tout
 
 # Sauvegarde de la base de donnees
-docker compose exec web python manage.py dumpdata > backup_$(date +%Y%m%d).json
+sh backup.sh
 ```
 
 ### Depannage
@@ -386,17 +392,25 @@ wget -q -O deploy.sh https://raw.githubusercontent.com/Samito-05/GestionnairePon
 chmod +x deploy.sh
 ```
 
+### Sauvegardes
+
+```bash
+# Sauvegarde manuelle (JSON horodate dans ./backups/, 30 conserves)
+sh backup.sh
+
+# Sauvegarde automatique quotidienne a 3h — ajouter au crontab du NAS :
+crontab -e
+# 0 3 * * * cd /share/homes/admin/GestionnairePontons && sh backup.sh >> backups/backup.log 2>&1
+
+# Restaurer une sauvegarde
+docker compose exec -T web python manage.py loaddata backups/backup_YYYYMMDD_HHMM.json
+```
+
 ### Acceder a la base de donnees
 
 ```bash
 # Shell Django interactif
 docker compose exec web python manage.py shell
-
-# Sauvegarder toutes les donnees
-docker compose exec web python manage.py dumpdata > backup_$(date +%Y%m%d_%H%M).json
-
-# Restaurer une sauvegarde
-docker compose exec web python manage.py loaddata backup_YYYYMMDD_HHMM.json
 ```
 
 ### Creer ou modifier un compte

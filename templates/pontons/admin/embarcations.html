@@ -54,7 +54,7 @@
               Modifier
             </a>
             <form method="post" action="{% url 'admin_embarcation_delete' emb.pk %}"
-                  onsubmit="return confirm('Supprimer cette embarcation ?')">
+                  onsubmit="return confirm('Supprimer « {{ emb.nom|escapejs }} » ?\n\n{{ emb.nb_locations }} location(s) en historique seront définitivement perdues.\n\nPour conserver l\'historique, préférez Modifier → décocher Actif.')">
               {% csrf_token %}
               <button type="submit" class="btn btn-danger btn-sm">
                 Suppr.

@@ -17,6 +17,7 @@ Installable comme application mobile (PWA) sur Android, iOS et desktop.
 | Icônes | Font Awesome 6 (CDN) |
 | Fichiers statiques | WhiteNoise 6.8 avec CompressedManifestStaticFilesStorage |
 | WSGI | Gunicorn 23 |
+| Anti brute-force | django-axes 7 (5 echecs → compte verrouille 15 min) |
 | Variables d'environnement | python-dotenv 1.0 |
 | Déploiement | Docker + Cloudflare Tunnel |
 | PWA | manifest.json + Service Worker v3 (cache-first static, HTML jamais mis en cache) |
@@ -275,7 +276,8 @@ Ponton
     --> ForeignKey Ponton
 
     Location
-      heure_debut, heure_fin, statut (reservee|sortie), notes, created_at
+      heure_debut, heure_fin, statut (reservee|sortie), returned_at,
+      is_manual, notes, created_at
       --> ForeignKey Embarcation
       --> ForeignKey User (gestionnaire)
 
@@ -294,6 +296,7 @@ User (Django natif)
 | `/` | Redirige vers planning |
 | `/planning/` | Public |
 | `/planning/?date=YYYY-MM-DD` | Public |
+| `/planning/row/<id>/` | Public (partial HTMX, polling) |
 | `/gestionnaire/` | Gestionnaire+ |
 | `/gestionnaire/louer/<id>/` | Gestionnaire+ |
 | `/gestionnaire/sortir/<id>/` | Gestionnaire+ |
@@ -319,6 +322,7 @@ GestionnairePontons/
 ├── pontons/
 │   ├── models.py            # Ponton, Embarcation, Location, UserProfile
 │   ├── views.py             # Toutes les vues
+│   ├── services.py          # Construction des donnees du planning
 │   ├── forms.py             # Formulaires avec validation
 │   ├── urls.py              # Routes de l'application
 │   ├── admin.py             # Interface admin Django natif
@@ -346,6 +350,7 @@ GestionnairePontons/
 ├── startup.ps1              # Script de demarrage Windows (developpement)
 ├── startup.bat
 ├── deploy.sh                # Script de mise a jour production (NAS via SSH)
+├── backup.sh                # Sauvegarde JSON horodatee (cron NAS)
 ├── requirements.txt
 └── manage.py
 ```
@@ -384,13 +389,7 @@ docker compose restart              # Tout redemarrer
 ./deploy.sh
 ```
 
-Le script `deploy.sh` fait `git pull` (via conteneur Docker `alpine/git`, pas besoin de git sur le NAS), rebuild, redemarre le container et joue les migrations automatiquement. Il ne touche pas `.env.production`.
-
-**Installation initiale du script (une seule fois) :**
-```bash
-wget -q -O deploy.sh https://raw.githubusercontent.com/Samito-05/GestionnairePontons/main/deploy.sh
-chmod +x deploy.sh
-```
+Le script `deploy.sh` fait `git pull` (via conteneur Docker `alpine/git`, pas besoin de git sur le NAS), rebuild, redemarre le container et joue les migrations automatiquement. Il ne touche pas `.env.production`. Il est versionne dans le depot — present des le clone initial.
 
 ### Sauvegardes
 

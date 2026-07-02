@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -34,7 +35,10 @@ class Embarcation(models.Model):
     nom = models.CharField(max_length=100)
     type_embarcation = models.CharField(max_length=20, choices=TYPE_CHOICES, default='pedalo')
     ponton = models.ForeignKey(Ponton, on_delete=models.CASCADE, related_name='embarcations')
-    couleur = models.CharField(max_length=7, default='#3273dc', help_text='Couleur hex ex: #3273dc')
+    couleur = models.CharField(
+        max_length=7, default='#3273dc', help_text='Couleur hex ex: #3273dc',
+        validators=[RegexValidator(r'^#[0-9a-fA-F]{6}$', 'Couleur hex invalide (format #RRGGBB).')],
+    )
     actif = models.BooleanField(default=True)
     ordre = models.PositiveIntegerField(default=0)
 

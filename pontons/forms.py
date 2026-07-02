@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 from django import forms
+from django.contrib.auth.password_validation import validate_password
+from django.db.models import Q
 from django.utils import timezone as tz
 from .models import Embarcation, Location, Ponton, UserProfile
 from django.contrib.auth.models import User
@@ -76,10 +78,14 @@ class LocationForm(forms.ModelForm):
             raise forms.ValidationError("L'heure de fin doit être après l'heure de début.")
 
         if embarcation and debut and fin:
+            # Fin effective = returned_at si retour anticipé, sinon heure_fin :
+            # une embarcation rendue tôt libère son créneau.
             overlap = Location.objects.filter(
                 embarcation=embarcation,
                 heure_debut__lt=fin,
-                heure_fin__gt=debut,
+            ).filter(
+                Q(returned_at__isnull=True, heure_fin__gt=debut) |
+                Q(returned_at__isnull=False, returned_at__gt=debut)
             )
             if self.instance.pk:
                 overlap = overlap.exclude(pk=self.instance.pk)
@@ -118,6 +124,13 @@ class UserCreateForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'input'}),
             'email': forms.EmailInput(attrs={'class': 'input'}),
         }
+
+    def clean_password(self):
+        password = self.cleaned_data['password']
+        # Applique AUTH_PASSWORD_VALIDATORS (longueur, mots communs, etc.)
+        # — set_password seul ne valide rien.
+        validate_password(password)
+        return password
 
     def save(self, commit=True):
         user = super().save(commit=False)

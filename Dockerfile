@@ -23,6 +23,12 @@ RUN DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY \
     DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS \
     python manage.py collectstatic --no-input
 
+# Non-root user — data/ and media/ pre-created so named volumes inherit ownership
+RUN useradd --create-home app \
+    && mkdir -p /app/data /app/media \
+    && chown -R app:app /app
+USER app
+
 EXPOSE 8000
 
 # Run with gunicorn

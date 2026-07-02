@@ -1,5 +1,8 @@
+from functools import wraps
+
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponse
@@ -30,17 +33,41 @@ def get_user_role(user):
 
 
 def require_role(*roles):
-    """Décorateur qui vérifie le rôle minimum."""
+    """Décorateur qui vérifie le rôle minimum.
+
+    Pour les requêtes HTMX, renvoie un header HX-Redirect au lieu d'un 302 :
+    sinon htmx injecterait la page de login dans la tuile ciblée.
+    """
     def decorator(view_func):
-        @login_required
+        @wraps(view_func)
         def _wrapped(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                if request.headers.get('HX-Request'):
+                    response = HttpResponse(status=401)
+                    response['HX-Redirect'] = f"{settings.LOGIN_URL}?next={request.path}"
+                    return response
+                return redirect_to_login(request.get_full_path())
             role = get_user_role(request.user)
             if role not in roles and not request.user.is_superuser:
+                if request.headers.get('HX-Request'):
+                    response = HttpResponse(status=403)
+                    response['HX-Redirect'] = '/planning/'
+                    return response
                 messages.error(request, "Accès refusé : droits insuffisants.")
                 return redirect('planning')
             return view_func(request, *args, **kwargs)
         return _wrapped
     return decorator
+
+
+# Cibles autorisées pour le paramètre POST "next" (noms d'URL uniquement —
+# jamais d'URL brute, pour bloquer les open redirects).
+_ALLOWED_NEXT = {'gestionnaire', 'planning'}
+
+
+def _safe_next(request):
+    nxt = request.POST.get('next', 'gestionnaire')
+    return nxt if nxt in _ALLOWED_NEXT else 'gestionnaire'
 
 
 def _build_tile_item(embarcation):
@@ -206,7 +233,7 @@ def louer_embarcation(request, pk):
             Q(embarcation=embarcation, statut='reservee', heure_debut__date=timezone.localdate(), returned_at__isnull=True) |
             Q(embarcation=embarcation, statut='sortie', heure_debut__lte=now, returned_at__isnull=True)
         )
-        next_url = request.POST.get('next', 'gestionnaire')
+        next_url = _safe_next(request)
         if overlap.exists():
             if request.headers.get('HX-Request'):
                 partial = request.POST.get('_htmx_partial', 'gestionnaire')
@@ -234,16 +261,17 @@ def louer_embarcation(request, pk):
 @require_role('admin', 'gestionnaire')
 @require_POST
 def sortir_embarcation(request, pk):
-    next_url = request.POST.get('next', 'gestionnaire')
-    embarcation = get_object_or_404(Embarcation, pk=pk)
-    loc = embarcation.location_en_cours()
-    if loc and loc.statut == 'reservee':
-        now = timezone.now()
-        duration = loc.heure_fin - loc.heure_debut
-        loc.heure_debut = now
-        loc.heure_fin = now + duration
-        loc.statut = 'sortie'
-        loc.save()
+    next_url = _safe_next(request)
+    with transaction.atomic():
+        embarcation = get_object_or_404(Embarcation.objects.select_for_update(), pk=pk)
+        loc = embarcation.location_en_cours()
+        if loc and loc.statut == 'reservee':
+            now = timezone.now()
+            duration = loc.heure_fin - loc.heure_debut
+            loc.heure_debut = now
+            loc.heure_fin = now + duration
+            loc.statut = 'sortie'
+            loc.save()
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
         if partial in ('planning_mob', 'planning_tl', 'planning_mob_tl'):
@@ -255,14 +283,15 @@ def sortir_embarcation(request, pk):
 @require_role('admin', 'gestionnaire')
 @require_POST
 def retour_embarcation(request, pk):
-    next_url = request.POST.get('next', 'gestionnaire')
-    embarcation = get_object_or_404(Embarcation, pk=pk)
-    loc = embarcation.location_en_cours()
-    if loc:
-        # Retour effectif : marque returned_at. On ne touche PAS heure_fin
-        # pour préserver le bloc prévu + le dépassement éventuel dans l'historique.
-        loc.returned_at = timezone.now()
-        loc.save()
+    next_url = _safe_next(request)
+    with transaction.atomic():
+        embarcation = get_object_or_404(Embarcation.objects.select_for_update(), pk=pk)
+        loc = embarcation.location_en_cours()
+        if loc:
+            # Retour effectif : marque returned_at. On ne touche PAS heure_fin
+            # pour préserver le bloc prévu + le dépassement éventuel dans l'historique.
+            loc.returned_at = timezone.now()
+            loc.save()
     if request.headers.get('HX-Request'):
         partial = request.POST.get('_htmx_partial', 'gestionnaire')
         if partial in ('planning_mob', 'planning_tl', 'planning_mob_tl'):
@@ -324,6 +353,7 @@ def admin_ponton_delete(request, pk):
 def admin_embarcations(request):
     now = timezone.now()
     embarcations = Embarcation.objects.select_related('ponton').annotate(
+        nb_locations=Count('locations'),
         est_louee_now=Exists(
             Location.objects.filter(
                 Q(embarcation=OuterRef('pk'), statut='reservee', heure_debut__date=timezone.localdate(), returned_at__isnull=True) |

@@ -112,16 +112,16 @@ Cloudflare gere le HTTPS et le certificat. Le serveur n'est jamais expose direct
 ### 1. Recuperer le code
 
 ```bash
-# Avec git
+# Avec git installe sur le NAS
 git clone https://github.com/Samito-05/GestionnairePontons.git
 cd GestionnairePontons
 
-# Sans git (wget disponible sur la plupart des NAS)
-wget -O pontons.zip https://github.com/Samito-05/GestionnairePontons/archive/refs/heads/main.zip
-unzip pontons.zip
-mv GestionnairePontons-main GestionnairePontons
-cd GestionnairePontons
+# Sans git sur le NAS (courant sur QNAP) — clone via conteneur Docker
+mkdir GestionnairePontons && cd GestionnairePontons
+docker run --rm -v "$(pwd):/repo" -w /repo alpine/git clone https://github.com/Samito-05/GestionnairePontons.git .
 ```
+
+> `deploy.sh` (mise a jour) requiert que ce dossier soit un clone git (`.git/` present) — les deux methodes ci-dessus conviennent.
 
 ### 2. Creer le fichier de configuration production
 
@@ -190,7 +190,7 @@ docker compose up -d --build tunnel
 ./deploy.sh
 ```
 
-Telecharge la derniere version, copie les fichiers, redémarre le container et joue les migrations. Ne touche pas `.env.production`.
+`git pull` (via conteneur Docker `alpine/git`, le NAS n'a pas git installe), rebuild, redemarre le container et joue les migrations. Ne touche pas `.env.production` (gitignore).
 
 ### Commandes utiles
 
@@ -378,7 +378,7 @@ docker compose restart              # Tout redemarrer
 ./deploy.sh
 ```
 
-Le script `deploy.sh` telecharge la derniere version depuis GitHub, copie les fichiers, redémarre le container et joue les migrations automatiquement. Il ne touche pas `.env.production`.
+Le script `deploy.sh` fait `git pull` (via conteneur Docker `alpine/git`, pas besoin de git sur le NAS), rebuild, redemarre le container et joue les migrations automatiquement. Il ne touche pas `.env.production`.
 
 **Installation initiale du script (une seule fois) :**
 ```bash

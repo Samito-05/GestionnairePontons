@@ -3,68 +3,60 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">&nbsp; Embarcations
-  </h1>
-  <a href="{% url 'admin_embarcation_new' %}" class="btn btn-primary btn-sm"> Nouvelle embarcation
-  </a>
+  <div>
+    <p class="page-eyebrow">Flotte</p>
+    <h1 class="page-title">Embarcations</h1>
+  </div>
+  <a href="{% url 'admin_embarcation_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouvelle embarcation</a>
 </div>
 
 <div class="table-wrap">
   <table class="data-table">
     <thead>
       <tr>
-        <th>Couleur</th>
-        <th>Nom</th>
+        <th>Embarcation</th>
         <th>Type</th>
         <th>Ponton</th>
         <th>Ordre</th>
         <th>Statut</th>
-        <th>Actions</th>
+        <th class="col-actions"><span class="sr-only">Actions</span></th>
       </tr>
     </thead>
     <tbody>
       {% for emb in embarcations %}
       <tr>
-        <td>
-          <span style="display:inline-block;width:20px;height:20px;border-radius:50%;
-                       background:{{ emb.couleur }};border:2px solid var(--border-bright);
-                       vertical-align:middle;"></span>
+        <td class="col-title">
+          <span class="cell-main"><span class="color-dot color-dot-lg" style="background:{{ emb.couleur }};"></span>{{ emb.nom }}</span>
         </td>
-        <td><span class="fw-600">{{ emb.nom }}</span></td>
-        <td style="color:var(--text-muted);font-size:.85rem;">{{ emb.get_type_embarcation_display }}</td>
-        <td style="font-size:.85rem;">{{ emb.ponton.nom }}</td>
-        <td>
-          <span class="mono" style="font-size:.8rem;color:var(--text-muted);">{{ emb.ordre }}</span>
-        </td>
-        <td>
-          <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+        <td data-label="Type" class="cell-muted">{{ emb.get_type_embarcation_display }}</td>
+        <td data-label="Ponton">{{ emb.ponton.nom }}</td>
+        <td data-label="Ordre" class="cell-muted">{{ emb.ordre }}</td>
+        <td data-label="Statut">
+          <div class="flex gap-1 flex-wrap">
             {% if emb.actif %}
               <span class="badge badge-success">Active</span>
             {% else %}
               <span class="badge badge-muted">Inactive</span>
             {% endif %}
             {% if emb.est_louee_maintenant %}
-              <span class="badge badge-danger"><span class="pulse">●</span> Sortie</span>
+              <span class="badge badge-danger"><span class="dot pulse"></span>En location</span>
             {% endif %}
           </div>
         </td>
-        <td>
-          <div style="display:flex;gap:.4rem;">
-            <a href="{% url 'admin_embarcation_edit' emb.pk %}" class="btn btn-info btn-sm">
-              Modifier
-            </a>
+        <td class="col-actions">
+          <div class="row-actions">
+            <a href="{% url 'admin_embarcation_edit' emb.pk %}" class="btn btn-info btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
             <form method="post" action="{% url 'admin_embarcation_delete' emb.pk %}"
-                  onsubmit="return confirm('Supprimer « {{ emb.nom|escapejs }} » ?\n\n{{ emb.nb_locations }} location(s) en historique seront définitivement perdues.\n\nPour conserver l\'historique, préférez Modifier → décocher Actif.')">
+                  data-confirm="Supprimer « {{ emb.nom }} » ?"
+                  data-confirm-detail="{{ emb.nb_locations }} location(s) en historique seront définitivement perdues.&#10;&#10;Pour conserver l'historique, préférez Modifier → décocher Actif.">
               {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm">
-                Suppr.
-              </button>
+              <button type="submit" class="btn btn-danger btn-sm"><svg class="icon"><use href="#i-trash"/></svg>Supprimer</button>
             </form>
           </div>
         </td>
       </tr>
       {% empty %}
-        <tr class="empty-row"><td colspan="7">Aucune embarcation.</td></tr>
+        <tr class="empty-row"><td colspan="6">Aucune embarcation pour le moment.</td></tr>
       {% endfor %}
     </tbody>
   </table>

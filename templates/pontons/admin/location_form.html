@@ -3,41 +3,25 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">{{ titre }}</h1>
-  <a href="{% url 'admin_locations' %}" class="btn btn-ghost btn-sm"> ← Retour
-  </a>
+  <div>
+    <p class="page-eyebrow">Locations</p>
+    <h1 class="page-title">{{ titre }}</h1>
+  </div>
+  <a href="{% url 'admin_locations' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg>Retour à la liste</a>
 </div>
 
-<div class="card" style="max-width:580px;">
+<div class="card form-card">
   <div class="card-body">
-    {% if form.non_field_errors %}
-      <div class="toast toast-error mb-3">
-        <span>{% for error in form.non_field_errors %}{{ error }}{% endfor %}</span>
-      </div>
-    {% endif %}
     <form method="post">
       {% csrf_token %}
-      {% for field in form %}
-      <div class="form-field">
-        <label>{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-          <span class="form-error">{{ field.errors.0 }}</span>
-        {% endif %}
-        {% if field.help_text %}
-          <span class="form-help">{{ field.help_text }}</span>
-        {% endif %}
-      </div>
-      {% endfor %}
-      <div class="toast toast-info mb-3" style="font-size:.8rem;margin-top:.5rem;">
-        <span>&nbsp;
-          Si l'heure de fin est vide, elle sera fixée automatiquement à début + 1h.
-        </span>
+      {% include 'pontons/admin/_form_fields.html' %}
+      <div class="notice notice-info mb-4">
+        <svg class="icon"><use href="#i-info"/></svg>
+        <span>Si l'heure de fin est vide, elle sera fixée automatiquement à début + 1 h.</span>
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary"> Enregistrer
-        </button>
-        <a href="{% url 'admin_locations' %}" class="btn btn-ghost">Annuler</a>
+        <button type="submit" class="btn btn-primary btn-lg"><svg class="icon"><use href="#i-check"/></svg>Enregistrer</button>
+        <a href="{% url 'admin_locations' %}" class="btn btn-ghost btn-lg">Annuler</a>
       </div>
     </form>
   </div>

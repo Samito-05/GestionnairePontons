@@ -10,6 +10,7 @@ urlpatterns = [
     path('gestionnaire/louer/<int:pk>/', views.louer_embarcation, name='louer_embarcation'),
     path('gestionnaire/sortir/<int:pk>/', views.sortir_embarcation, name='sortir_embarcation'),
     path('gestionnaire/retour/<int:pk>/', views.retour_embarcation, name='retour_embarcation'),
+    path('gestionnaire/retour/annuler/<int:pk>/', views.annuler_retour, name='annuler_retour'),
 
     # Planning HTMX partials
     path('planning/row/<int:pk>/', views.planning_row_partial, name='planning_row_partial'),

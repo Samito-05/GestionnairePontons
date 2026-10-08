@@ -301,6 +301,7 @@ User (Django natif)
 | `/gestionnaire/louer/<id>/` | Gestionnaire+ |
 | `/gestionnaire/sortir/<id>/` | Gestionnaire+ |
 | `/gestionnaire/retour/<id>/` | Gestionnaire+ |
+| `/gestionnaire/retour/annuler/<id location>/` | Gestionnaire+ (annulation d'un retour, 60 s max) |
 | `/gestion/` | Admin |
 | `/gestion/pontons/` | Admin |
 | `/gestion/embarcations/` | Admin |

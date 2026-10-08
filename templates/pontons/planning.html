@@ -1,731 +1,82 @@
 {% extends 'base.html' %}
 {% block title %}Planning — {{ date_cible|date:"d/m/Y" }}{% endblock %}
 
-{% block extra_css %}
-<style>
-
-/* ══════════════════════════════════════════════
-   DATE NAV BAR
-══════════════════════════════════════════════ */
-.planning-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.25rem;
-}
-
-.planning-title {
-  font-size: 1.05rem;
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  color: var(--text);
-}
-.planning-title i { color: var(--accent); font-size: .92rem; }
-.planning-title strong { font-family: var(--font-display); font-weight: 600; }
-
-.planning-controls {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  flex-wrap: wrap;
-}
-
-.clock-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .3rem .72rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: 20px;
-  font-family: var(--mono);
-  font-size: .8rem;
-  color: var(--text-muted);
-}
-.clock-tag i { font-size: .7rem; color: var(--accent); }
-
-/* Legend */
-.legend {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  margin-bottom: 1.1rem;
-  flex-wrap: wrap;
-}
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: .36rem;
-  font-size: .76rem;
-  color: var(--text-muted);
-}
-.legend-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-}
-.legend-line {
-  width: 12px; height: 2px;
-  background: var(--danger);
-  flex-shrink: 0;
-}
-
-/* ══════════════════════════════════════════════
-   DESKTOP TIMELINE
-══════════════════════════════════════════════ */
-.tl-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  margin-bottom: 1.5rem;
-}
-
-.tl-row {
-  display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid var(--border);
-}
-.tl-row:last-child { border-bottom: none; }
-
-.tl-label {
-  width: 170px;
-  min-width: 170px;
-  padding: .28rem .65rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-right: 1px solid var(--border-bright);
-  flex-shrink: 0;
-  font-size: .79rem;
-  /* Colonne fixe pendant le scroll horizontal 24h */
-  position: sticky;
-  left: 0;
-  z-index: 20;
-  background: var(--surface-2);
-}
-
-/* Piste large 24h — largeur pilotée par JS via #tl-inner (≈4h visibles) */
-#tl-inner {
-  position: relative;
-  display: inline-block;
-  min-width: 100%;
-}
-
-.tl-track {
-  position: relative;
-  flex: 1;
-  overflow: visible;
-}
-
-/* Axis row */
-.tl-row-axis {
-  height: 28px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-bright) !important;
-}
-.tl-row-axis .tl-label {
-  font-size: .7rem;
-  font-weight: 400;
-  color: var(--text-muted);
-  border-right-color: transparent;
-  font-family: var(--mono);
-  background: var(--surface);
-}
-
-.hour-tick {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-size: .7rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  white-space: nowrap;
-  pointer-events: none;
-  font-family: var(--mono);
-}
-.hour-tick-last { transform: translate(-100%, -50%); }
-
-/* Ponton header row */
-.tl-row-ponton {
-  height: 30px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-bright) !important;
-}
-.tl-row-ponton .tl-label {
-  font-weight: 700;
-  font-size: .8rem;
-  color: var(--accent);
-  font-family: var(--font-display);
-  border-right-color: var(--border-bright);
-  background: var(--surface);
-}
-
-/* Embarcation row */
-.tl-row-emb { height: 46px; }
-.tl-row-emb .tl-label { background: var(--surface-2); }
-.tl-row-emb:hover .tl-label { background: var(--surface-3); }
-.tl-row-emb:hover { background: var(--surface-3); }
-
-/* Grid lines */
-.grid-h  { position: absolute; top:0; bottom:0; width:1px; background: var(--border-bright); pointer-events:none; }
-.grid-hh { position: absolute; top:0; bottom:0; width:1px; background: var(--border); pointer-events:none; }
-
-/* Séparateur de jour (minuit) — la fenêtre 24h glissante traverse minuit */
-.grid-day { width: 2px; background: var(--accent); opacity: .55; }
-.hour-tick-day {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-/* Reserved block — ticket vendu, pas encore sorti (positionné depuis heure_debut) */
-.reserved-block {
-  position: absolute;
-  top: 0; bottom: 0;
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent 0px, transparent 5px,
-    rgba(110,131,148,.18) 5px, rgba(110,131,148,.18) 6px
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-left: 2px solid rgba(110,131,148,.4);
-}
-.tl-row-emb.is-reserved .tl-label { background: var(--surface-2); }
-.mob-tl-row-emb.is-reserved .mob-tl-label { background: var(--surface-2); }
-
-/* Rental block */
-.rental-block {
-  position: absolute;
-  top: 5px; bottom: 5px;
-  border-radius: 4px;
-  font-size: .7rem;
-  font-weight: 700;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
-  cursor: default;
-  transition: filter .12s;
-  min-width: 6px;
-  font-family: var(--mono);
-}
-.rental-block:hover { filter: brightness(1.1); z-index: 2; }
-.rental-block.is-narrow { font-size: 0; }
-
-/* Overtime block — sortie hors délai (dépassement, pas encore retournée) */
-.overtime-block {
-  position: absolute;
-  top: 5px; bottom: 5px;
-  border-radius: 4px;
-  z-index: 11;
-  min-width: 3px;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--danger) 0px, var(--danger) 6px,
-    rgba(0,0,0,.22) 6px, rgba(0,0,0,.22) 11px
-  );
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
-  animation: pulse-dot 1.6s ease-in-out infinite;
-}
-
-/* Now line */
-.now-line {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 2px;
-  background: var(--danger);
-  z-index: 1;
-  pointer-events: none;
-  box-shadow: 0 0 6px var(--danger-dim);
-}
-
-
-/* ══════════════════════════════════════════════
-   FULLSCREEN BUTTON (desktop + mobile shared)
-══════════════════════════════════════════════ */
-.fs-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .3rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: 6px;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: .26rem .44rem;
-  font-size: .69rem;
-  font-family: var(--font-ui);
-  font-weight: 500;
-  transition: background .12s, color .12s, border-color .12s;
-  white-space: nowrap;
-  line-height: 1;
-}
-.fs-btn:hover {
-  background: var(--surface-3);
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.fs-btn .icon-compress { display: none; }
-.fs-btn-text { font-size: .69rem; }
-@media (max-width: 768px) { .fs-btn-text { display: none; } }
-
-/* Desktop fullscreen container */
-#tl-container {
-  margin-bottom: 1.5rem;
-}
-
-/* Desktop + mobile shared toolbar */
-.tl-toolbar,
-.mob-tl-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: .24rem .5rem;
-  background: var(--surface);
-  border: 1px solid var(--border-bright);
-  border-bottom: 1px solid var(--border);
-}
-.tl-toolbar {
-  border-radius: var(--radius) var(--radius) 0 0;
-}
-#tl-container .tl-wrap {
-  margin-bottom: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-top: none;
-}
-
-/* Desktop fullscreen */
-#tl-container.tl-fullscreen {
-  position: fixed !important;
-  inset: 0;
-  z-index: 9999;
-  margin: 0 !important;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-#tl-container.tl-fullscreen .tl-toolbar {
-  flex-shrink: 0;
-  border-radius: 0;
-  border: none;
-  border-bottom: 1px solid var(--border);
-}
-#tl-container.tl-fullscreen .tl-wrap {
-  flex: 1;
-  overflow: auto;
-  border-radius: 0;
-  border: none;
-}
-#tl-container.tl-fullscreen .fs-btn .icon-expand   { display: none; }
-#tl-container.tl-fullscreen .fs-btn .icon-compress { display: flex; }
-
-body.tl-fs-active { overflow: hidden; }
-
-/* Mobile timeline toolbar */
-.mob-tl-toolbar {
-  border-radius: 0;
-  flex-shrink: 0;
-}
-.mob-tl-outer .mob-tl-toolbar {
-  border-left: none;
-  border-right: none;
-  border-top: none;
-}
-
-/* ══════════════════════════════════════════════
-   MOBILE PLANNING
-══════════════════════════════════════════════ */
-.mob-ponton-label {
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-  margin: 1.25rem 0 .5rem;
-  font-weight: 700;
-  font-size: .82rem;
-  color: var(--accent);
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-/* Compact 2-col grid */
-.mob-emb-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .45rem;
-  margin-bottom: .25rem;
-}
-
-.mob-tile {
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: stretch;
-  overflow: hidden;
-  min-height: 54px;
-}
-
-/* Color rail — left edge */
-.mob-tile-rail {
-  width: 4px;
-  flex-shrink: 0;
-}
-
-.mob-tile-body {
-  flex: 1;
-  padding: .42rem .55rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: .18rem;
-  min-width: 0;
-}
-
-.mob-tile-name {
-  font-size: .78rem;
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-}
-
-.mob-tile-status {
-  display: flex;
-  align-items: center;
-  gap: .28rem;
-  font-size: .69rem;
-  font-weight: 700;
-  font-family: var(--font-ui);
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.mob-tile-retour {
-  font-family: var(--mono);
-  font-size: .7rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-/* Rented tile — tinted bg */
-.mob-tile-rented {
-  background: var(--danger-dim);
-  border-color: rgba(192,54,30,.25);
-}
-[data-theme="dark"] .mob-tile-rented {
-  border-color: rgba(226,89,107,.2);
-}
-
-/* Reserved tile */
-.mob-tile-reserved {
-  background: var(--warning-dim);
-  border-color: rgba(142,94,14,.25);
-}
-[data-theme="dark"] .mob-tile-reserved {
-  border-color: rgba(240,160,64,.2);
-}
-
-/* Available tile */
-.mob-tile-available {
-  background: var(--surface-2);
-}
-
-/* Slot tags (kept for detail row, hidden by default) */
-.mob-slot-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
-  border-radius: 3px;
-  padding: 2px 9px;
-  font-size: .7rem;
-  font-weight: 700;
-  font-family: var(--mono);
-}
-
-/* ══════════════════════════════════════════════
-   MOBILE — VIEW TOGGLE
-══════════════════════════════════════════════ */
-.mob-view-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: 20px;
-  padding: 2px;
-  margin-bottom: 1rem;
-}
-.mob-view-btn {
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: .74rem;
-  font-family: var(--font-ui);
-  font-weight: 600;
-  padding: .28rem 1rem;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: background .15s, color .15s;
-  white-space: nowrap;
-  line-height: 1;
-}
-.mob-view-btn.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-/* ══════════════════════════════════════════════
-   MOBILE — TIMELINE VIEW
-══════════════════════════════════════════════ */
-.mob-tl-outer {
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-}
-
-.mob-tl-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.mob-tl-inner {
-  /* width set by JS — tracks need fixed px width for scroll */
-  position: relative;
-  display: inline-block;
-  min-width: 100%;
-}
-
-.mob-tl-row {
-  display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid var(--border);
-}
-.mob-tl-row:last-child { border-bottom: none; }
-
-.mob-tl-label {
-  width: 140px;
-  min-width: 140px;
-  padding: .22rem .5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-right: 1px solid var(--border-bright);
-  flex-shrink: 0;
-  font-size: .7rem;
-  background: var(--surface-2);
-  position: sticky;
-  left: 0;
-  z-index: 20;
-}
-
-.mob-tl-track {
-  position: relative;
-  flex: 1;
-  overflow: visible;
-}
-
-/* Axis row */
-.mob-tl-row-axis {
-  height: 22px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-bright) !important;
-  position: sticky;
-  top: 0;
-  z-index: 15;
-}
-.mob-tl-row-axis .mob-tl-label {
-  font-size: .62rem;
-  color: var(--text-muted);
-  font-family: var(--mono);
-  font-weight: 400;
-}
-
-/* Ponton header row */
-.mob-tl-row-ponton {
-  height: 24px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-bright) !important;
-}
-.mob-tl-row-ponton .mob-tl-label {
-  font-weight: 700;
-  font-size: .73rem;
-  color: var(--accent);
-  font-family: var(--font-display);
-}
-
-/* Embarcation row */
-.mob-tl-row-emb { height: 44px; }
-.mob-tl-row-emb .mob-tl-label { background: var(--surface-2); }
-
-/* Tick labels on axis */
-.mob-tl-tick {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-size: .6rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  font-family: var(--mono);
-  pointer-events: none;
-  white-space: nowrap;
-}
-.mob-tl-tick-last { transform: translate(-100%, -50%); }
-
-/* Grid lines */
-.mob-tl-gh  { position: absolute; top:0; bottom:0; width:1px; background: var(--border-bright); pointer-events:none; }
-.mob-tl-ghh { position: absolute; top:0; bottom:0; width:1px; background: var(--border); pointer-events:none; }
-
-/* Now line */
-.mob-tl-now {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 2px;
-  background: var(--danger);
-  z-index: 1;
-  pointer-events: none;
-  box-shadow: 0 0 5px var(--danger-dim);
-}
-
-/* ══════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════ */
-@media (min-width: 769px) {
-  .mobile-planning { display: none !important; }
-  .mob-tl-outer    { display: none !important; }
-  .mob-view-toggle { display: none !important; }
-}
-@media (max-width: 768px) {
-  .tl-wrap { display: none !important; }
-  #tl-container .tl-toolbar { display: none !important; }
-}
-
-/* ══════════════════════════════════════════════
-   QUICK ACTION BUTTONS (planning inline)
-══════════════════════════════════════════════ */
-.btn-xs {
-  font-size: .7rem;
-  padding: .18rem .52rem;
-  line-height: 1.4;
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-}
-
-/* Mobile tile action row */
-.mob-tile-action {
-  padding: .32rem .55rem .42rem;
-  border-top: 1px solid var(--border);
-}
-.mob-tile-action form { margin: 0; }
-.mob-tile-action .btn { width: 100%; justify-content: center; font-size: .72rem; padding: .26rem .5rem; }
-</style>
-{% endblock %}
-
-
 {% block content %}
 <section class="page-section">
-  <div class="container">
+  <div class="container" id="planning-root" data-window-start="{{ window_start_iso }}">
 
-    <!-- ── Header ──────────────────────────────────────────────── -->
-    <div class="planning-header">
-      <div class="planning-title">
-        <span>
-          <span class="hide-mobile text-muted text-sm" style="font-family:var(--font-ui);font-weight:400;">Planning du&nbsp;</span>
-          <strong>{{ date_cible|date:"l d F Y" }}</strong>
-        </span>
+    <!-- ── En-tête : date + navigation ─────────────────────────── -->
+    <div class="page-header">
+      <div>
+        <p class="page-eyebrow">Planning{% if date_cible == now.date %} · aujourd'hui{% endif %}</p>
+        <h1 class="page-title">{{ date_cible|date:"l j"|capfirst }} <em>{{ date_cible|date:"F Y" }}</em></h1>
       </div>
-      <div class="planning-controls">
-        <div class="btn-group">
-          <a href="?date={{ date_prev|date:'Y-m-d' }}" class="btn btn-ghost btn-sm">
-            ‹
+      <div class="page-actions">
+        <div class="btn-group" role="group" aria-label="Changer de jour">
+          <a href="?date={{ date_prev|date:'Y-m-d' }}" class="btn btn-ghost btn-icon" aria-label="Jour précédent" title="Jour précédent">
+            <svg class="icon"><use href="#i-chevron-left"/></svg>
           </a>
-          <a href="?date={% now 'Y-m-d' %}" class="btn btn-ghost btn-sm">Aujourd'hui</a>
-          <a href="?date={{ date_next|date:'Y-m-d' }}" class="btn btn-ghost btn-sm">
-            ›
+          <input type="date" class="date-input" id="date-picker" value="{{ date_cible|date:'Y-m-d' }}" aria-label="Choisir une date">
+          <a href="?date={{ date_next|date:'Y-m-d' }}" class="btn btn-ghost btn-icon" aria-label="Jour suivant" title="Jour suivant">
+            <svg class="icon"><use href="#i-chevron-right"/></svg>
           </a>
         </div>
-        <span id="live-clock" class="clock-tag">
-          <span>{{ now|time:"H:i" }}</span>
+        {% if date_cible != now.date %}
+        <a href="{% url 'planning' %}" class="btn btn-ghost">Aujourd'hui</a>
+        {% endif %}
+        <span id="live-clock" class="clock-tag" title="Heure actuelle">
+          <svg class="icon"><use href="#i-clock"/></svg><span data-clock>{{ now|time:"H:i" }}</span>
         </span>
         {% if role == 'gestionnaire' or role == 'admin' %}
-        <a href="{% url 'gestionnaire' %}" class="btn btn-primary btn-sm">
-          <span class="hide-mobile">Gérer les sorties</span>
-          <span class="hide-desktop">Gérer</span>
+        <a href="{% url 'gestionnaire' %}" class="btn btn-primary hide-mobile">
+          <svg class="icon"><use href="#i-boat"/></svg>Gérer les sorties
         </a>
         {% endif %}
       </div>
     </div>
 
-    <!-- ── Legend ──────────────────────────────────────────────── -->
-    <div class="legend">
-      <div class="legend-item">
-        <span class="legend-dot" style="background:var(--success);"></span>
-        Disponible
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot" style="background:var(--warning);"></span>
-        Ticket vendu
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot" style="background:var(--danger);"></span>
-        En sortie
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot" style="background:repeating-linear-gradient(-45deg,var(--danger) 0 3px,rgba(0,0,0,.25) 3px 5px);"></span>
-        Dépassement
-      </div>
-      <div class="legend-item">
-        <span class="legend-line"></span>
-        Maintenant
-      </div>
-    </div>
-
     {% if not planning_data %}
-      <div class="toast toast-info" style="max-width:520px;">
-        <span>&nbsp;
-          Aucun ponton actif configuré.
-          {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" style="color:inherit;text-decoration:underline;">Ajouter un ponton</a>{% endif %}
-        </span>
+      <div class="empty-state">
+        <svg class="icon"><use href="#i-anchor"/></svg>
+        <h2>Aucun ponton actif</h2>
+        <p>Le planning s'affichera dès qu'un ponton et ses embarcations seront configurés.</p>
+        {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" class="btn btn-primary">Ajouter un ponton</a>{% endif %}
       </div>
 
     {% else %}
 
+    <!-- ── Légende + état de la flotte en ce moment ────────────── -->
+    <div class="legend" aria-label="État actuel de la flotte">
+      <span class="legend-item"><span class="legend-dot" style="background:var(--success-fill);"></span>Disponibles <strong data-count="libre"></strong></span>
+      <span class="legend-item"><span class="legend-swatch" style="background:repeating-linear-gradient(-45deg,transparent 0 3px,var(--warning-fill) 3px 5px);border-left:3px solid var(--warning-fill);"></span>Tickets <strong data-count="reservee"></strong></span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--danger-fill);"></span>En sortie <strong data-count="sortie"></strong></span>
+      <span class="legend-item"><span class="legend-swatch" style="background:repeating-linear-gradient(-45deg,var(--danger-fill) 0 3px,#7d1f0d 3px 5px);"></span>Retards <strong data-count="retard"></strong></span>
+      <span class="legend-item"><span class="legend-line"></span>Maintenant</span>
+    </div>
+
     <!-- ════════════════════════════════════════
-         DESKTOP TIMELINE
+         CHRONOLOGIE BUREAU
     ════════════════════════════════════════ -->
     <div id="tl-container">
       <div class="tl-toolbar">
-        <button class="fs-btn" onclick="toggleTlFullscreen()" title="Plein écran">
-          <svg class="icon-expand" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 1H1V4.5M8.5 1H12V4.5M12 8.5V12H8.5M4.5 12H1V8.5"/></svg>
-          <svg class="icon-compress" width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4.5H4.5V1M12 4.5H8.5V1M12 8.5H8.5V12M1 8.5H4.5V12"/></svg>
-          <span class="fs-btn-text">Plein écran</span>
-        </button>
+        <span class="tl-toolbar-info">{{ window_start|date:"D j, G\h" }} → {{ window_end|date:"D j, G\h" }} · faites défiler pour voir la journée</span>
+        <div class="tl-toolbar-actions">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="scrollTlToCenter(true)" title="Recentrer sur l'heure actuelle">
+            <svg class="icon"><use href="#i-target"/></svg>Maintenant
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm fs-btn" onclick="toggleTlFullscreen()" title="Plein écran (Échap pour quitter)">
+            <svg class="icon icon-expand"><use href="#i-expand"/></svg>
+            <svg class="icon icon-compress"><use href="#i-compress"/></svg>
+            Plein écran
+          </button>
+        </div>
       </div>
       <div class="tl-wrap">
       <div id="tl-inner">
 
-      <!-- Axis -->
+      <!-- Axe des heures -->
       <div class="tl-row tl-row-axis">
-        <div class="tl-label">
-          {{ window_start|date:"G\h" }} → {{ window_end|date:"G\h" }}
-        </div>
+        <div class="tl-label">Embarcation</div>
         <div class="tl-track">
           {% for m in marks %}{% if m.is_hour %}
             <span class="hour-tick {% if m.is_midnight %}hour-tick-day{% endif %} {% if forloop.last %}hour-tick-last{% endif %}"
@@ -735,7 +86,6 @@ body.tl-fs-active { overflow: hidden; }
       </div>
 
       {% for ponton_data in planning_data %}
-        <!-- Ponton header -->
         <div class="tl-row tl-row-ponton">
           <div class="tl-label">{{ ponton_data.ponton.nom }}</div>
           <div class="tl-track">
@@ -755,28 +105,26 @@ body.tl-fs-active { overflow: hidden; }
     </div><!-- /tl-container -->
 
     <!-- ════════════════════════════════════════
-         MOBILE — VIEW TOGGLE
+         MOBILE — choix de la vue
     ════════════════════════════════════════ -->
-    <div class="mob-view-toggle">
-      <button id="btn-mob-grid" class="mob-view-btn active">Grille</button>
-      <button id="btn-mob-tl"   class="mob-view-btn">Chronologie</button>
+    <div class="segmented" role="group" aria-label="Type de vue">
+      <button type="button" id="btn-mob-grid" class="active">Grille</button>
+      <button type="button" id="btn-mob-tl">Chronologie</button>
     </div>
 
-    <!-- ════════════════════════════════════════
-         MOBILE — TIMELINE VIEW
-    ════════════════════════════════════════ -->
+    <!-- MOBILE — chronologie -->
     <div id="mob-tl-outer" class="mob-tl-outer" style="display:none;">
-      <div class="mob-tl-toolbar" style="justify-content:space-between;">
-        <span style="font-family:var(--mono);font-size:.68rem;color:var(--text-muted);">{{ window_start|date:"d/m G\h" }} → {{ window_end|date:"d/m G\h" }}</span>
+      <div class="mob-tl-toolbar">
+        <span class="tl-toolbar-info">{{ window_start|date:"d/m G\h" }} → {{ window_end|date:"d/m G\h" }}</span>
+        <button type="button" class="btn btn-ghost btn-xs" onclick="scrollMobTlToNow()">
+          <svg class="icon"><use href="#i-target"/></svg>Maintenant
+        </button>
       </div>
       <div id="mob-tl-scroll" class="mob-tl-scroll">
         <div id="mob-tl-inner" class="mob-tl-inner">
 
-          <!-- Axis -->
           <div class="mob-tl-row mob-tl-row-axis">
-            <div class="mob-tl-label">
-              {{ window_start|date:"G\h" }} → {{ window_end|date:"G\h" }}
-            </div>
+            <div class="mob-tl-label">Heure</div>
             <div class="mob-tl-track" id="mob-tl-axis-track">
               {% for m in marks %}{% if m.show_mobile %}
                 <span class="mob-tl-tick {% if m.is_midnight %}hour-tick-day{% endif %} {% if forloop.last %}mob-tl-tick-last{% endif %}"
@@ -786,7 +134,6 @@ body.tl-fs-active { overflow: hidden; }
           </div>
 
           {% for ponton_data in planning_data %}
-          <!-- Ponton header -->
           <div class="mob-tl-row mob-tl-row-ponton">
             <div class="mob-tl-label">{{ ponton_data.ponton.nom }}</div>
             <div class="mob-tl-track">
@@ -805,22 +152,17 @@ body.tl-fs-active { overflow: hidden; }
       </div><!-- /mob-tl-scroll -->
     </div><!-- /mob-tl-outer -->
 
-    <!-- ════════════════════════════════════════
-         MOBILE VIEW — compact grid
-    ════════════════════════════════════════ -->
-    <div id="mob-grid" class="mobile-planning">
+    <!-- MOBILE — grille de tuiles (sert aussi de source aux compteurs de la légende) -->
+    <div id="mob-grid" class="mobile-planning" data-count-scope>
       {% for ponton_data in planning_data %}
-
-        <div class="mob-ponton-label">
-          {{ ponton_data.ponton.nom }}
-        </div>
-
-        <div class="mob-emb-grid">
-          {% for row in ponton_data.rows %}
-          {% include 'pontons/_planning_mob_tile.html' with row=row %}
-          {% endfor %}
-        </div>
-
+        <section class="ponton-section">
+          <h2 class="section-title">{{ ponton_data.ponton.nom }}</h2>
+          <div class="emb-grid">
+            {% for row in ponton_data.rows %}
+            {% include 'pontons/_planning_mob_tile.html' with row=row %}
+            {% endfor %}
+          </div>
+        </section>
       {% endfor %}
     </div><!-- /mob-grid -->
 
@@ -832,12 +174,23 @@ body.tl-fs-active { overflow: hidden; }
 
 {% block extra_js %}
 <script>
-// Fenêtre GLISSANTE 24h (now ±12h, traverse minuit) — viewport ~4h centré sur now
+// Fenêtre GLISSANTE 24h (now ±12h, traverse minuit) — viewport centré sur maintenant
 const WINDOW_START_MS  = {{ window_start_ms }};
 const WINDOW_START_ISO = '{{ window_start_iso }}';
 const GRID_DUR   = {{ grid_span }};  // minutes (1440)
-const VISIBLE_H  = 4;    // heures visibles dans le viewport (now ±2h)
-const TL_LABEL_W = 170;  // px — matches .tl-label width in CSS
+const MOB_TL_KEY   = 'planning_mob_view'; // 'grid' | 'timeline'
+const MOB_TL_MIN_W = 900;                 // px minimum de piste mobile
+const FS_KEY       = 'planning_fullscreen';
+
+// Largeur réelle de la colonne fixe (définie en CSS) — évite une constante à garder en phase
+function labelW(sel, fallback) {
+  const el = document.querySelector(sel);
+  return (el && el.offsetWidth) || fallback;
+}
+// Heures visibles sans défiler : ~4h sur petit écran, jusqu'à 8h sur grand écran
+function visibleHours(viewW) {
+  return Math.min(8, Math.max(4, Math.round(viewW / 200)));
+}
 
 // Position % dans la fenêtre pour un timestamp ms
 function timeToPct(ms) {
@@ -850,78 +203,70 @@ function centerPct() {
   return (p >= 0 && p <= 100) ? p : 50;
 }
 
+function nowLabel() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
 function drawNowLine() {
-  document.querySelectorAll('.now-line, .mini-bar-now').forEach(el => el.remove());
+  document.querySelectorAll('.now-line, .now-pill').forEach(el => el.remove());
   const p = timeToPct(Date.now());
   if (p < 0 || p > 100) return;
+  const pct = p.toFixed(4) + '%';
 
-  const pct = p.toFixed(4);
-
-  document.querySelectorAll('.tl-track').forEach(track => {
+  document.querySelectorAll('#tl-inner .tl-track').forEach(track => {
     const line = document.createElement('div');
     line.className = 'now-line';
-    line.style.left = pct + '%';
+    line.style.left = pct;
     track.appendChild(line);
   });
-
-  document.querySelectorAll('.mini-bar').forEach(bar => {
-    const line = document.createElement('div');
-    line.className = 'mini-bar-now';
-    line.style.left = pct + '%';
-    bar.appendChild(line);
-  });
+  // Pastille de l'heure sur l'axe
+  const axis = document.querySelector('#tl-inner .tl-row-axis .tl-track');
+  if (axis) {
+    const pill = document.createElement('span');
+    pill.className = 'now-pill';
+    pill.style.left = pct;
+    pill.textContent = nowLabel();
+    axis.appendChild(pill);
+  }
 }
 
 function adjustNarrowBlocks() {
   // Seuil en px réels (la piste 24h est large — le % ne veut plus rien dire)
   document.querySelectorAll('.rental-block').forEach(b => {
-    b.classList.toggle('is-narrow', b.offsetWidth < 52);
+    b.classList.toggle('is-narrow', b.offsetWidth < 84);
   });
 }
 
-function updateClock() {
-  const now = new Date();
-  const txt = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  const el = document.getElementById('live-clock');
-  if (el) el.querySelector('span:last-child').textContent = txt;
-}
-
-// ── Desktop timeline : piste large 24h + centrage sur maintenant ──
+// ── Chronologie bureau : piste large 24h + centrage sur maintenant ──
 function initTlWidth() {
   const wrap  = document.querySelector('.tl-wrap');
   const inner = document.getElementById('tl-inner');
-  if (!wrap || !inner) return;
-  const spanH  = GRID_DUR / 60;
-  const trackW = (wrap.clientWidth - TL_LABEL_W) * (spanH / VISIBLE_H);
-  inner.style.width = (TL_LABEL_W + trackW) + 'px';
+  if (!wrap || !inner || !wrap.clientWidth) return;
+  const lw     = labelW('.tl-label', 232);
+  const viewW  = wrap.clientWidth - lw;
+  const trackW = viewW * (GRID_DUR / 60 / visibleHours(viewW));
+  inner.style.width = (lw + trackW) + 'px';
 }
 
-function scrollTlToCenter() {
+function scrollTlToCenter(smooth) {
   const wrap  = document.querySelector('.tl-wrap');
   const inner = document.getElementById('tl-inner');
   if (!wrap || !inner) return;
-  const trackW  = inner.offsetWidth - TL_LABEL_W;
-  const px      = centerPct() / 100 * trackW;
-  const halfView = (wrap.clientWidth - TL_LABEL_W) / 2;
-  wrap.scrollLeft = Math.max(0, px - halfView);
+  const lw       = labelW('.tl-label', 232);
+  const trackW   = inner.offsetWidth - lw;
+  const px       = centerPct() / 100 * trackW;
+  const halfView = (wrap.clientWidth - lw) / 2;
+  wrap.scrollTo({ left: Math.max(0, px - halfView), behavior: smooth === true ? 'smooth' : 'auto' });
 }
 
-// ── Mobile timeline setup ─────────────────────────────────────
-const MOB_TL_KEY     = 'planning_mob_view'; // 'grid' | 'timeline'
-const MOB_LABEL_W    = 140; // px — matches .mob-tl-label width in CSS
-const MOB_TL_MIN_W   = 900; // px minimum track width
-
-function getMobTlWidth() {
-  // Piste 24h : ~4h visibles par écran (now ±2h)
-  const spanH  = GRID_DUR / 60;
-  const trackW = (window.innerWidth - MOB_LABEL_W) * (spanH / VISIBLE_H);
-  return Math.max(MOB_TL_MIN_W, MOB_LABEL_W + trackW);
-}
-
+// ── Chronologie mobile ────────────────────────────────────────
 function initMobTlWidth() {
   const inner = document.getElementById('mob-tl-inner');
   if (!inner) return;
-  inner.style.width = getMobTlWidth() + 'px';
+  const lw     = labelW('.mob-tl-label', 172);
+  const trackW = (window.innerWidth - lw) * (GRID_DUR / 60 / 4);   // ~4h par écran
+  inner.style.width = Math.max(MOB_TL_MIN_W, lw + trackW) + 'px';
 }
 
 function drawMobTlNow() {
@@ -941,10 +286,16 @@ function scrollMobTlToNow() {
   const scroll = document.getElementById('mob-tl-scroll');
   const inner  = document.getElementById('mob-tl-inner');
   if (!scroll || !inner) return;
-  const totalTrackW = inner.offsetWidth - MOB_LABEL_W;
-  const nowPx = centerPct() / 100 * totalTrackW;
-  const halfView = (window.innerWidth - MOB_LABEL_W) / 2;
+  const lw          = labelW('.mob-tl-label', 172);
+  const totalTrackW = inner.offsetWidth - lw;
+  const nowPx       = centerPct() / 100 * totalTrackW;
+  const halfView    = (scroll.clientWidth - lw) / 2;
   scroll.scrollLeft = Math.max(0, nowPx - halfView);
+}
+
+function mobTlVisible() {
+  const outer = document.getElementById('mob-tl-outer');
+  return outer && outer.style.display !== 'none';
 }
 
 function applyMobView(view) {
@@ -953,100 +304,120 @@ function applyMobView(view) {
   const tl     = document.getElementById('mob-tl-outer');
   const btnG   = document.getElementById('btn-mob-grid');
   const btnTl  = document.getElementById('btn-mob-tl');
-  if (!grid) return; // desktop — nothing to do
+  if (!grid) return; // aucun ponton
   grid.style.display  = isGrid ? '' : 'none';
   tl.style.display    = isGrid ? 'none' : '';
   btnG.classList.toggle('active',  isGrid);
   btnTl.classList.toggle('active', !isGrid);
+  btnG.setAttribute('aria-pressed', isGrid);
+  btnTl.setAttribute('aria-pressed', !isGrid);
   if (!isGrid) {
     initMobTlWidth();
     drawMobTlNow();
     requestAnimationFrame(scrollMobTlToNow);
   }
-  localStorage.setItem(MOB_TL_KEY, view);
+  try { localStorage.setItem(MOB_TL_KEY, view); } catch (e) {}
+}
+
+function redrawOverlays() {
+  drawNowLine();
+  drawMobTlNow();
+  adjustNarrowBlocks();
+}
+
+// ── Synchronisation douce ─────────────────────────────────────
+// Remplace les lignes/tuiles par celles d'une page fraîche, sans recharger :
+// le défilement, le plein écran et la vue mobile choisie sont conservés.
+// Si la fenêtre 24h a glissé (changement d'heure), on recharge pour réaligner l'axe.
+let refreshing = false;
+async function softRefresh() {
+  if (refreshing || document.hidden || document.querySelector('.htmx-request')) return;
+  refreshing = true;
+  try {
+    const resp = await fetch(location.href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } });
+    if (!resp.ok || resp.redirected) return;
+    const doc  = new DOMParser().parseFromString(await resp.text(), 'text/html');
+    const root = doc.getElementById('planning-root');
+    if (!root) return;
+    if (root.dataset.windowStart !== WINDOW_START_ISO) { location.reload(); return; }
+    if (document.querySelector('.htmx-request')) return;   // une action est partie entre-temps
+    ['tl-inner', 'mob-tl-inner', 'mob-grid'].forEach(id => {
+      const cur = document.getElementById(id), fresh = doc.getElementById(id);
+      if (!cur || !fresh) return;
+      cur.innerHTML = fresh.innerHTML;
+      htmx.process(cur);
+    });
+    redrawOverlays();
+    if (window.refreshLiveUi) window.refreshLiveUi();
+  } catch (e) {
+    /* hors ligne : on réessaiera au prochain passage */
+  } finally {
+    refreshing = false;
+  }
+}
+
+// ── Plein écran (bureau / affichage mural) ───────────────────
+function toggleTlFullscreen(force) {
+  const container = document.getElementById('tl-container');
+  // Masquée sur mobile : ne jamais y bloquer le défilement de la page
+  if (!container || getComputedStyle(container).display === 'none') return;
+  const isFs = container.classList.toggle('tl-fullscreen', force);
+  document.body.classList.toggle('tl-fs-active', isFs);
+  try { sessionStorage.setItem(FS_KEY, isFs ? '1' : ''); } catch (e) {}
+  // La largeur du viewport change → recalcule la piste et recentre
+  initTlWidth();
+  scrollTlToCenter();
+  redrawOverlays();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  let wasFs = false;
+  try { wasFs = sessionStorage.getItem(FS_KEY) === '1'; } catch (e) {}
+  if (wasFs) toggleTlFullscreen(true);
   initTlWidth();
   scrollTlToCenter();
-  drawNowLine();
-  adjustNarrowBlocks();
+  redrawOverlays();
 
   const btnG  = document.getElementById('btn-mob-grid');
   const btnTl = document.getElementById('btn-mob-tl');
   if (btnG && btnTl) {
     btnG.addEventListener('click',  () => applyMobView('grid'));
     btnTl.addEventListener('click', () => applyMobView('timeline'));
-    applyMobView(localStorage.getItem(MOB_TL_KEY) || 'grid');
+    let saved = 'grid';
+    try { saved = localStorage.getItem(MOB_TL_KEY) || 'grid'; } catch (e) {}
+    applyMobView(saved);
   }
+
+  const picker = document.getElementById('date-picker');
+  if (picker) picker.addEventListener('change', () => { if (picker.value) location.search = '?date=' + picker.value; });
 });
 
-// Recurring auto-refresh every 30s (was one-shot setTimeout)
-setInterval(updateClock, 10000);
-setInterval(() => { drawNowLine(); drawMobTlNow(); }, 30000);
-setInterval(() => location.reload(), 60000);
+setInterval(redrawOverlays, 30000);
+setInterval(softRefresh, 60000);
 
-// Reload on back-button (bfcache) — prevents stale page after creating a rental
-window.addEventListener('pageshow', function(event) {
-  if (event.persisted) location.reload();
-});
+// Retour arrière (bfcache) ou retour sur l'onglet : resynchroniser tout de suite
+window.addEventListener('pageshow', e => { if (e.persisted) softRefresh(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { redrawOverlays(); softRefresh(); } });
 
-// Reload on tab focus only if away > 2 min (prevents interrupting form interactions)
-let lastFocusTime = Date.now();
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) {
-    if (Date.now() - lastFocusTime > 120000) location.reload();
-  } else {
-    lastFocusTime = Date.now();
-  }
-});
-
-// ── Timeline fullscreen (desktop) ────────────────────────────
-function toggleTlFullscreen() {
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
   const container = document.getElementById('tl-container');
-  if (!container) return;
-  const isFs = container.classList.toggle('tl-fullscreen');
-  document.body.classList.toggle('tl-fs-active', isFs);
-  // Largeur du viewport change → recalcule la piste et recentre
-  initTlWidth();
-  scrollTlToCenter();
-  drawNowLine();
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    const container = document.getElementById('tl-container');
-    if (container && container.classList.contains('tl-fullscreen')) toggleTlFullscreen();
-  }
+  if (container && container.classList.contains('tl-fullscreen')) toggleTlFullscreen(false);
 });
 
-// Redimensionnement : recalcule la largeur de piste desktop et recentre
+// Redimensionnement / rotation : recalcule les pistes et recentre
 let tlResizeTimer = null;
-window.addEventListener('resize', function() {
+window.addEventListener('resize', () => {
   clearTimeout(tlResizeTimer);
-  tlResizeTimer = setTimeout(function() {
+  tlResizeTimer = setTimeout(() => {
     initTlWidth();
     scrollTlToCenter();
-    drawNowLine();
+    if (mobTlVisible()) { initMobTlWidth(); requestAnimationFrame(scrollMobTlToNow); }
+    redrawOverlays();
   }, 150);
 });
 
-window.addEventListener('orientationchange', function() {
-  setTimeout(function() {
-    const outer = document.getElementById('mob-tl-outer');
-    if (outer && outer.style.display !== 'none') {
-      initMobTlWidth();
-      drawMobTlNow();
-      requestAnimationFrame(scrollMobTlToNow);
-    }
-  }, 300);
-});
-
-// Re-draw now-line and fix narrow blocks after any HTMX row swap
-document.body.addEventListener('htmx:afterSwap', function() {
-  drawNowLine();
-  drawMobTlNow();
-  adjustNarrowBlocks();
-});
+// Après un échange HTMX de ligne : retracer la ligne « maintenant » et les blocs étroits
+document.body.addEventListener('htmx:afterSwap', redrawOverlays);
 </script>
 {% endblock %}

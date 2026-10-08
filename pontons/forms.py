@@ -12,6 +12,10 @@ class PontonForm(forms.ModelForm):
     class Meta:
         model = Ponton
         fields = ['nom', 'description', 'ordre', 'actif']
+        labels = {
+            'actif': 'Actif (visible au planning et à la location)',
+            'ordre': "Ordre d'affichage",
+        }
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'input'}),
             'description': forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
@@ -23,6 +27,12 @@ class EmbarcationForm(forms.ModelForm):
     class Meta:
         model = Embarcation
         fields = ['nom', 'type_embarcation', 'ponton', 'couleur', 'actif', 'ordre']
+        labels = {
+            'type_embarcation': "Type d'embarcation",
+            'actif': 'Active (visible au planning et à la location)',
+            'ordre': "Ordre d'affichage",
+        }
+        help_texts = {'couleur': 'Couleur des blocs de cette embarcation sur le planning.'}
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'input'}),
             'type_embarcation': forms.Select(attrs={'class': 'select is-fullwidth'}),
@@ -36,6 +46,11 @@ class LocationForm(forms.ModelForm):
     class Meta:
         model = Location
         fields = ['embarcation', 'heure_debut', 'heure_fin', 'statut', 'notes']
+        labels = {
+            'heure_debut': 'Début',
+            'heure_fin': 'Fin prévue',
+            'statut': 'État',
+        }
         widgets = {
             'embarcation': forms.Select(attrs={'class': 'select is-fullwidth'}),
             'heure_debut': forms.DateTimeInput(

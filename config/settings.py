@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
@@ -108,7 +109,20 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Django >= 5.1 : le réglage STATICFILES_STORAGE n'existe plus (ignoré en silence) —
+# le backend se déclare dans STORAGES. Noms hachés + gzip : cache navigateur long
+# et invalidation automatique à chaque déploiement (collectstatic au build Docker).
+# Pendant `manage.py test`, stockage simple : le manifeste n'existe pas sans collectstatic.
+TESTING = 'test' in sys.argv
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.StaticFilesStorage' if TESTING
+            else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        ),
+    },
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -12,18 +12,18 @@
       {% elif block.is_reserved %}
       <div class="reserved-block"
            style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;"
-           title="{{ block.label }}"></div>
+           title="Ticket vendu — {{ block.label }}"></div>
       {% else %}
       <div class="rental-block"
            style="left:{{ block.left_pct }}%;width:{{ block.width_pct }}%;background:{{ block.color }};color:{{ block.text_color }};"
-           title="{{ block.label }}">
+           title="{{ row.embarcation.nom }} · {{ block.label }}{% if block.loc.notes %} · {{ block.loc.notes }}{% endif %}">
         {{ block.label }}
       </div>
       {% endif %}
     {% endfor %}
   </div>
   {% if row.statut == 'sortie' %}
-  <span style="display:none"
+  <span hidden
         hx-get="{% url 'planning_row_partial' row.embarcation.pk %}?partial=planning_tl"
         hx-trigger="every 20s"
         hx-target="#tl-row-{{ row.embarcation.pk }}"

@@ -1,313 +1,55 @@
-<!DOCTYPE html>
-<html lang="fr" data-theme="light">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Connexion — La Plage L'Isle-Adam</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="manifest" href="/static/manifest.json">
-  <link rel="icon" type="image/png" href="/static/icons/blason.png">
+{% extends 'base.html' %}
+{% block title %}Connexion — La Plage L'Isle-Adam{% endblock %}
+{% block body_class %}login-page{% endblock %}
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+{% block shell %}
+<button type="button" class="nav-icon-btn theme-toggle login-theme" data-theme-toggle aria-label="Basculer entre thème clair et sombre" title="Thème clair / sombre">
+  <svg class="icon icon-moon"><use href="#i-moon"/></svg>
+  <svg class="icon icon-sun"><use href="#i-sun"/></svg>
+</button>
 
-    :root {
-      --bg:            #eef3f8;
-      --surface:       #dfe8f2;
-      --surface-2:     #ffffff;
-      --border:        rgba(15,107,178,.1);
-      --border-bright: rgba(15,107,178,.2);
-      --accent:        #0F6BB2;
-      --accent-dim:    rgba(15,107,178,.1);
-      --danger:        #c83518;
-      --danger-dim:    rgba(200,53,24,.1);
-      --text:          #181A1D;
-      --text-muted:    #424B58;
-      --text-dim:      #9BB5C8;
-    }
-
-    [data-theme="dark"] {
-      --bg:            #06101c;
-      --surface:       #0a1928;
-      --surface-2:     #0f2238;
-      --border:        rgba(68,124,213,.08);
-      --border-bright: rgba(68,124,213,.16);
-      --accent:        #447CD5;
-      --accent-dim:    rgba(68,124,213,.14);
-      --danger:        #e0566a;
-      --danger-dim:    rgba(224,86,106,.12);
-      --text:          #c8ddf0;
-      --text-muted:    #6080a0;
-      --text-dim:      #223448;
-    }
-
-    html, body {
-      min-height: 100vh;
-      font-family: 'Syne', sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
-
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-      position: relative;
-    }
-
-    /* Subtle background lines — light mode only */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        repeating-linear-gradient(0deg, transparent, transparent 40px,
-          var(--border) 40px, var(--border) 41px);
-      opacity: .5;
-      pointer-events: none;
-    }
-
-    /* Theme toggle — top right corner */
-    .page-theme-toggle {
-      position: fixed;
-      top: 1rem; right: 1rem;
-      width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--surface-2);
-      border: 1px solid var(--border-bright);
-      border-radius: 4px;
-      color: var(--text-muted);
-      font-size: .82rem;
-      cursor: pointer;
-      transition: color .14s, background .14s;
-      z-index: 10;
-    }
-    .page-theme-toggle:hover { color: var(--text); background: var(--surface); }
-
-    .login-wrap {
-      width: 100%;
-      max-width: 380px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Brand */
-    .login-brand {
-      text-align: center;
-      margin-bottom: 1.75rem;
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto .85rem;
-    }
-    .brand-logo img {
-      height: 64px;
-      width: auto;
-      filter: drop-shadow(0 2px 8px rgba(15,107,178,.25));
-    }
-
-    .brand-name {
-      font-family: 'Fraunces', serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      display: block;
-      margin-bottom: .22rem;
-      color: var(--text);
-    }
-
-    .brand-sub {
-      font-size: .78rem;
-      color: var(--text-muted);
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    /* Card */
-    .login-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border-bright);
-      border-radius: 8px;
-      padding: 1.85rem;
-      box-shadow: 0 4px 20px rgba(26,42,74,.12), 0 1px 4px rgba(26,42,74,.06);
-    }
-
-    [data-theme="dark"] .login-card {
-      box-shadow: 0 16px 50px rgba(0,0,0,.5);
-    }
-
-    /* Error */
-    .error-box {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .65rem .85rem;
-      background: var(--danger-dim);
-      border: 1px solid rgba(192,54,30,.25);
-      border-radius: 4px;
-      color: var(--danger);
-      font-size: .83rem;
-      margin-bottom: 1.35rem;
-    }
-    [data-theme="dark"] .error-box { border-color: rgba(226,89,107,.25); }
-
-    /* Form */
-    .form-field { margin-bottom: 1.1rem; }
-
-    .form-label {
-      display: block;
-      font-size: .72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      margin-bottom: .38rem;
-    }
-
-    input[type=text],
-    input[type=password] {
-      width: 100%;
-      background: var(--surface-2);
-      border: 1px solid var(--border-bright);
-      border-radius: 4px;
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: .875rem;
-      padding: .6rem .88rem;
-      outline: none;
-      transition: border-color .14s, box-shadow .14s;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-dim);
-    }
-    input::placeholder { color: var(--text-dim); }
-
-    [data-theme="dark"] input[type=text],
-    [data-theme="dark"] input[type=password] {
-      background: var(--surface);
-      border-color: var(--border-bright);
-    }
-
-    .btn-login {
-      width: 100%;
-      padding: .7rem;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-family: 'Syne', sans-serif;
-      font-size: .9rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .45rem;
-      margin-top: 1.35rem;
-      transition: filter .14s, transform .1s;
-      letter-spacing: .02em;
-    }
-    .btn-login:hover  { filter: brightness(1.1); }
-    .btn-login:active { transform: scale(.98); }
-
-    .login-footer {
-      text-align: center;
-      margin-top: 1rem;
-    }
-    .login-footer a {
-      color: var(--text-muted);
-      font-size: .78rem;
-      display: inline-flex;
-      align-items: center;
-      gap: .32rem;
-      transition: color .14s;
-      font-weight: 500;
-    }
-    .login-footer a:hover { color: var(--text); }
-  </style>
-</head>
-<body>
-
-  <!-- Theme toggle -->
-  <button class="page-theme-toggle" id="themeToggle" aria-label="Basculer le thème"><span id="themeIcon">☾</span></button>
-
-  <div class="login-wrap">
-
-    <div class="login-brand">
-      <div class="brand-logo">
-        <img src="/static/icons/blason.png"
-             alt="Blason L'Isle-Adam">
-      </div>
-      <span class="brand-name">La Plage</span>
-      <span class="brand-sub">Location d'embarcations</span>
-    </div>
-
-    <div class="login-card">
-      {% if form.errors %}
-        <div class="error-box">
-          Identifiant ou mot de passe incorrect.
-        </div>
-      {% endif %}
-
-      <form method="post">
-        {% csrf_token %}
-
-        <div class="form-field">
-          <label class="form-label">Identifiant</label>
-          <input type="text" name="username" autofocus autocomplete="username" placeholder="Votre identifiant">
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Mot de passe</label>
-          <input type="password" name="password" autocomplete="current-password" placeholder="••••••••">
-        </div>
-
-        <input type="hidden" name="next" value="{{ next }}">
-
-        <button type="submit" class="btn-login">
-          Se connecter
-        </button>
-      </form>
-
-      <div class="login-footer">
-        <a href="{% url 'planning' %}"> Voir le planning sans connexion
-        </a>
-      </div>
-    </div>
-
+<main class="login-wrap">
+  <div class="login-brand">
+    <img src="/static/icons/blason.png" alt="Blason de L'Isle-Adam" width="69" height="76">
+    <h1>La <em>Plage</em></h1>
+    <p>L'Isle-Adam · Location d'embarcations</p>
   </div>
 
-  <script>
-    (function() {
-      var saved = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', saved);
-      var icon = document.getElementById('themeIcon');
-      if (icon) icon.textContent = saved === 'dark' ? '☀' : '☾';
-    })();
+  <div class="card login-card">
+    {% if form.errors %}
+      <div class="notice notice-error" role="alert">
+        <svg class="icon"><use href="#i-alert"/></svg>
+        <span>Identifiant ou mot de passe incorrect.</span>
+      </div>
+    {% endif %}
 
-    var btn = document.getElementById('themeToggle');
-    if (btn) {
-      btn.addEventListener('click', function() {
-        var current = document.documentElement.getAttribute('data-theme');
-        var next    = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        var icon = document.getElementById('themeIcon');
-        if (icon) icon.textContent = next === 'dark' ? '☀' : '☾';
-      });
-    }
+    <form method="post">
+      {% csrf_token %}
 
-    if ('serviceWorker' in navigator)
-      navigator.serviceWorker.register('/static/sw.js').catch(function() {});
-  </script>
-</body>
-</html>
+      <div class="form-field">
+        <label for="id_username">Identifiant</label>
+        <input type="text" id="id_username" name="username" value="{{ form.username.value|default:'' }}"
+               required autofocus autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+      </div>
+
+      <div class="form-field">
+        <label for="id_password">Mot de passe</label>
+        <div class="password-field">
+          <input type="password" id="id_password" name="password" required autocomplete="current-password">
+          <button type="button" class="password-toggle" data-password-toggle aria-label="Afficher le mot de passe" aria-pressed="false">
+            <svg class="icon"><use href="#i-eye"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <button type="submit" class="btn btn-primary btn-lg btn-full mt-2"><svg class="icon"><use href="#i-login"/></svg>Se connecter</button>
+    </form>
+  </div>
+
+  <div class="login-footer">
+    <a href="{% url 'planning' %}"><svg class="icon"><use href="#i-calendar"/></svg>Voir le planning sans connexion</a>
+  </div>
+</main>
+{% endblock %}

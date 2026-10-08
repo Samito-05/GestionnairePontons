@@ -3,61 +3,53 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">&nbsp; Pontons
-  </h1>
-  <a href="{% url 'admin_ponton_new' %}" class="btn btn-primary btn-sm"> Nouveau ponton
-  </a>
+  <div>
+    <p class="page-eyebrow">Flotte</p>
+    <h1 class="page-title">Pontons</h1>
+  </div>
+  <a href="{% url 'admin_ponton_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouveau ponton</a>
 </div>
 
 <div class="table-wrap">
   <table class="data-table">
     <thead>
       <tr>
-        <th>Ordre</th>
         <th>Nom</th>
         <th>Description</th>
         <th>Embarcations</th>
+        <th>Ordre</th>
         <th>Statut</th>
-        <th>Actions</th>
+        <th class="col-actions"><span class="sr-only">Actions</span></th>
       </tr>
     </thead>
     <tbody>
       {% for ponton in pontons %}
       <tr>
-        <td>
-          <span class="mono" style="font-size:.8rem;color:var(--text-muted);">{{ ponton.ordre }}</span>
-        </td>
-        <td>
-          <span class="fw-600">{{ ponton.nom }}</span>
-        </td>
-        <td style="color:var(--text-muted);font-size:.85rem;">{{ ponton.description|default:"—" }}</td>
-        <td>
-          <span class="badge badge-info">{{ ponton.nb_embarcations }}</span>
-        </td>
-        <td>
+        <td class="col-title"><span class="cell-main">{{ ponton.nom }}</span></td>
+        <td data-label="Description" class="cell-muted">{{ ponton.description|default:"—" }}</td>
+        <td data-label="Embarcations"><span class="badge badge-info">{{ ponton.nb_embarcations }}</span></td>
+        <td data-label="Ordre" class="cell-muted">{{ ponton.ordre }}</td>
+        <td data-label="Statut">
           {% if ponton.actif %}
-            <span class="badge badge-success">● Actif</span>
+            <span class="badge badge-success"><span class="dot"></span>Actif</span>
           {% else %}
             <span class="badge badge-muted">Inactif</span>
           {% endif %}
         </td>
-        <td>
-          <div style="display:flex;gap:.4rem;">
-            <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="btn btn-info btn-sm">
-              Modifier
-            </a>
+        <td class="col-actions">
+          <div class="row-actions">
+            <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="btn btn-info btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
             <form method="post" action="{% url 'admin_ponton_delete' ponton.pk %}"
-                  onsubmit="return confirm('Supprimer « {{ ponton.nom|escapejs }} » et ses {{ ponton.nb_embarcations }} embarcation(s) ?\n\nTout l\'historique de locations associé sera définitivement perdu.\n\nPour conserver l\'historique, préférez Modifier → décocher Actif.')">
+                  data-confirm="Supprimer « {{ ponton.nom }} » ?"
+                  data-confirm-detail="Ses {{ ponton.nb_embarcations }} embarcation(s) et tout l'historique de locations associé seront définitivement perdus.&#10;&#10;Pour conserver l'historique, préférez Modifier → décocher Actif.">
               {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm">
-                Suppr.
-              </button>
+              <button type="submit" class="btn btn-danger btn-sm"><svg class="icon"><use href="#i-trash"/></svg>Supprimer</button>
             </form>
           </div>
         </td>
       </tr>
       {% empty %}
-        <tr class="empty-row"><td colspan="6">Aucun ponton.</td></tr>
+        <tr class="empty-row"><td colspan="6">Aucun ponton pour le moment. Créez-en un pour y rattacher des embarcations.</td></tr>
       {% endfor %}
     </tbody>
   </table>

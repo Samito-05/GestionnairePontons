@@ -20,9 +20,12 @@ Three access levels, each with its own area:
 
 - **Django 5.2**, Python 3.12
 - **SQLite** database at `data/db.sqlite3`
-- **WhiteNoise** for static file serving (`CompressedManifestStaticFilesStorage`)
-- **HTMX** for partial page swaps (planning rows + gestionnaire tiles refresh without full reload)
-- **Custom CSS** in `static/css/base.css`. Form widgets use Bulma-style class names (`input`, `select`, `textarea`) but there is **no Bulma stylesheet loaded** — styling comes from `base.css`. Do not assume Bulma is available.
+- **WhiteNoise** for static file serving (`CompressedManifestStaticFilesStorage`, declared in `STORAGES` — the old `STATICFILES_STORAGE` setting is ignored since Django 5.1). Hashed names need `collectstatic` (done in the Docker build); `manage.py test` switches to the plain storage via `TESTING` in settings.
+- **HTMX** for partial page swaps (planning rows + gestionnaire tiles refresh without full reload). Vendored at `static/js/htmx.min.js` (1.9.12) — no CDN.
+- **Custom CSS** in `static/css/base.css` — the single stylesheet (design tokens, components, every page; light + dark via `[data-theme]`). Form widgets use Bulma-style class names (`input`, `select`, `textarea`) but there is **no Bulma stylesheet loaded** — styling comes from `base.css`. Do not assume Bulma is available.
+- **Shared JS** in `static/js/app.js` (theme, toasts, confirm dialog, HTMX error toasts, clock, tile countdowns, state counters). Page-specific JS stays inline in the page template.
+- **Fonts** self-hosted in `static/fonts/` (Fraunces = display, Figtree = UI; OFL). RGPD: **no third-party CDN** for fonts, scripts or styles.
+- **Icons**: inline SVG sprite `templates/_icons.html`, used as `<svg class="icon"><use href="#i-name"/></svg>`. No icon font.
 - **PWA**: `static/manifest.json` + `static/sw.js`
 - **Gunicorn** in production, containerized via Docker + Cloudflare Tunnel
 - `gunicorn`, `python-dotenv` runtime deps; `django-extensions`, `Pillow` dev-only
@@ -40,8 +43,8 @@ pontons/         Main app — the only project app
   context_processors.py   injects `role` into every template
   urls.py        app routes
   management/commands/  init_demo, peuple_bdd
-templates/       base.html, pontons/, pontons/admin/, registration/
-static/          css/base.css, icons/, manifest.json, sw.js
+templates/       base.html, _icons.html, pontons/, pontons/admin/, registration/
+static/          css/base.css, js/ (app.js, htmx.min.js), fonts/, icons/, manifest.json, sw.js
 data/            db.sqlite3 (gitignored)
 ```
 
@@ -53,6 +56,7 @@ data/            db.sqlite3 (gitignored)
   - `sortie`: active until **actually returned** — tracked by `returned_at` (null = still out). `heure_fin` is only the *scheduled* end; passing it does **not** free the boat. A `sortie` past `heure_fin` with `returned_at IS NULL` is **overtime** (`is_overtime()` / `overtime_minutes`), shown as a striped red segment on the timeline and a red "Retard +N min" state on the tiles.
   - "active now" everywhere = `returned_at IS NULL` (+ `heure_debut__lte=now` for sortie). This clause is duplicated across `models`, `views` (gestionnaire, louer, admin_embarcations, api_status) and `services` — keep them in sync.
 - **Return** (`retour_embarcation`) sets `returned_at = now` and leaves `heure_fin` untouched, so the overtime segment stays visible in history. Do not overwrite `heure_fin` on return.
+- **Undo return** (`annuler_retour`, POST `/gestionnaire/retour/annuler/<location pk>/`) clears `returned_at` again. Only within `RETOUR_UNDO_WINDOW` (60 s) and only if the boat has no active rental since — otherwise two rentals would be active on one boat. The return response advertises it through an `HX-Trigger: retourFait` header; `app.js` shows the "Annuler" toast.
 - `Location.is_manual` distinguishes admin-created rentals (fixed `heure_fin`, exact block) from gestionnaire quick-rentals (block extends to end of grid on the planning).
 - **UserProfile** holds `role`; auto-created for every new `User` via a `post_save` signal. Never assume a profile is missing — `get_or_create` where needed.
 
@@ -65,6 +69,11 @@ The state machine for a quick rental: **libre → reservee** (louer) **→ sorti
 - **Overlap protection**: rental collisions are rejected in two places — `LocationForm.clean()` (admin forms) and `louer_embarcation` (uses `select_for_update()` inside `transaction.atomic()` for the quick-rent race). Keep both.
 - **Planning grid**: window is computed dynamically from the day's rentals in `services.build_planning_data`, falling back to **13h–20h**. HTMX partials pass `grid_start`/`grid_end` back so a swapped row keeps the same bounds as the loaded page (avoids visual offset). Don't hardcode the window.
 - **HTMX partials**: views branch on `request.headers.get('HX-Request')` and a `_htmx_partial` POST field (`gestionnaire`, `planning_mob`, `planning_tl`, `planning_mob_tl`). Partial templates are the `_`-prefixed files under `templates/pontons/`.
+- **UI components** (all in `base.css`): boat tiles are `.tile` + `.tile--libre|reservee|sortie` (+ `.is-late`) with `data-statut` — shared by `_gestionnaire_tile.html` and `_planning_mob_tile.html`; the state counters/filters and the mobile "retards" badge are computed client-side from those attributes, so keep them on any new tile markup. A `sortie` tile carries `data-end` (scheduled end, ms epoch) for the live countdown.
+- **Live refresh without reload**: `/gestionnaire/` re-fetches itself via HTMX (`hx-select="#board-sections"`) when the operator is idle; `/planning/` uses `softRefresh()` (fetch + swap of `#tl-inner`, `#mob-tl-inner`, `#mob-grid`), and falls back to a full reload only when the 24h window has shifted. Keep those ids stable.
+- **Feedback**: Django `messages` render as floating toasts (`success`/`warning`/`error`/`info`); in-page boxes use `.notice`. Destructive forms use `data-confirm="Titre"` (+ `data-confirm-detail`) — handled by the `<dialog>` in `base.html`, never `confirm()`.
+- **Admin forms** render through `pontons/admin/_form_fields.html`; list tables add `data-label` on each `<td>` (they collapse into cards on mobile).
+- **Navigation**: top bar on desktop, bottom tab bar on mobile (gestionnaire/admin only); the admin sidebar becomes a scrollable tab strip on mobile.
 - **French UI**: user-facing text, `messages`, verbose names, choices labels — all French.
 - **Custom admin area** (`/gestion/`) is separate from Django's built-in admin (`/admin/`). Both exist. New management UI generally goes under `/gestion/`.
 
@@ -84,7 +93,7 @@ Windows note: this repo lives on Windows. A `.venv/` and a `venv/` both exist; a
 
 ## Tests
 
-`pontons/tests.py` covers: rental overlap rejection, role-based access redirects, the `UserProfile` auto-create signal, and the atomic quick-rental race guard. **Run `python manage.py test` after any change to models, forms, views, or the role logic**, and add cases when you extend that behavior.
+`pontons/tests.py` covers: rental overlap rejection, role-based access redirects, the `UserProfile` auto-create signal, the atomic quick-rental race guard, and undo-return (restore, expiry, re-rented, role gate). Log test users in with `force_login(user, backend=MODEL_BACKEND)` — `client.login()` fails under django-axes (no request object). **Run `python manage.py test` after any change to models, forms, views, or the role logic**, and add cases when you extend that behavior.
 
 ## Configuration & secrets
 

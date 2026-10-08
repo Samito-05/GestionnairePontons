@@ -1,11 +1,11 @@
 {
-  "name": "Gestionnaire Pontons",
-  "short_name": "Pontons",
+  "name": "La Plage — L'Isle-Adam",
+  "short_name": "La Plage",
   "description": "Gestion des locations d'embarcations",
   "start_url": "/planning/",
   "display": "standalone",
-  "background_color": "#0077b6",
-  "theme_color": "#00b4d8",
+  "background_color": "#f3eee4",
+  "theme_color": "#0c3d66",
   "orientation": "any",
   "icons": [
     {
@@ -41,7 +41,7 @@
       "description": "Voir le planning du jour"
     },
     {
-      "name": "Gestion rapide",
+      "name": "Sorties",
       "url": "/gestionnaire/",
       "description": "Gérer les sorties"
     }

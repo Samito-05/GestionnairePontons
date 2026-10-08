@@ -1,188 +1,87 @@
 {% extends 'base.html' %}
-{% block title %}Gestion rapide des sorties{% endblock %}
-
-{% block extra_css %}
-<style>
-.gest-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-}
-.gest-title { font-size: 1.15rem; }
-
-.ponton-section { margin-bottom: 2rem; }
-
-.ponton-section-title {
-  font-size: .82rem;
-  font-family: var(--font-display);
-  color: var(--accent);
-  font-weight: 700;
-  margin-bottom: .6rem;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-}
-
-/* ── Tile grid — same as mobile planning ── */
-.emb-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .45rem;
-}
-
-.emb-tile {
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: stretch;
-  overflow: hidden;
-}
-.emb-tile-rented   { background: var(--danger-dim);  border-color: rgba(192,54,30,.25); }
-.emb-tile-overtime { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger) inset; }
-.emb-tile-reserved { background: var(--warning-dim); border-color: rgba(142,94,14,.25); }
-[data-theme="dark"] .emb-tile-rented   { border-color: rgba(226,89,107,.2); }
-[data-theme="dark"] .emb-tile-reserved { border-color: rgba(240,160,64,.2); }
-
-.emb-tile-rail { width: 4px; flex-shrink: 0; }
-
-.emb-tile-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.emb-tile-body {
-  padding: .44rem .58rem .36rem;
-  display: flex;
-  flex-direction: column;
-  gap: .14rem;
-}
-
-.emb-tile-name {
-  font-size: .8rem;
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-}
-
-.emb-tile-meta {
-  display: flex;
-  align-items: center;
-  gap: .3rem;
-  flex-wrap: wrap;
-}
-
-.emb-tile-type {
-  font-size: .67rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: .03em;
-}
-
-.emb-tile-status {
-  font-size: .67rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.emb-tile-info {
-  font-family: var(--mono);
-  font-size: .7rem;
-  color: var(--text-muted);
-}
-
-.emb-tile-client {
-  font-size: .72rem;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Action section */
-.emb-tile-action {
-  padding: .32rem .55rem .44rem;
-  border-top: 1px solid var(--border);
-}
-.emb-tile-action form { margin: 0; }
-.emb-tile-action .btn { width: 100%; justify-content: center; font-size: .74rem; padding: .28rem .5rem; }
-
-/* HTMX loading state */
-.emb-tile.htmx-request { opacity: .5; pointer-events: none; transition: opacity .1s; }
-
-/* Input for vente */
-.emb-tile-input {
-  width: 100%;
-  background: var(--surface-3);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-size: .76rem;
-  padding: .32rem .55rem;
-  outline: none;
-  margin-bottom: .3rem;
-  transition: border-color var(--t);
-  box-sizing: border-box;
-}
-.emb-tile-input:focus { border-color: var(--accent); }
-.emb-tile-input::placeholder { color: var(--text-dim); }
-</style>
-{% endblock %}
+{% block title %}Gestion des sorties — La Plage{% endblock %}
 
 {% block content %}
 <section class="page-section">
-  <div class="container">
+  <div class="container" data-server-now="{{ now|date:'U' }}">
 
-    <div class="gest-header">
-      <h1 class="gest-title">&nbsp;
-        <span>Gestion des sorties</span>
-      </h1>
-      <div style="display:flex;align-items:center;gap:.55rem;">
-        <span id="live-clock" class="clock-tag">
-          <span>{{ now|time:"H:i" }}</span>
+    <div class="page-header">
+      <div>
+        <p class="page-eyebrow">{{ now|date:"l j F" }}</p>
+        <h1 class="page-title">Gestion des <em>sorties</em></h1>
+      </div>
+      <div class="page-actions">
+        <span id="live-clock" class="clock-tag" title="Heure actuelle">
+          <svg class="icon"><use href="#i-clock"/></svg><span data-clock>{{ now|time:"H:i" }}</span>
         </span>
-        <a href="{% url 'planning' %}" class="btn btn-ghost btn-sm"> Planning
-        </a>
+        <a href="{% url 'planning' %}" class="btn btn-ghost hide-mobile"><svg class="icon"><use href="#i-calendar"/></svg>Planning</a>
       </div>
     </div>
 
-    {% for ponton_data in embarcations_status %}
-    <div class="ponton-section">
-      <div class="ponton-section-title">
-        {{ ponton_data.ponton.nom }}
-      </div>
+    {% if embarcations_status %}
+    <!-- Résumé de la flotte : chaque puce filtre les tuiles -->
+    <div class="statbar" role="group" aria-label="Filtrer les embarcations par état">
+      <button type="button" class="stat-chip" data-filter="all" aria-pressed="true">
+        <strong data-count="all">–</strong> Toutes
+      </button>
+      <button type="button" class="stat-chip" data-filter="libre" aria-pressed="false">
+        <span class="dot"></span><strong data-count="libre">–</strong> Disponibles
+      </button>
+      <button type="button" class="stat-chip" data-filter="reservee" aria-pressed="false">
+        <span class="dot"></span><strong data-count="reservee">–</strong> Tickets
+      </button>
+      <button type="button" class="stat-chip" data-filter="sortie" aria-pressed="false">
+        <span class="dot"></span><strong data-count="sortie">–</strong> En sortie
+      </button>
+      <button type="button" class="stat-chip" data-filter="retard" data-count-alert aria-pressed="false">
+        <span class="dot"></span><strong data-count="retard">–</strong> Retards
+      </button>
+    </div>
+    {% endif %}
 
-      <div class="emb-grid">
-        {% for item in ponton_data.embarcations %}
-          {% include 'pontons/_gestionnaire_tile.html' with item=item %}
+    <div id="board" data-filter="all" data-count-scope>
+      <div id="board-sections">
+        {% for ponton_data in embarcations_status %}
+        <section class="ponton-section">
+          <h2 class="section-title">
+            {{ ponton_data.ponton.nom }}
+            <span class="section-count">{{ ponton_data.embarcations|length }} embarcation{{ ponton_data.embarcations|length|pluralize }}</span>
+          </h2>
+
+          <div class="emb-grid">
+            {% for item in ponton_data.embarcations %}
+              {% include 'pontons/_gestionnaire_tile.html' with item=item %}
+            {% empty %}
+              <p class="text-muted text-sm" style="grid-column:1/-1;">Aucune embarcation sur ce ponton.</p>
+            {% endfor %}
+          </div>
+        </section>
+
         {% empty %}
-          <div style="color:var(--text-dim);font-size:.85rem;grid-column:1/-1;">
-            Aucune embarcation sur ce ponton.
+          <div class="empty-state">
+            <svg class="icon"><use href="#i-anchor"/></svg>
+            <h2>Aucun ponton configuré</h2>
+            <p>Ajoutez un ponton et ses embarcations pour commencer à gérer les sorties.</p>
+            {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" class="btn btn-primary">Créer un ponton</a>{% endif %}
           </div>
         {% endfor %}
       </div>
+
+      <div class="empty-state" id="filter-empty" hidden>
+        <svg class="icon"><use href="#i-check"/></svg>
+        <h2>Rien dans ce filtre</h2>
+        <p>Aucune embarcation ne correspond à cet état pour le moment.</p>
+        <button type="button" class="btn btn-ghost" data-filter-reset>Tout afficher</button>
+      </div>
     </div>
 
-    {% empty %}
-      <div class="toast toast-info" style="max-width:520px;">
-        <span>&nbsp; Aucun ponton configuré.
-          {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" style="color:inherit;text-decoration:underline;">Créer un ponton</a>{% endif %}
-        </span>
-      </div>
-    {% endfor %}
+    <!-- Synchronisation avec les autres postes : remplace les tuiles sans recharger la page -->
+    <span hidden
+          hx-get="{% url 'gestionnaire' %}"
+          hx-trigger="every 30s [boardIdle()], board-refresh from:body"
+          hx-select="#board-sections"
+          hx-target="#board-sections"
+          hx-swap="outerHTML"></span>
 
   </div>
 </section>
@@ -190,28 +89,57 @@
 
 {% block extra_js %}
 <script>
-function updateClock() {
-  const now = new Date();
-  const txt = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const el = document.getElementById('live-clock');
-  if (el) el.querySelector('span:last-child').textContent = txt;
-}
-setInterval(updateClock, 10000);
+(function () {
+  var board = document.getElementById('board');
+  var chips = document.querySelectorAll('.stat-chip[data-filter]');
+  var emptyBox = document.getElementById('filter-empty');
 
-// Track user activity — don't reload while typing notes
-let lastActivity = Date.now();
-['click', 'keydown', 'focus'].forEach(ev =>
-  document.addEventListener(ev, () => { lastActivity = Date.now(); }, true)
-);
+  // Une section sans tuile visible est masquée ; message si le filtre ne donne rien
+  function applyFilter() {
+    var f = board.dataset.filter, anyVisible = false;
+    board.querySelectorAll('.ponton-section').forEach(function (sec) {
+      var visible = Array.prototype.some.call(sec.querySelectorAll('.tile'), function (t) {
+        if (f === 'all') return true;
+        if (f === 'retard') return t.classList.contains('is-late');
+        return t.dataset.statut === f;
+      });
+      sec.classList.toggle('is-empty', f !== 'all' && !visible);
+      if (visible) anyVisible = true;
+    });
+    emptyBox.hidden = (f === 'all') || anyVisible;
+  }
+  function setFilter(f) {
+    board.dataset.filter = f;
+    chips.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.filter === f ? 'true' : 'false'); });
+    applyFilter();
+  }
+  chips.forEach(function (c) {
+    // Second appui sur la puce active = retour à « Toutes »
+    c.addEventListener('click', function () { setFilter(board.dataset.filter === c.dataset.filter ? 'all' : c.dataset.filter); });
+  });
+  var reset = document.querySelector('[data-filter-reset]');
+  if (reset) reset.addEventListener('click', function () { setFilter('all'); });
+  document.body.addEventListener('htmx:afterSwap', applyFilter);
 
-// Fetch status every 30s; reload only if user has been idle for 10s
-setInterval(function() {
-  fetch('/api/status/')
-    .then(r => r.json())
-    .then(() => {
-      if (Date.now() - lastActivity > 10000) location.reload();
-    })
-    .catch(() => {});
-}, 30000);
+  // Activité récente ou saisie en cours : on ne remplace pas les tuiles sous les doigts
+  var lastActivity = 0;
+  ['pointerdown', 'keydown', 'input'].forEach(function (ev) {
+    document.addEventListener(ev, function () { lastActivity = Date.now(); }, true);
+  });
+  window.boardIdle = function () {
+    if (document.hidden || Date.now() - lastActivity < 8000) return false;
+    if (document.querySelector('#board .htmx-request')) return false;
+    return !Array.prototype.some.call(document.querySelectorAll('.tile-input'), function (i) {
+      return i.value.trim() !== '' || i === document.activeElement;
+    });
+  };
+  // Retour sur l'onglet / l'appli : synchro immédiate
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && window.boardIdle()) htmx.trigger(document.body, 'board-refresh');
+  });
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) htmx.trigger(document.body, 'board-refresh');
+  });
+})();
 </script>
 {% endblock %}

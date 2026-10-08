@@ -3,152 +3,55 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <h1 class="page-title">&nbsp;
-    Tableau de bord
-  </h1>
+  <div>
+    <p class="page-eyebrow">Administration</p>
+    <h1 class="page-title">Tableau de <em>bord</em></h1>
+  </div>
+  <a href="{% url 'admin_location_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouvelle location</a>
 </div>
 
-<!-- Stat cards -->
 <div class="stat-grid">
-
-  <div class="stat-card stat-card-blue">
-    <div class="stat-icon"></div>
-    <div class="stat-body">
-      <div class="stat-label">Pontons</div>
-      <div class="stat-value mono">{{ nb_pontons }}</div>
-    </div>
-    <a href="{% url 'admin_pontons' %}" class="stat-link">Gérer →</a>
+  <div class="stat-card stat-card-coral">
+    <div class="stat-icon"><svg class="icon"><use href="#i-ticket"/></svg></div>
+    <div class="stat-value">{{ nb_locations_today }}</div>
+    <div class="stat-label">Location{{ nb_locations_today|pluralize }} aujourd'hui</div>
+    <a href="{% url 'admin_locations' %}" class="stat-link">Voir le détail →</a>
   </div>
 
   <div class="stat-card stat-card-teal">
-    <div class="stat-icon"></div>
-    <div class="stat-body">
-      <div class="stat-label">Embarcations actives</div>
-      <div class="stat-value mono">{{ nb_embarcations }}</div>
-    </div>
+    <div class="stat-icon"><svg class="icon"><use href="#i-boat"/></svg></div>
+    <div class="stat-value">{{ nb_embarcations }}</div>
+    <div class="stat-label">Embarcation{{ nb_embarcations|pluralize }} active{{ nb_embarcations|pluralize }}</div>
     <a href="{% url 'admin_embarcations' %}" class="stat-link">Gérer →</a>
   </div>
 
-  <div class="stat-card stat-card-green">
-    <div class="stat-icon"></div>
-    <div class="stat-body">
-      <div class="stat-label">Locations aujourd'hui</div>
-      <div class="stat-value mono">{{ nb_locations_today }}</div>
-    </div>
-    <a href="{% url 'admin_locations' %}" class="stat-link">Voir →</a>
+  <div class="stat-card">
+    <div class="stat-icon"><svg class="icon"><use href="#i-anchor"/></svg></div>
+    <div class="stat-value">{{ nb_pontons }}</div>
+    <div class="stat-label">Ponton{{ nb_pontons|pluralize }}</div>
+    <a href="{% url 'admin_pontons' %}" class="stat-link">Gérer →</a>
   </div>
 
   <div class="stat-card stat-card-amber">
-    <div class="stat-icon"></div>
-    <div class="stat-body">
-      <div class="stat-label">Utilisateurs</div>
-      <div class="stat-value mono">{{ nb_users }}</div>
-    </div>
+    <div class="stat-icon"><svg class="icon"><use href="#i-users"/></svg></div>
+    <div class="stat-value">{{ nb_users }}</div>
+    <div class="stat-label">Utilisateur{{ nb_users|pluralize }}</div>
     <a href="{% url 'admin_users' %}" class="stat-link">Gérer →</a>
   </div>
-
 </div>
 
-<!-- Quick actions -->
 <div class="card mt-4">
   <div class="card-header">
     <span class="card-header-title">Actions rapides</span>
   </div>
   <div class="card-body">
-    <div style="display:flex;flex-wrap:wrap;gap:.55rem;">
-      <a href="{% url 'admin_ponton_new' %}" class="btn btn-ghost btn-sm"> Nouveau ponton
-      </a>
-      <a href="{% url 'admin_embarcation_new' %}" class="btn btn-ghost btn-sm"> Nouvelle embarcation
-      </a>
-      <a href="{% url 'admin_location_new' %}" class="btn btn-primary btn-sm"> Nouvelle location
-      </a>
-      <a href="{% url 'admin_user_new' %}" class="btn btn-ghost btn-sm"> Nouvel utilisateur
-      </a>
+    <div class="quick-actions">
+      <a href="{% url 'gestionnaire' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-boat"/></svg>Gérer les sorties</a>
+      <a href="{% url 'planning' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-calendar"/></svg>Voir le planning</a>
+      <a href="{% url 'admin_ponton_new' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-plus"/></svg>Nouveau ponton</a>
+      <a href="{% url 'admin_embarcation_new' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-plus"/></svg>Nouvelle embarcation</a>
+      <a href="{% url 'admin_user_new' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-plus"/></svg>Nouvel utilisateur</a>
     </div>
   </div>
 </div>
-
-<style>
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 1rem;
-}
-
-.stat-card {
-  background: var(--surface-2);
-  border-radius: var(--radius);
-  border: 1px solid;
-  padding: 1.15rem 1.2rem .95rem;
-  display: flex;
-  flex-direction: column;
-  gap: .6rem;
-  transition: transform var(--t), box-shadow var(--t);
-}
-.stat-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-
-/* Left accent bar per category */
-.stat-card { position: relative; padding-left: 1.4rem; }
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: .9rem; bottom: .9rem; left: 0;
-  width: 3px;
-  border-radius: 2px;
-}
-
-.stat-card-blue  { border-color: rgba(23,88,153,.2); }
-.stat-card-blue::before  { background: var(--info); }
-.stat-card-blue  .stat-icon { color: var(--info); }
-
-.stat-card-teal  { border-color: rgba(29,122,82,.2); }
-.stat-card-teal::before  { background: var(--success); }
-.stat-card-teal  .stat-icon { color: var(--success); }
-
-.stat-card-green { border-color: rgba(29,122,82,.2); }
-.stat-card-green::before { background: #2e9e65; }
-.stat-card-green .stat-icon { color: #2e9e65; }
-
-.stat-card-amber { border-color: rgba(192,54,30,.2); }
-.stat-card-amber::before { background: var(--accent); }
-.stat-card-amber .stat-icon { color: var(--accent); }
-
-[data-theme="dark"] .stat-card-blue  { border-color: rgba(74,158,237,.18); }
-[data-theme="dark"] .stat-card-teal  { border-color: rgba(62,207,184,.18); }
-[data-theme="dark"] .stat-card-green { border-color: rgba(62,207,130,.18); }
-[data-theme="dark"] .stat-card-amber { border-color: rgba(212,137,31,.18); }
-
-.stat-icon { font-size: 1.1rem; }
-
-.stat-label {
-  font-size: .73rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  font-weight: 700;
-  font-family: var(--font-ui);
-}
-
-.stat-value {
-  font-size: 1.9rem;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-  font-family: var(--mono);
-}
-
-.stat-link {
-  font-size: .74rem;
-  color: var(--text-muted);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: .32rem;
-  transition: color var(--t);
-  font-weight: 600;
-  font-family: var(--font-ui);
-}
-.stat-link:hover { color: var(--accent); }
-.stat-link i { font-size: .62rem; }
-</style>
 {% endblock %}

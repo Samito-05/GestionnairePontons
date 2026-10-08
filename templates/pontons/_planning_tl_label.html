@@ -1,28 +1,34 @@
 <div id="tl-label-{{ row.embarcation.pk }}" class="tl-label">
-  <div style="display:flex;align-items:center;gap:.35rem;overflow:hidden;">
-    <span class="color-dot" style="background:{{ row.embarcation.couleur }};flex-shrink:0;"></span>
-    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.8rem;flex:1;min-width:0;">{{ row.embarcation.nom }}</span>
-    {% if role == 'gestionnaire' or role == 'admin' %}
-      {% if row.statut == 'sortie' %}
-      <form hx-post="{% url 'retour_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{window_start: WINDOW_START_ISO}" style="margin:0;flex-shrink:0;">{% csrf_token %}
-        <input type="hidden" name="_htmx_partial" value="planning_tl">
-        <input type="hidden" name="next" value="planning">
-        <button type="submit" class="btn btn-danger btn-xs">Retour</button>
-      </form>
-      {% elif row.statut == 'reservee' %}
-      <form hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{window_start: WINDOW_START_ISO}" style="margin:0;flex-shrink:0;">{% csrf_token %}
-        <input type="hidden" name="_htmx_partial" value="planning_tl">
-        <input type="hidden" name="next" value="planning">
-        <button type="submit" class="btn btn-warning btn-xs">Sortir</button>
-      </form>
-      {% else %}
-      <form hx-post="{% url 'louer_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{window_start: WINDOW_START_ISO}" style="margin:0;flex-shrink:0;">{% csrf_token %}
-        <input type="hidden" name="_htmx_partial" value="planning_tl">
-        <input type="hidden" name="notes" value="">
-        <input type="hidden" name="next" value="planning">
-        <button type="submit" class="btn btn-success btn-xs">Vente</button>
-      </form>
-      {% endif %}
+  <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
+  <span class="tl-label-text">
+    <span class="tl-label-name" title="{{ row.embarcation.nom }}">{{ row.embarcation.nom }}</span>
+    {% if row.statut == 'sortie' %}
+      {% if row.overtime %}<span class="tl-label-state is-sortie">Retard{% if row.overtime_min %} +{{ row.overtime_min }} min{% endif %}</span>
+      {% else %}<span class="tl-label-state is-sortie">En sortie{% if row.retour %} → {{ row.retour }}{% endif %}</span>{% endif %}
+    {% elif row.statut == 'reservee' %}<span class="tl-label-state is-reservee">Ticket vendu</span>
+    {% else %}<span class="tl-label-state is-libre">Disponible</span>
     {% endif %}
-  </div>
+  </span>
+  {% if role == 'gestionnaire' or role == 'admin' %}
+    {% if row.statut == 'sortie' %}
+    <form hx-post="{% url 'retour_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
+      <input type="hidden" name="_htmx_partial" value="planning_tl">
+      <input type="hidden" name="next" value="planning">
+      <button type="submit" class="btn btn-return btn-xs" aria-label="Retour — {{ row.embarcation.nom }}">Retour</button>
+    </form>
+    {% elif row.statut == 'reservee' %}
+    <form hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
+      <input type="hidden" name="_htmx_partial" value="planning_tl">
+      <input type="hidden" name="next" value="planning">
+      <button type="submit" class="btn btn-warning btn-xs" aria-label="Sortir — {{ row.embarcation.nom }}">Sortir</button>
+    </form>
+    {% else %}
+    <form hx-post="{% url 'louer_embarcation' row.embarcation.pk %}" hx-target="#tl-row-{{ row.embarcation.pk }}" hx-swap="outerHTML" hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
+      <input type="hidden" name="_htmx_partial" value="planning_tl">
+      <input type="hidden" name="notes" value="">
+      <input type="hidden" name="next" value="planning">
+      <button type="submit" class="btn btn-success btn-xs" aria-label="Vente — {{ row.embarcation.nom }}">Vente</button>
+    </form>
+    {% endif %}
+  {% endif %}
 </div>

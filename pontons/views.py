@@ -1,7 +1,9 @@
+import json
 from functools import wraps
 
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
 from django.utils import timezone
@@ -83,6 +85,21 @@ def _build_tile_item(embarcation):
         'ticket_time': timezone.localtime(loc.created_at).strftime('%H:%M')
                        if (loc and loc.statut == 'reservee') else None,
     }
+
+
+# Délai pendant lequel un retour validé par erreur peut être annulé.
+# Volontairement court : au-delà, l'embarcation a pu repartir avec un autre client.
+RETOUR_UNDO_WINDOW = timedelta(seconds=60)
+
+
+def _action_response(request, embarcation, next_url):
+    """Réponse commune aux actions rapides : partiel HTMX ciblé, sinon redirection."""
+    if request.headers.get('HX-Request'):
+        partial = request.POST.get('_htmx_partial', 'gestionnaire')
+        if partial in ('planning_mob', 'planning_tl', 'planning_mob_tl'):
+            return _planning_htmx_response(request, embarcation, partial)
+        return _tile_response(request, embarcation)
+    return redirect(next_url)
 
 
 def _tile_response(request, embarcation):
@@ -292,11 +309,48 @@ def retour_embarcation(request, pk):
             # pour préserver le bloc prévu + le dépassement éventuel dans l'historique.
             loc.returned_at = timezone.now()
             loc.save()
+    response = _action_response(request, embarcation, next_url)
+    if loc and request.headers.get('HX-Request'):
+        # Le client propose « Annuler » pendant quelques secondes (voir app.js).
+        # json.dumps échappe les accents : un en-tête HTTP doit rester ASCII.
+        response['HX-Trigger'] = json.dumps({'retourFait': {
+            'nom': embarcation.nom,
+            'url': reverse('annuler_retour', args=[loc.pk]),
+        }})
+    return response
+
+
+@require_role('admin', 'gestionnaire')
+@require_POST
+def annuler_retour(request, pk):
+    """Annule un retour validé par erreur : la location redevient active.
+
+    Refusé si le délai est passé ou si l'embarcation a été relouée entre-temps
+    (sinon deux locations seraient actives sur la même embarcation).
+    """
+    next_url = _safe_next(request)
+    erreur = None
+    with transaction.atomic():
+        embarcation = get_object_or_404(
+            Embarcation.objects.select_for_update(), locations__pk=pk
+        )
+        loc = get_object_or_404(Location, pk=pk)
+        if loc.returned_at is None:
+            pass  # déjà annulé (double appui) : rien à faire
+        elif timezone.now() - loc.returned_at > RETOUR_UNDO_WINDOW:
+            erreur = "Annulation impossible : le délai est dépassé."
+        elif embarcation.location_en_cours() is not None:
+            erreur = f"Annulation impossible : {embarcation.nom} a déjà été relouée."
+        else:
+            loc.returned_at = None
+            loc.save(update_fields=['returned_at'])
     if request.headers.get('HX-Request'):
-        partial = request.POST.get('_htmx_partial', 'gestionnaire')
-        if partial in ('planning_mob', 'planning_tl', 'planning_mob_tl'):
-            return _planning_htmx_response(request, embarcation, partial)
-        return _tile_response(request, embarcation)
+        response = _action_response(request, embarcation, next_url)
+        if erreur:
+            response['HX-Trigger'] = json.dumps({'appToast': {'message': erreur, 'kind': 'warning'}})
+        return response
+    if erreur:
+        messages.warning(request, erreur)
     return redirect(next_url)
 
 
@@ -324,7 +378,8 @@ def admin_pontons(request):
 def admin_ponton_new(request):
     form = PontonForm(request.POST or None)
     if form.is_valid():
-        form.save()
+        ponton = form.save()
+        messages.success(request, f"Ponton « {ponton.nom} » créé.")
         return redirect('admin_pontons')
     return render(request, 'pontons/admin/ponton_form.html', {'form': form, 'titre': 'Nouveau ponton'})
 
@@ -335,6 +390,7 @@ def admin_ponton_edit(request, pk):
     form = PontonForm(request.POST or None, instance=ponton)
     if form.is_valid():
         form.save()
+        messages.success(request, f"Ponton « {ponton.nom} » enregistré.")
         return redirect('admin_pontons')
     return render(request, 'pontons/admin/ponton_form.html', {'form': form, 'titre': 'Modifier le ponton'})
 
@@ -343,7 +399,9 @@ def admin_ponton_edit(request, pk):
 @require_POST
 def admin_ponton_delete(request, pk):
     ponton = get_object_or_404(Ponton, pk=pk)
+    nom = ponton.nom
     ponton.delete()
+    messages.success(request, f"Ponton « {nom} » supprimé.")
     return redirect('admin_pontons')
 
 
@@ -368,7 +426,8 @@ def admin_embarcations(request):
 def admin_embarcation_new(request):
     form = EmbarcationForm(request.POST or None)
     if form.is_valid():
-        form.save()
+        emb = form.save()
+        messages.success(request, f"Embarcation « {emb.nom} » créée.")
         return redirect('admin_embarcations')
     return render(request, 'pontons/admin/embarcation_form.html', {'form': form, 'titre': 'Nouvelle embarcation'})
 
@@ -379,6 +438,7 @@ def admin_embarcation_edit(request, pk):
     form = EmbarcationForm(request.POST or None, instance=emb)
     if form.is_valid():
         form.save()
+        messages.success(request, f"Embarcation « {emb.nom} » enregistrée.")
         return redirect('admin_embarcations')
     return render(request, 'pontons/admin/embarcation_form.html', {'form': form, 'titre': "Modifier l'embarcation"})
 
@@ -387,7 +447,9 @@ def admin_embarcation_edit(request, pk):
 @require_POST
 def admin_embarcation_delete(request, pk):
     emb = get_object_or_404(Embarcation, pk=pk)
+    nom = emb.nom
     emb.delete()
+    messages.success(request, f"Embarcation « {nom} » supprimée.")
     return redirect('admin_embarcations')
 
 
@@ -407,6 +469,7 @@ def admin_locations(request):
 
     return render(request, 'pontons/admin/locations.html', {
         'locations': locations,
+        'now': timezone.now(),
         'date_cible': date_cible,
         'date_prev': date_cible - timedelta(days=1),
         'date_next': date_cible + timedelta(days=1),
@@ -421,6 +484,7 @@ def admin_location_new(request):
         loc.gestionnaire = request.user
         loc.is_manual = True
         loc.save()
+        messages.success(request, f"Location de « {loc.embarcation.nom} » créée.")
         return redirect('admin_locations')
     return render(request, 'pontons/admin/location_form.html', {'form': form, 'titre': 'Nouvelle location'})
 
@@ -431,6 +495,7 @@ def admin_location_edit(request, pk):
     form = LocationForm(request.POST or None, instance=loc)
     if form.is_valid():
         form.save()
+        messages.success(request, "Location enregistrée.")
         return redirect('admin_locations')
     return render(request, 'pontons/admin/location_form.html', {'form': form, 'titre': 'Modifier la location'})
 
@@ -440,6 +505,7 @@ def admin_location_edit(request, pk):
 def admin_location_delete(request, pk):
     loc = get_object_or_404(Location, pk=pk)
     loc.delete()
+    messages.success(request, "Location supprimée.")
     return redirect('admin_locations')
 
 
@@ -455,7 +521,8 @@ def admin_users(request):
 def admin_user_new(request):
     form = UserCreateForm(request.POST or None)
     if form.is_valid():
-        form.save()
+        new_user = form.save()
+        messages.success(request, f"Utilisateur « {new_user.username} » créé.")
         return redirect('admin_users')
     return render(request, 'pontons/admin/user_form.html', {'form': form, 'titre': 'Nouvel utilisateur'})
 
@@ -467,6 +534,7 @@ def admin_user_edit(request, pk):
     form = UserProfileForm(request.POST or None, instance=profile)
     if form.is_valid():
         form.save()
+        messages.success(request, f"Rôle de « {user.username} » mis à jour.")
         return redirect('admin_users')
     return render(request, 'pontons/admin/user_form.html', {
         'form': form, 'titre': f'Modifier {user.username}', 'edit_user': user,
@@ -480,7 +548,9 @@ def admin_user_delete(request, pk):
     if user == request.user:
         messages.error(request, 'Vous ne pouvez pas supprimer votre propre compte.')
         return redirect('admin_users')
+    username = user.username
     user.delete()
+    messages.success(request, f"Utilisateur « {username} » supprimé.")
     return redirect('admin_users')
 
 

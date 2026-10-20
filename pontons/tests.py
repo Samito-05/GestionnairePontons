@@ -168,3 +168,10 @@ class RetourUndoTest(TestCase):
         self.assertRedirects(resp, '/planning/')
         self.loc.refresh_from_db()
         self.assertIsNotNone(self.loc.returned_at)
+
+
+class HealthTest(TestCase):
+    def test_health_is_public_and_ok(self):
+        r = Client().get('/health')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.content, b'ok')

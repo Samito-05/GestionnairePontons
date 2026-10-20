@@ -578,3 +578,14 @@ def api_status(request):
             'overtime': loc.is_overtime() if loc else False,
         })
     return JsonResponse({'status': data, 'now': timezone.localtime(now).strftime('%H:%M:%S')})
+
+
+def health(request):
+    """Sonde Docker : le serveur répond et la base se lit. Publique, ne renvoie rien de sensible."""
+    from django.db import connection
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT 1')
+    except Exception:
+        return HttpResponse('db error', status=503, content_type='text/plain')
+    return HttpResponse('ok', content_type='text/plain')

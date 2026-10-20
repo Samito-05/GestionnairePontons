@@ -99,11 +99,11 @@ Windows note: this repo lives on Windows. A `.venv/` and a `venv/` both exist; a
 
 - Settings read from env via `python-dotenv`. `DJANGO_SECRET_KEY` is **required** (no default — app crashes if missing). `DJANGO_DEBUG` defaults to `False`. `DJANGO_ALLOWED_HOSTS` is comma-separated.
 - Local: copy `.env.example` → `.env`. Prod: `.env.production` (from `.env.production.example`) — **never commit either**.
-- Production hardening (HSTS, secure cookies, proxy SSL header) activates automatically when `DEBUG=False`. `SECURE_SSL_REDIRECT` is intentionally **off** — Cloudflare Tunnel terminates TLS and forwards HTTP to `127.0.0.1:8000`; do not re-enable Django's redirect.
+- Production hardening (HSTS, secure cookies, proxy SSL header) activates automatically when `DEBUG=False`. `SECURE_SSL_REDIRECT` is intentionally **off** — Cloudflare Tunnel terminates TLS and forwards HTTP to the container; do not re-enable Django's redirect.
 
 ## Deployment
 
-Docker Compose runs two services: `web` (gunicorn, bound to `127.0.0.1:8000`) and `tunnel` (cloudflared). `deploy.sh` pulls the latest `main` from GitHub, copies source over the running checkout (preserving `.env.production`), rebuilds, and runs migrations. SQLite and media live in named volumes.
+Production runs from **Samito-05/nas-stack**, which builds this repo's `Dockerfile` next to the other projects behind one Cloudflare Tunnel, and handles pulls, backups and health waits. This repo only provides the image: migrations run at container start (`CMD`), `/health` is the healthcheck probe (public, `SELECT 1`), and `.dockerignore` keeps `.env*`, `data/` and `.git` out of the image. `docker-compose.yml` is a local test of the production image only (`127.0.0.1:8000`). SQLite lives in a named volume at `/app/data`. Keep `localhost` in `DJANGO_ALLOWED_HOSTS` for the healthcheck.
 
 ## Demo accounts
 

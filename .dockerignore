@@ -1,0 +1,16 @@
+# Jamais dans l'image : secrets, base, sauvegardes, historique git
+.git
+.env
+.env.*
+!.env.example
+!.env.production.example
+data
+backups
+staticfiles
+media
+venv
+.venv
+**/__pycache__
+*.pyc
+startup.bat
+startup.ps1

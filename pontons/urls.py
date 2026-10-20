@@ -15,6 +15,9 @@ urlpatterns = [
     # Planning HTMX partials
     path('planning/row/<int:pk>/', views.planning_row_partial, name='planning_row_partial'),
 
+    # Sonde de santé (healthcheck Docker)
+    path('health', views.health, name='health'),
+
     # API
     path('api/status/', views.api_status, name='api_status'),
 

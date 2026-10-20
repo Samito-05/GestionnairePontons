@@ -1,24 +1,29 @@
+# Test local de l'image de production : http://127.0.0.1:8000
+#   cp .env.production.example .env.production   (puis remplir)
+#   docker compose up --build
+# En ligne, le projet est déployé par Samito-05/nas-stack (tunnel Cloudflare, sauvegardes, mises à jour).
 services:
   web:
     build: .
-    restart: unless-stopped
     ports:
-      - "127.0.0.1:8000:8000"   # Only accessible locally — Cloudflare Tunnel connects here
+      - "127.0.0.1:8000:8000"
     env_file:
-      - .env.production           # Create this from .env.production.example, never commit it
+      - .env.production
     volumes:
-      - db_data:/app/data          # Named volume → directory → db.sqlite3 lives inside
-      - media_data:/app/media
-
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    env_file:
-      - .env.production           # cloudflared reads TUNNEL_TOKEN natively
-    depends_on:
-      - web
+      - db_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=4)"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   db_data:
-  media_data:

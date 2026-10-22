@@ -1,8 +1,8 @@
-/* ─── Service Worker v3 ────────────────────────────────────
+/* ─── Service Worker v4 ────────────────────────────────────
    Strategy: only cache static assets.
    HTML pages are NEVER cached — always fetched fresh.
    ──────────────────────────────────────────────────────── */
-const CACHE_NAME = 'pontons-v3';
+const CACHE_NAME = 'pontons-v4';
 
 const STATIC_ASSETS = [
   '/static/manifest.json',

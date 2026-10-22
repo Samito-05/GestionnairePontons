@@ -4,8 +4,8 @@
   "description": "Gestion des locations d'embarcations",
   "start_url": "/planning/",
   "display": "standalone",
-  "background_color": "#f3eee4",
-  "theme_color": "#0c3d66",
+  "background_color": "#eef1f3",
+  "theme_color": "#0d1114",
   "orientation": "any",
   "icons": [
     {

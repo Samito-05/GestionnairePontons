@@ -631,10 +631,12 @@ th[aria-sort="descending"] .th-sort .icon { transform: rotate(180deg); }
 .login-head p { font-size: .9rem; color: var(--ink-3); font-weight: 600; }
 .login-card form { padding: 1.3rem 1.4rem 1.4rem; }
 .login-card .notice { margin: 1.1rem 1.4rem 0; }
-.login-foot { padding: 0 1.4rem 1.2rem; }
+.login-foot { padding: .9rem 1.4rem; background: #fff; border-top: 1px solid var(--rule); }
 .login-foot img { width: 100%; height: auto; max-width: 260px; margin: 0 auto; }
 .login-link { display: inline-flex; align-items: center; gap: .5rem; min-height: 48px; padding: 0 .5rem; color: var(--shell-ink); font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
-.login-theme { position: fixed; top: .5rem; right: .5rem; }
+.login-theme { position: fixed; top: .5rem; right: .5rem; color: var(--shell-ink-2); }
+.login-page :focus-visible { outline-color: var(--signal); }
+.login-page .login-card :focus-visible { outline-color: var(--focus); }
 
 /* ── 14. Responsive ───────────────────────────────────────────── */
 @media (min-width: 769px) {

@@ -1,37 +1,38 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Connexion — La Plage L'Isle-Adam{% endblock %}
 {% block body_class %}login-page{% endblock %}
 
 {% block shell %}
-<button type="button" class="nav-icon-btn theme-toggle login-theme" data-theme-toggle aria-label="Basculer entre thème clair et sombre" title="Thème clair / sombre">
+<button type="button" class="topbar-btn theme-toggle login-theme" data-theme-toggle aria-label="Basculer entre thème clair et sombre" title="Thème clair / sombre">
   <svg class="icon icon-moon"><use href="#i-moon"/></svg>
   <svg class="icon icon-sun"><use href="#i-sun"/></svg>
 </button>
 
-<main class="login-wrap">
-  <div class="login-brand">
-    <img src="/static/icons/blason.png" alt="Blason de L'Isle-Adam" width="69" height="76">
-    <h1>La <em>Plage</em></h1>
-    <p>L'Isle-Adam · Location d'embarcations</p>
-  </div>
+<main class="login-wrap" id="contenu">
+  <div class="login-card">
+    <div class="login-head">
+      <img src="{% static 'icons/blason.png' %}" alt="Blason de L'Isle-Adam" width="44" height="48">
+      <div>
+        <h1>La Plage</h1>
+        <p>Location d'embarcations · L'Isle-Adam</p>
+      </div>
+    </div>
 
-  <div class="card login-card">
     {% if form.errors %}
       <div class="notice notice-error" role="alert">
-        <svg class="icon"><use href="#i-alert"/></svg>
+        <svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>
         <span>Identifiant ou mot de passe incorrect.</span>
       </div>
     {% endif %}
 
     <form method="post">
       {% csrf_token %}
-
       <div class="form-field">
         <label for="id_username">Identifiant</label>
         <input type="text" id="id_username" name="username" value="{{ form.username.value|default:'' }}"
                required autofocus autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
       </div>
-
       <div class="form-field">
         <label for="id_password">Mot de passe</label>
         <div class="password-field">
@@ -41,15 +42,15 @@
           </button>
         </div>
       </div>
-
       <input type="hidden" name="next" value="{{ next }}">
-
-      <button type="submit" class="btn btn-primary btn-lg btn-full mt-2"><svg class="icon"><use href="#i-login"/></svg>Se connecter</button>
+      <button type="submit" class="btn btn-primary btn-lg btn-full">Se connecter</button>
     </form>
+
+    <div class="login-foot">
+      <img src="{% static 'icons/logo-ville.svg' %}" alt="Ville de L'Isle-Adam — ville parc, ville numérique" width="439" height="102">
+    </div>
   </div>
 
-  <div class="login-footer">
-    <a href="{% url 'planning' %}"><svg class="icon"><use href="#i-calendar"/></svg>Voir le planning sans connexion</a>
-  </div>
+  <a class="login-link" href="{% url 'planning' %}"><svg class="icon"><use href="#i-calendar"/></svg>Voir le planning sans connexion</a>
 </main>
 {% endblock %}

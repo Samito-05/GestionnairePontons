@@ -179,7 +179,7 @@ main { flex: 1; }
 }
 .topbar-btn:hover { color: var(--shell-ink); background: var(--shell-2); }
 .topbar-btn--solid { background: var(--signal); color: var(--ticket-ink); }
-.topbar-btn--solid:hover { background: #ffe14d; color: var(--ticket-ink); }
+.topbar-btn--solid:hover { filter: brightness(1.1); }
 .topbar :focus-visible { outline-color: var(--signal); outline-offset: -3px; }
 .theme-toggle .icon-sun { display: none; }
 :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
@@ -476,9 +476,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 .tl-label-state { display: flex; align-items: center; gap: .3rem; font-size: .82rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tl-label-state .mark { width: .75rem; height: .75rem; }
 .tl-label form { margin: 0; flex-shrink: 0; }
-.tl-label .btn { min-height: 40px; min-width: 76px; padding: 0 .6rem; font-size: .88rem; }
+.tl-label .btn { min-height: 48px; min-width: 76px; padding: 0 .6rem; font-size: .88rem; }
 .mob-tl-label .tl-label-name { font-size: .86rem; line-height: 1.15; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.mob-tl-label .btn { min-height: 40px; min-width: 0; padding: 0 .5rem; font-size: .8rem; }
+.mob-tl-label .btn { min-height: 48px; min-width: 0; padding: 0 .5rem; font-size: .8rem; }
 
 .tl-track, .mob-tl-track { position: relative; flex: 1; }
 

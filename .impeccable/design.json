@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T07:57:02+00:00",
+  "title": "Design System: La Plage — L'Isle-Adam",
+  "extensions": {
+    "colorMeta": {
+      "libre": {
+        "role": "primary",
+        "displayName": "Port Green",
+        "canonical": "#075c2f",
+        "tonalRamp": [
+          "#001500",
+          "#003105",
+          "#004f22",
+          "#236e40",
+          "#468f5f",
+          "#68b17f",
+          "#8ed8a4",
+          "#b8ffcd"
+        ]
+      },
+      "ticket": {
+        "role": "primary",
+        "displayName": "Special-Mark Yellow",
+        "canonical": "#ffd100",
+        "tonalRamp": [
+          "#230000",
+          "#411600",
+          "#613500",
+          "#815500",
+          "#a37600",
+          "#c59800",
+          "#edbf00",
+          "#ffed8d"
+        ],
+        "note": "Same value; ticket is the state field, signal is the shell accent."
+      },
+      "sortie": {
+        "role": "primary",
+        "displayName": "Starboard Blue",
+        "canonical": "#0b4a9e",
+        "tonalRamp": [
+          "#000048",
+          "#00176a",
+          "#00398c",
+          "#1f5ab0",
+          "#407cd4",
+          "#619efa",
+          "#86c5ff",
+          "#bdf1ff"
+        ]
+      },
+      "retard": {
+        "role": "primary",
+        "displayName": "Isolated-Danger Red",
+        "canonical": "#a50018",
+        "tonalRamp": [
+          "#3c0000",
+          "#620000",
+          "#880000",
+          "#ae1420",
+          "#d54141",
+          "#fc6661",
+          "#ff8e86",
+          "#ffcfc6"
+        ]
+      },
+      "signal": {
+        "role": "secondary",
+        "displayName": "Signal Yellow",
+        "canonical": "#ffd100",
+        "tonalRamp": [
+          "#230000",
+          "#411600",
+          "#613500",
+          "#815500",
+          "#a37600",
+          "#c59800",
+          "#edbf00",
+          "#ffed8d"
+        ],
+        "note": "Same value; ticket is the state field, signal is the shell accent."
+      },
+      "shell": {
+        "role": "neutral",
+        "displayName": "Hull Black",
+        "canonical": "#0d1114",
+        "tonalRamp": [
+          "#080c0f",
+          "#202528",
+          "#3c4044",
+          "#595e62",
+          "#797e82",
+          "#9a9fa3",
+          "#bfc5c9",
+          "#e9eff4"
+        ]
+      },
+      "shell-2": {
+        "role": "neutral",
+        "displayName": "Hull Black Hover",
+        "canonical": "#20272d",
+        "tonalRamp": [
+          "#060c11",
+          "#1e252b",
+          "#394147",
+          "#575f66",
+          "#767e86",
+          "#97a0a7",
+          "#bcc5cd",
+          "#e6f0f8"
+        ]
+      },
+      "shell-ink-2": {
+        "role": "neutral",
+        "displayName": "Shell Secondary Ink",
+        "canonical": "#b8c2ca",
+        "tonalRamp": [
+          "#060c11",
+          "#1d252b",
+          "#394148",
+          "#565f66",
+          "#757f86",
+          "#96a0a8",
+          "#bcc6ce",
+          "#e6f0f8"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "River Mist",
+        "canonical": "#eef1f3",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222426",
+          "#3e4042",
+          "#5b5e60",
+          "#7b7e7f",
+          "#9c9fa1",
+          "#c2c4c6",
+          "#eceff1"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "White Board",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Recessed Board",
+        "canonical": "#f5f7f8",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#232425",
+          "#3e4041",
+          "#5c5e5f",
+          "#7c7d7e",
+          "#9d9fa0",
+          "#c2c4c5",
+          "#edeff0"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#cdd4da",
+        "tonalRamp": [
+          "#070c10",
+          "#1f2529",
+          "#3b4145",
+          "#585e64",
+          "#787e84",
+          "#999fa5",
+          "#bec5cb",
+          "#e8f0f6"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "#9aa6af",
+        "tonalRamp": [
+          "#050c12",
+          "#1c252c",
+          "#374149",
+          "#545f67",
+          "#747f88",
+          "#94a0a9",
+          "#bac6cf",
+          "#e4f1fa"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#0d1114",
+        "tonalRamp": [
+          "#080c0f",
+          "#202528",
+          "#3c4044",
+          "#595e62",
+          "#797e82",
+          "#9a9fa3",
+          "#bfc5c9",
+          "#e9eff4"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Secondary Ink",
+        "canonical": "#3b444c",
+        "tonalRamp": [
+          "#050c12",
+          "#1d252c",
+          "#384149",
+          "#555f67",
+          "#757f88",
+          "#95a0a9",
+          "#bbc6cf",
+          "#e5f0fa"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Quiet Ink",
+        "canonical": "#56616b",
+        "tonalRamp": [
+          "#050c14",
+          "#1c252e",
+          "#37414a",
+          "#545f69",
+          "#737f89",
+          "#94a0ab",
+          "#b9c6d1",
+          "#e3f0fc"
+        ]
+      },
+      "ticket-text": {
+        "role": "primary",
+        "displayName": "Ticket Ochre (on-surface)",
+        "canonical": "#6b4f00",
+        "tonalRamp": [
+          "#1c0400",
+          "#381e00",
+          "#563a00",
+          "#755911",
+          "#967937",
+          "#b99a59",
+          "#dfc07e",
+          "#ffeaa7"
+        ]
+      },
+      "retard-wash": {
+        "role": "neutral",
+        "displayName": "Late Wash",
+        "canonical": "#fde8ea",
+        "tonalRamp": [
+          "#140709",
+          "#2e1f21",
+          "#4b3b3d",
+          "#6a585a",
+          "#8a787a",
+          "#ac999b",
+          "#d3bec0",
+          "#fee9eb"
+        ]
+      },
+      "ground-night": {
+        "role": "neutral",
+        "displayName": "Night Ground",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "surface-night": {
+        "role": "neutral",
+        "displayName": "Night Board",
+        "canonical": "#111518",
+        "tonalRamp": [
+          "#080c0f",
+          "#202528",
+          "#3c4044",
+          "#595e62",
+          "#797e82",
+          "#9a9fa3",
+          "#bfc5c9",
+          "#e9eff4"
+        ]
+      },
+      "ink-night": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "#f2f5f7",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222426",
+          "#3e4042",
+          "#5b5e60",
+          "#7b7e7f",
+          "#9c9fa1",
+          "#c2c4c6",
+          "#eceff1"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles; 1.3rem under 768px."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Countdown / overrun in a row: the largest figure in the row."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Boat names, section and dialog titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default text; meta lines at 0.92rem in ink-2."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "State plaque words, badges, tab labels, table heads. Sentence case."
+      }
+    },
+    "shadows": [
+      {
+        "name": "toast",
+        "value": "0 8px 24px rgb(0 0 0 / .28)",
+        "purpose": "Floating toasts only."
+      },
+      {
+        "name": "dialog",
+        "value": "0 16px 48px rgb(0 0 0 / .35)",
+        "purpose": "Confirm dialog only; backdrop rgb(5 8 10 / .6)."
+      },
+      {
+        "name": "current-line",
+        "value": "inset 0 -3px 0 var(--signal)",
+        "purpose": "Current nav item (tabs use inset 0 3px 0)."
+      },
+      {
+        "name": "swap-flash",
+        "value": "0 0 0 4px var(--signal)",
+        "purpose": "Row just swapped by HTMX, fades over 0.7s."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(.22, 1, .36, 1)",
+        "purpose": "Toast/dialog entry and row swap flash."
+      },
+      {
+        "name": "state-transition",
+        "value": ".15s",
+        "purpose": "Button background, border and filter changes."
+      },
+      {
+        "name": "toast-in",
+        "value": ".2s translateY(-8px) to 0 + fade",
+        "purpose": "Toast and dialog entry."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "all animation/transition off; swap flash held as static 3px ring",
+        "purpose": "prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xs",
+        "value": "359px"
+      },
+      {
+        "name": "mobile",
+        "value": "768px"
+      },
+      {
+        "name": "tablet",
+        "value": "1023px"
+      },
+      {
+        "name": "container",
+        "value": "1440px"
+      }
+    ],
+    "themes": {
+      "dark": {
+        "selector": ":root[data-theme=\"dark\"]",
+        "note": "State fields unchanged; ground #000, surface #111518, rules #2c343b/#46515a, inks #f2f5f7/#b4bec6/#98a3ac, on-surface state text libre #3cc47a ticket #ffd100 sortie #8ab8ff retard #ff8f99, focus #ffd100."
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Vendre Button",
+      "kind": "button",
+      "refersTo": "button-vendre",
+      "description": "Sells a ticket; wears the ticket yellow it produces.",
+      "html": "<button class=\"ds-btn ds-btn-vendre\">Vendre</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:52px;min-width:108px;padding:0 1rem;border:1px solid transparent;border-radius:var(--radius,4px);font-family:var(--font,system-ui);font-weight:800;font-size:1.02rem;line-height:1;cursor:pointer;transition:filter .15s}.ds-btn:hover{filter:brightness(1.1)}.ds-btn:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:2px}.ds-btn-vendre{background:var(--ticket,#ffd100);color:var(--ticket-ink,#0d1114)}"
+    },
+    {
+      "name": "Sortir Button",
+      "kind": "button",
+      "refersTo": "button-sortir",
+      "description": "Sends a ticketed boat out; wears sortie blue.",
+      "html": "<button class=\"ds-btn ds-btn-sortir\">Sortir</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:52px;min-width:108px;padding:0 1rem;border:1px solid transparent;border-radius:var(--radius,4px);font-family:var(--font,system-ui);font-weight:800;font-size:1.02rem;line-height:1;cursor:pointer;transition:filter .15s}.ds-btn:hover{filter:brightness(1.1)}.ds-btn:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:2px}.ds-btn-sortir{background:var(--sortie,#0b4a9e);color:var(--sortie-ink,#fff)}"
+    },
+    {
+      "name": "Retour Button",
+      "kind": "button",
+      "refersTo": "button-retour",
+      "description": "Takes a boat back; wears libre green.",
+      "html": "<button class=\"ds-btn ds-btn-retour\">Retour</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:52px;min-width:108px;padding:0 1rem;border:1px solid transparent;border-radius:var(--radius,4px);font-family:var(--font,system-ui);font-weight:800;font-size:1.02rem;line-height:1;cursor:pointer;transition:filter .15s}.ds-btn:hover{filter:brightness(1.1)}.ds-btn:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:2px}.ds-btn-retour{background:var(--libre,#075c2f);color:var(--libre-ink,#fff)}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary and admin actions.",
+      "html": "<button class=\"ds-btn-ghost\">Modifier</button>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;min-height:44px;padding:0 1rem;background:var(--surface,#fff);color:var(--ink,#0d1114);border:1px solid var(--rule-strong,#9aa6af);border-radius:var(--radius,4px);font-family:var(--font,system-ui);font-weight:800;font-size:.95rem;cursor:pointer;transition:background-color .15s,border-color .15s}.ds-btn-ghost:hover{background:var(--surface-2,#f5f7f8);border-color:var(--ink-3,#56616b)}.ds-btn-ghost:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:2px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "48px ruled field, focus shifts border and outline to the focus colour.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Client (facultatif)\">",
+      "css": ".ds-input{width:100%;min-height:48px;padding:.6rem .8rem;background:var(--surface,#fff);color:var(--ink,#0d1114);border:1px solid var(--rule-strong,#9aa6af);border-radius:var(--radius,4px);font-family:var(--font,system-ui);font-size:1rem}.ds-input::placeholder{color:var(--ink-3,#56616b)}.ds-input:hover{border-color:var(--ink-3,#56616b)}.ds-input:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:0;border-color:var(--focus,#0b4a9e)}"
+    },
+    {
+      "name": "Boat Row (late)",
+      "kind": "card",
+      "refersTo": "state-plaque-retard",
+      "description": "Signature row: state plaque | name + figure | action. Shown in the late state.",
+      "html": "<article class=\"ds-tile ds-late\"><div class=\"ds-plaque\"><svg class=\"ds-mark\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><circle cx=\"10\" cy=\"5\" r=\"4.3\"/><circle cx=\"10\" cy=\"15\" r=\"4.3\"/></svg><span>Retard</span></div><div class=\"ds-body\"><strong class=\"ds-name\"><span class=\"ds-chip\" style=\"background:#22c55e\"></span>Kayak Vert</strong><span class=\"ds-fig\">+46 min</span><span class=\"ds-meta\">fin 08:56 · Famille Leroy</span></div><div class=\"ds-act\"><button class=\"ds-btn ds-btn-retour\">Retour</button></div></article>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:52px;min-width:108px;padding:0 1rem;border:1px solid transparent;border-radius:var(--radius,4px);font-family:var(--font,system-ui);font-weight:800;font-size:1.02rem;line-height:1;cursor:pointer;transition:filter .15s}.ds-btn:hover{filter:brightness(1.1)}.ds-btn:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:2px}.ds-btn-retour{background:var(--libre,#075c2f);color:#fff}.ds-tile{display:grid;grid-template-columns:74px minmax(0,1fr) auto;min-height:72px;background:var(--surface,#fff);border:1px solid var(--rule,#cdd4da);border-radius:4px;overflow:hidden;font-family:var(--font,system-ui)}.ds-tile.ds-late{background:var(--retard-wash,#fde8ea);border:2px solid var(--retard-line,#a50018)}.ds-plaque{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.82rem;font-weight:800;background:var(--retard,#a50018);color:#fff}.ds-mark{width:1.15rem;height:1.15rem;fill:currentColor}.ds-body{padding:.45rem .75rem;display:flex;flex-direction:column;justify-content:center;gap:.1rem;min-width:0}.ds-name{display:flex;align-items:center;gap:.45rem;font-size:1.1rem;font-weight:800}.ds-chip{width:10px;height:10px;border-radius:2px}.ds-fig{font-size:1.25rem;font-weight:800;color:var(--retard-text,#a50018);font-variant-numeric:tabular-nums}.ds-meta{font-size:.92rem;color:var(--ink-2,#3b444c)}.ds-act{display:flex;align-items:center;padding:.6rem .7rem .6rem 0}"
+    },
+    {
+      "name": "State Plaques",
+      "kind": "custom",
+      "refersTo": "state-plaque-libre",
+      "description": "The four buoyage states: colour field + topmark + word.",
+      "html": "<div class=\"ds-plaques\"><div class=\"ds-pl ds-pl-libre\"><svg class=\"ds-mark\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M10 2 18.5 17.5h-17z\"/></svg><span>Libre</span></div><div class=\"ds-pl ds-pl-ticket\"><svg class=\"ds-mark\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M3.5 3.5l13 13M16.5 3.5l-13 13\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.6\" stroke-linecap=\"square\"/></svg><span>Ticket</span></div><div class=\"ds-pl ds-pl-sortie\"><svg class=\"ds-mark\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><circle cx=\"10\" cy=\"10\" r=\"7.5\"/></svg><span>Sorti</span></div><div class=\"ds-pl ds-pl-retard\"><svg class=\"ds-mark\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><circle cx=\"10\" cy=\"5\" r=\"4.3\"/><circle cx=\"10\" cy=\"15\" r=\"4.3\"/></svg><span>Retard</span></div></div>",
+      "css": ".ds-plaques{display:flex;gap:2px;font-family:var(--font,system-ui)}.ds-pl{width:74px;height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.82rem;font-weight:800}.ds-mark{width:1.15rem;height:1.15rem;fill:currentColor}.ds-pl-libre{background:#075c2f;color:#fff}.ds-pl-ticket{background:#ffd100;color:#0d1114}.ds-pl-sortie{background:#0b4a9e;color:#fff}.ds-pl-retard{background:#a50018;color:#fff}"
+    },
+    {
+      "name": "Filter Bar",
+      "kind": "chip",
+      "refersTo": "filter-active",
+      "description": "Five ruled cells, count over mark + label; pressed cell inverts, Retards alarms red.",
+      "html": "<div class=\"ds-filters\"><button class=\"ds-f\" aria-pressed=\"true\"><strong>10</strong><span>Tous</span></button><button class=\"ds-f\" aria-pressed=\"false\"><strong>0</strong><span><svg class=\"ds-mark ds-g\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><path d=\"M10 2 18.5 17.5h-17z\"/></svg>Libres</span></button><button class=\"ds-f ds-alert\" aria-pressed=\"false\"><strong>1</strong><span><svg class=\"ds-mark ds-r\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><circle cx=\"10\" cy=\"5\" r=\"4.3\"/><circle cx=\"10\" cy=\"15\" r=\"4.3\"/></svg>Retards</span></button></div>",
+      "css": ".ds-filters{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface,#fff);border:1px solid var(--rule,#cdd4da);font-family:var(--font,system-ui)}.ds-f{min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;background:none;border:0;border-left:1px solid var(--rule,#cdd4da);color:var(--ink,#0d1114);cursor:pointer}.ds-f:first-child{border-left:0}.ds-f strong{font-size:1.45rem;font-weight:800;line-height:1}.ds-f span{display:flex;align-items:center;gap:.3rem;font-size:.84rem;font-weight:700;color:var(--ink-2,#3b444c)}.ds-mark{width:.85rem;height:.85rem;fill:currentColor}.ds-g{color:#075c2f}.ds-r{color:#a50018}.ds-f:hover{background:var(--surface-2,#f5f7f8)}.ds-f[aria-pressed=true]{background:var(--ink,#0d1114);color:var(--surface,#fff)}.ds-f[aria-pressed=true] span{color:inherit}.ds-alert strong{color:var(--retard-text,#a50018)}.ds-f:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:2px}"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "topbar",
+      "description": "Black shell bar; current item white with a 3px signal-yellow underline.",
+      "html": "<nav class=\"ds-bar\"><span class=\"ds-brand\">La Plage<small>L'Isle-Adam</small></span><a class=\"ds-nav\" aria-current=\"page\" href=\"#\">Sorties</a><a class=\"ds-nav\" href=\"#\">Planning</a></nav>",
+      "css": ".ds-bar{display:flex;align-items:stretch;height:56px;background:var(--shell,#0d1114);color:#fff;font-family:var(--font,system-ui);padding-left:1.5rem;gap:1.5rem}.ds-brand{align-self:center;font-weight:800;font-size:1.06rem;line-height:1.1}.ds-brand small{display:block;font-weight:500;font-size:.78rem;color:var(--shell-ink-2,#b8c2ca)}.ds-nav{display:flex;align-items:center;padding:0 1rem;color:var(--shell-ink-2,#b8c2ca);font-weight:700;font-size:.95rem;text-decoration:none;box-shadow:inset 0 -3px 0 transparent}.ds-nav:hover{color:#fff;background:var(--shell-2,#20272d)}.ds-nav[aria-current=page]{color:#fff;box-shadow:inset 0 -3px 0 var(--signal,#ffd100)}.ds-nav:focus-visible{outline:3px solid var(--signal,#ffd100);outline-offset:-3px}"
+    },
+    {
+      "name": "Late Band",
+      "kind": "custom",
+      "refersTo": "late-band",
+      "description": "Sticky red alarm under the top bar when any boat is late.",
+      "html": "<button class=\"ds-band\"><svg class=\"ds-mark\" viewBox=\"0 0 20 20\" aria-hidden=\"true\"><circle cx=\"10\" cy=\"5\" r=\"4.3\"/><circle cx=\"10\" cy=\"15\" r=\"4.3\"/></svg><span>Kayak Vert +46 min</span><b>Voir ›</b></button>",
+      "css": ".ds-band{width:100%;height:52px;display:flex;align-items:center;gap:.7rem;padding:0 1rem;background:var(--retard,#a50018);color:#fff;border:0;text-align:left;font-family:var(--font,system-ui);font-weight:800;font-size:1.05rem;cursor:pointer}.ds-band span{flex:1}.ds-band b{font-size:.92rem}.ds-mark{width:1.1rem;height:1.1rem;fill:currentColor}.ds-band:focus-visible{outline:3px solid var(--focus,#0b4a9e);outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "River Buoyage",
+    "overview": "Every boat state is a navigation mark: a saturated colour field plus a topmark shape, read at arm's length in sunlight. Libre is a green triangle (▲), a sold ticket is a yellow saltire (✕), a boat out is a blue disc (●), a late boat is the isolated-danger double disc (●●) on red. The shapes come from IALA lateral, special and isolated-danger topmarks and live in the SVG sprite as `m-libre`, `m-ticket`, `m-sortie`, `m-retard`. Colour and shape always travel together.\n\nThe world is a working instrument, not a showcase. Near-black shell bars frame a cool, pale ground by day and true black at night; content sits on white surfaces separated by 1px rules with 4px corners. Saturated colour is spent only on state and on the operator actions that change state, and each action button wears the colour of the state it produces. One typeface, Atkinson Hyperlegible Next, at heavy weights, with tabular figures everywhere so times and countdowns never jitter. Density is high and honest: the number (countdown or overrun) is the biggest thing in a row.\n\nLateness outranks everything. A late boat turns its row's plaque red with the double-disc mark, washes the row pink (dark red at night) inside a 2px red line, raises a sticky red band under the top bar, puts a red count on the filter bar and a red badge on the bottom tab, and paints red/black hazard stripes on the planning timeline.",
+    "keyCharacteristics": [
+      "State = colour field + buoyage topmark, never colour alone.",
+      "Action buttons carry the colour of the state they produce (Vendre yellow, Sortir blue, Retour green).",
+      "Black shell, pale cool ground, white surfaces on 1px rules, 4px corners; no shadows on resting content.",
+      "One face (Atkinson Next), weights 400 to 800, tabular figures globally.",
+      "Day and night themes share the same saturated signal fields; only grounds, inks and on-surface state text change.",
+      "Signal yellow is the shell's only accent: active tab/nav line, focus on black, day marker, the toast action."
+    ],
+    "rules": [
+      {
+        "name": "The Buoyage Rule",
+        "body": "A state is always a colour field and its topmark together. A new state indicator that shows colour without the mark, or the mark in a colour other than its state, is wrong.",
+        "section": "colors"
+      },
+      {
+        "name": "The Produced-State Rule",
+        "body": "An operator action button wears the colour of the state it creates: Vendre = ticket yellow, Sortir = sortie blue, Retour = libre green. Never colour an action by urgency or brand.",
+        "section": "colors"
+      },
+      {
+        "name": "The Signal-Budget Rule",
+        "body": "Saturated colour appears only on state, on state-producing actions, on the late alarm, and on the shell's yellow accent line. Everything else is neutral ink on white.",
+        "section": "colors"
+      },
+      {
+        "name": "The Same-Signal-At-Night Rule",
+        "body": "The four state fields keep their day values in the dark theme; only grounds, inks, on-surface state text and the focus colour (to yellow) change.",
+        "section": "colors"
+      },
+      {
+        "name": "The One-Face Rule",
+        "body": "Atkinson Next is the only typeface. Hierarchy comes from size and weight (400/600/700/800), never from a second family, italics or uppercase tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Every time, count and duration is set in tabular figures. Do not override `font-variant-numeric` locally.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ruled-Not-Raised Rule",
+        "body": "Rows, panels, tables and forms sit on 1px rules with no shadow. Shadow is reserved for what floats above the page (toast, dialog).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do pair every state colour with its topmark from the sprite (`m-libre` ▲, `m-ticket` ✕, `m-sortie` ●, `m-retard` ●●).",
+      "Do colour an action button with the state it produces (Vendre yellow, Sortir blue, Retour green).",
+      "Do use `ticket-text` (dark ochre) for ticket wording on light surfaces; reserve the yellow field for fills and the shell accent.",
+      "Do separate content with 1px rules and the ground/surface tone step; keep shadows to toasts and the dialog.",
+      "Do make the countdown or overrun the largest figure in a row, in tabular figures.",
+      "Do keep operator action targets at 52px in rows and every touch target at least 48px.",
+      "Do give anything late the full red treatment: plaque, wash and 2px line, band, filter count, tab badge, stripes.",
+      "Do mark current navigation with a 3px signal-yellow line on the shell."
+    ],
+    "donts": [
+      "Don't show a state by colour alone, or reuse a state colour for anything that is not that state or its producing action.",
+      "Don't draw a boat's own colour as a circle; the disc means \"sorti\".",
+      "Don't add a second typeface, italics or uppercase tracked labels.",
+      "Don't put mid-grey text on a state field; plaque ink is white, or black on yellow.",
+      "Don't lift resting rows, panels or tables with shadows or glow.",
+      "Don't load fonts, icons or styles from a third party; icons come from the inline SVG sprite."
+    ]
+  }
+}

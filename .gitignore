@@ -200,3 +200,7 @@ docker-compose.override.yml
 .sass-cache/
 *.stackdump
 .mcp.json
+
+# Impeccable : captures de revue et cache local (jamais commités)
+.impeccable/review/
+.impeccable/hook.cache.json

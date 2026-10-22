@@ -1,19 +1,10 @@
 /* ─── La Plage — comportements communs à toutes les pages ───────────────
-   Thème · toasts · dialogue de confirmation · erreurs HTMX
+   Toasts · dialogue de confirmation · erreurs HTMX
    horloge · comptes à rebours des sorties · bandeau des retards
    tri des tableaux · service worker
    ─────────────────────────────────────────────────────────────────── */
 (function () {
   'use strict';
-
-  /* ── Thème (la valeur initiale est posée dans <head>, avant le rendu) ── */
-  document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      try { localStorage.setItem('theme', next); } catch (e) {}
-    });
-  });
 
   /* ── Toasts ── */
   var stack = document.getElementById('toastStack');

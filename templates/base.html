@@ -1,27 +1,18 @@
 {% load static %}<!DOCTYPE html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Gestion des locations d'embarcations">
-  <meta name="theme-color" content="#0d1114">
+  <meta name="theme-color" content="#005378">
+  <meta name="color-scheme" content="light">
   <link rel="icon" type="image/png" href="{% static 'icons/blason.png' %}">
   <title>{% block title %}La Plage — L'Isle-Adam{% endblock %}</title>
 
   <link rel="manifest" href="{% static 'manifest.json' %}">
   <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
 
-  <!-- Thème appliqué avant le premier rendu (pas de flash clair/sombre) -->
-  <script>
-    (function () {
-      var t = null;
-      try { t = localStorage.getItem('theme'); } catch (e) {}
-      if (t !== 'dark' && t !== 'light')
-        t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
-  <link rel="preload" href="{% static 'fonts/atkinson-next-latin-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/hanken-grotesk-latin-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
@@ -60,10 +51,6 @@
       {% if user.is_authenticated %}
         <span class="topbar-user">{{ user.username }}<small>{% if role == 'admin' %}Administrateur{% elif role == 'gestionnaire' %}Gestionnaire{% else %}Visiteur{% endif %}</small></span>
       {% endif %}
-      <button type="button" class="topbar-btn theme-toggle" data-theme-toggle aria-label="Basculer entre thème clair et sombre" title="Thème clair / sombre">
-        <svg class="icon icon-moon"><use href="#i-moon"/></svg>
-        <svg class="icon icon-sun"><use href="#i-sun"/></svg>
-      </button>
       {% if user.is_authenticated %}
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}

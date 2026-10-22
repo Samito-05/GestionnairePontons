@@ -1,9 +1,7 @@
-Police auto-hébergée (aucun appel à un CDN tiers — RGPD).
+Polices auto-hébergées (aucun appel à un CDN tiers — RGPD).
 
-Atkinson Hyperlegible Next — Copyright 2020-2024 The Atkinson Hyperlegible Next
-Project Authors (https://github.com/googlefonts/atkinson-hyperlegible-next)
-
-Distribuée sous SIL Open Font License 1.1 : https://openfontlicense.org
-Fichier : atkinson-next-latin-wght.woff2, variable (axe wght 200–800),
-sous-ensemble latin + ponctuation générée avec fontTools (pyftsubset) à partir de
-AtkinsonHyperlegibleNext[wght].ttf du dépôt google/fonts (ofl/atkinsonhyperlegiblenext).
+Hanken Grotesk — Copyright The Hanken Grotesk Project Authors
+(https://github.com/marcologous/hanken-grotesk) — SIL Open Font License 1.1.
+Fraunces — Copyright The Fraunces Project Authors
+(https://github.com/undercasetype/Fraunces) — SIL Open Font License 1.1.
+Sous-ensemble latin, fichiers variables (via @fontsource-variable).

@@ -3,10 +3,10 @@
   <span class="tl-label-text">
     <span class="tl-label-name" title="{{ row.embarcation.nom }}">{{ row.embarcation.nom }}</span>
     {% if row.statut == 'sortie' %}
-      {% if row.overtime %}<span class="tl-label-state is-retard"><svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>Retard{% if row.overtime_min %} +{{ row.overtime_min }} min{% endif %}</span>
-      {% else %}<span class="tl-label-state is-sortie"><svg class="mark" aria-hidden="true"><use href="#m-sortie"/></svg>Sorti{% if row.retour %} · fin {{ row.retour }}{% endif %}</span>{% endif %}
-    {% elif row.statut == 'reservee' %}<span class="tl-label-state is-reservee"><svg class="mark" aria-hidden="true"><use href="#m-ticket"/></svg>Ticket vendu</span>
-    {% else %}<span class="tl-label-state is-libre"><svg class="mark" aria-hidden="true"><use href="#m-libre"/></svg>Libre</span>
+      {% if row.overtime %}<span class="tl-label-state mark-retard"><svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>Retard{% if row.overtime_min %} +{{ row.overtime_min }} min{% endif %}</span>
+      {% else %}<span class="tl-label-state mark-sortie"><svg class="mark" aria-hidden="true"><use href="#m-sortie"/></svg>Sorti{% if row.retour %} · fin {{ row.retour }}{% endif %}</span>{% endif %}
+    {% elif row.statut == 'reservee' %}<span class="tl-label-state mark-ticket"><svg class="mark" aria-hidden="true"><use href="#m-ticket"/></svg>Ticket vendu</span>
+    {% else %}<span class="tl-label-state mark-libre"><svg class="mark" aria-hidden="true"><use href="#m-libre"/></svg>Libre</span>
     {% endif %}
   </span>
   {% if role == 'gestionnaire' or role == 'admin' %}

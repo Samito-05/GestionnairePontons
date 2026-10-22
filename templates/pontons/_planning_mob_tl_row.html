@@ -1,4 +1,4 @@
-<div id="mob-tl-row-{{ row.embarcation.pk }}" class="mob-tl-row mob-tl-row-emb{% if row.statut == 'reservee' %} is-reserved{% endif %}">
+<div id="mob-tl-row-{{ row.embarcation.pk }}" class="mob-tl-row mob-tl-row-emb">
   {% include 'pontons/_planning_mob_tl_label.html' with row=row %}
   <div class="mob-tl-track">
     {% for m in marks %}

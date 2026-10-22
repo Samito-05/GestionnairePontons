@@ -4,10 +4,10 @@
 {% block topbar_clock %}<span class="topbar-clock" aria-hidden="true"><span data-clock>{{ now|time:"H:i" }}</span></span>{% endblock %}
 
 {% block content %}
-<section class="page-section">
+<section class="page-section page-section--flush">
   <div class="container" data-server-now="{{ now|date:'U' }}">
 
-    <div class="page-header page-header--board">
+    <div class="page-header sr-only-mobile">
       <h1 class="page-title">Sorties<small>{{ now|date:"l j F"|capfirst }}</small></h1>
       <span id="live-clock" class="clock" title="Heure actuelle"><span data-clock>{{ now|time:"H:i" }}</span></span>
     </div>

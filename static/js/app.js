@@ -33,8 +33,11 @@
     if (!stack) return null;
     options = options || {};
     var toast = document.createElement('div');
-    toast.className = 'toast toast-' + (kind || 'error');
-    toast.innerHTML = '<span></span><button type="button" class="toast-close" aria-label="Fermer">' +
+    kind = kind || 'error';
+    toast.className = 'toast toast-' + kind;
+    // Même marque de balisage que les messages Django (base.html)
+    var mark = { success: 'libre', info: 'sortie', warning: 'ticket', error: 'retard' }[kind] || 'sortie';
+    toast.innerHTML = '<svg class="mark" aria-hidden="true"><use href="#m-' + mark + '"/></svg><span></span><button type="button" class="toast-close" aria-label="Fermer">' +
                       '<svg class="icon"><use href="#i-x"/></svg></button>';
     toast.querySelector('span').textContent = msg;
     if (options.actionLabel) {
@@ -152,8 +155,6 @@
       var diff = Math.round((end - now) / 60000);
       var late = now > end;
       tile.classList.toggle('is-late', late);
-      var label = tile.querySelector('[data-state-label]');
-      if (label) label.textContent = late ? 'Retard' : 'Sorti';
       if (late) {
         var lateMin = Math.floor((now - end) / 60000);
         out.textContent = lateMin ? '+' + lateMin + ' min' : '+<1 min';
@@ -169,10 +170,11 @@
     if (!scope) return;
     var items = scope.querySelectorAll('[data-statut]');
     var n = { all: items.length, libre: 0, reservee: 0, sortie: 0, retard: 0 };
+    var firstLate = null;
     items.forEach(function (el) {
       var s = el.dataset.statut;
       if (s in n) n[s]++;
-      if (el.classList.contains('is-late')) n.retard++;
+      if (el.classList.contains('is-late')) { n.retard++; if (!firstLate) firstLate = el; }
     });
     document.querySelectorAll('[data-count]').forEach(function (el) {
       el.textContent = n[el.dataset.count];
@@ -186,14 +188,13 @@
     // Bandeau des retards : le premier en clair, les suivants comptés
     var band = document.querySelector('[data-late-band]');
     if (band) {
-      var late = scope.querySelectorAll('.tile.is-late');
-      band.hidden = late.length === 0;
-      if (late.length) {
-        var first = late[0];
-        var name = first.querySelector('.tile-name');
-        var fig = first.querySelector('[data-remaining]');
+      band.hidden = !firstLate;
+      document.body.classList.toggle('has-late-band', !!firstLate);   // le toast passe sous le bandeau
+      if (firstLate) {
+        var name = firstLate.querySelector('.tile-name');
+        var fig = firstLate.querySelector('[data-remaining]');
         var txt = (name ? name.textContent.trim() : '') + (fig ? ' ' + fig.textContent.trim() : '');
-        if (late.length > 1) txt += ' · ' + (late.length - 1) + ' autre' + (late.length > 2 ? 's' : '');
+        if (n.retard > 1) txt += ' · ' + (n.retard - 1) + ' autre' + (n.retard > 2 ? 's' : '');
         band.querySelector('[data-late-text]').textContent = txt;
       }
     }
@@ -215,7 +216,7 @@
 
   function tick() { updateClock(); updateCountdowns(); liftLateRows(); window.updateStatCounts(); }
   tick();
-  setInterval(tick, 15000);
+  setInterval(function () { if (!document.hidden) tick(); }, 15000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
   document.body.addEventListener('htmx:afterSwap', tick);
   window.refreshLiveUi = tick;
@@ -233,6 +234,7 @@
 
   /* ── Tableaux triables : <table data-sortable>, <th data-sort="text|num"> ──
      Tri côté client de la page affichée ; l'ordre serveur revient au rechargement. */
+  var collator = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });
   document.querySelectorAll('table[data-sortable]').forEach(function (table) {
     var tbody = table.tBodies[0];
     table.querySelectorAll('th[data-sort]').forEach(function (th, _, all) {
@@ -248,18 +250,16 @@
         var dir = th.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
         all.forEach(function (o) { o.removeAttribute('aria-sort'); });
         th.setAttribute('aria-sort', dir);
-        var key = function (tr) {
-          var td = tr.children[idx];
-          var v = td ? (td.dataset.value || td.textContent).trim() : '';
-          return th.dataset.sort === 'num' ? parseFloat(v.replace(',', '.')) || 0 : v.toLowerCase();
-        };
-        var rows = Array.prototype.filter.call(tbody.rows, function (r) { return !r.classList.contains('empty-row'); });
-        rows.sort(function (a, b) {
-          var x = key(a), y = key(b);
-          var c = typeof x === 'number' ? x - y : x.localeCompare(y, 'fr', { numeric: true });
-          return dir === 'ascending' ? c : -c;
-        });
-        rows.forEach(function (r) { tbody.appendChild(r); });
+        var num = th.dataset.sort === 'num', sign = dir === 'ascending' ? 1 : -1;
+        // Clé lue une seule fois par ligne
+        var keyed = Array.prototype.filter.call(tbody.rows, function (r) { return !r.classList.contains('empty-row'); })
+          .map(function (r) {
+            var td = r.children[idx];
+            var v = td ? (td.dataset.value || td.textContent).trim() : '';
+            return { r: r, k: num ? parseFloat(v.replace(',', '.')) || 0 : v };
+          });
+        keyed.sort(function (a, b) { return sign * (num ? a.k - b.k : collator.compare(a.k, b.k)); });
+        keyed.forEach(function (o) { tbody.appendChild(o.r); });
       });
     });
   });

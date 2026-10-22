@@ -103,7 +103,9 @@
 <!-- ══ MESSAGES (toasts, en haut : ne masquent jamais un bouton d'action) ══ -->
 <div class="toast-stack" id="toastStack" role="status" aria-live="polite">
   {% for message in messages %}
-    <div class="toast toast-{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}">
+    {% if 'error' in message.tags %}{% firstof 'error' as kind %}{% elif 'warning' in message.tags %}{% firstof 'warning' as kind %}{% elif 'success' in message.tags %}{% firstof 'success' as kind %}{% else %}{% firstof 'info' as kind %}{% endif %}
+    <div class="toast toast-{{ kind }}">
+      <svg class="mark" aria-hidden="true"><use href="#m-{% if kind == 'error' %}retard{% elif kind == 'warning' %}ticket{% elif kind == 'success' %}libre{% else %}sortie{% endif %}"/></svg>
       <span>{{ message }}</span>
       <button type="button" class="toast-close" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button>
     </div>

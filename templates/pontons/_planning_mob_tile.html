@@ -21,7 +21,7 @@
   {% if role == 'gestionnaire' or role == 'admin' %}
     {% if row.statut == 'sortie' %}
       <form class="tile-action" hx-post="{% url 'retour_embarcation' row.embarcation.pk %}"
-            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML"
+            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML settle:700ms"
             hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_mob">
         <input type="hidden" name="next" value="planning">
@@ -29,7 +29,7 @@
       </form>
     {% elif row.statut == 'reservee' %}
       <form class="tile-action" hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}"
-            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML"
+            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML settle:700ms"
             hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_mob">
         <input type="hidden" name="next" value="planning">
@@ -37,7 +37,7 @@
       </form>
     {% else %}
       <form class="tile-action" hx-post="{% url 'louer_embarcation' row.embarcation.pk %}"
-            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML"
+            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML settle:700ms"
             hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_mob">
         <input type="hidden" name="notes" value="">

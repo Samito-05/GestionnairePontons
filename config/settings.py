@@ -53,6 +53,8 @@ AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = timedelta(minutes=15)
 AXES_LOCKOUT_PARAMETERS = ['username']
 AXES_RESET_ON_SUCCESS = True
+# axes.W006 : lockout par username voulu (voir plus haut)
+SILENCED_SYSTEM_CHECKS = ['axes.W006']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

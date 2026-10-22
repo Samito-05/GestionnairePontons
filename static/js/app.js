@@ -227,6 +227,20 @@
     });
   });
 
+  /* ── Mot de passe : alerte Verr. Maj ── */
+  document.querySelectorAll('.password-field input').forEach(function (input) {
+    var caps = document.createElement('span');
+    caps.className = 'form-help';
+    caps.setAttribute('role', 'status');
+    caps.hidden = true;
+    caps.textContent = 'Verr. Maj activée';
+    input.parentElement.after(caps);
+    function check(e) { caps.hidden = !e.getModifierState('CapsLock'); }
+    input.addEventListener('keydown', check);
+    input.addEventListener('keyup', check);
+    input.addEventListener('blur', function () { caps.hidden = true; });
+  });
+
   /* ── Tableaux triables : <table data-sortable>, <th data-sort="text|num"> ──
      Tri côté client de la page affichée ; l'ordre serveur revient au rechargement. */
   var collator = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });

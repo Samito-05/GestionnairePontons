@@ -11,9 +11,9 @@
 
 /* ── 1. Police auto-hébergée (RGPD : aucun CDN tiers) ─────────── */
 @font-face {
-  font-family: 'Hanken Grotesk';
-  src: url('../fonts/hanken-grotesk-latin-wght.woff2') format('woff2');
-  font-weight: 100 900;
+  font-family: 'Figtree';
+  src: url('../fonts/figtree-latin-wght.woff2') format('woff2');
+  font-weight: 300 900;
   font-style: normal;
   font-display: swap;
 }
@@ -30,43 +30,43 @@
 
 :root {
   color-scheme: light;
-  --font: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 
   /* Surfaces : fond froid, lignes blanches sur filets */
-  --ground:     #f3f7f9;
-  --surface:    #ffffff;
-  --surface-2:  #f9f9f9;
-  --rule:       #d3dde3;
-  --rule-strong:#9aabb6;
-  --ink:        #14222b;
-  --ink-2:      #333333;
-  --ink-3:      #4f5f69;
+  --ground:     #f3eee4;
+  --surface:    #fffdf8;
+  --surface-2:  #f8f4ea;
+  --rule:       #ddd5c3;
+  --rule-strong:#a99f8a;
+  --ink:        #102a43;
+  --ink-2:      #34495e;
+  --ink-3:      #4a6278;
 
   /* Coque : bleu pétrole de la ville, liseré jaune signal */
-  --shell:      #005378;
-  --shell-2:    #186485;
+  --shell:      #0c3d66;
+  --shell-2:    #165a93;
   --shell-ink:  #ffffff;
-  --shell-ink-2:#d6e8f0;
-  --signal:     #ffd100;
-  --accent:     #00abc2;
+  --shell-ink-2:#d3e2ef;
+  --signal:     #f0a531;
+  --accent:     #14a096;
 
   /* États (fond + encre posée dessus) — contraste ≥ 7:1 */
-  --libre:      #075c2f;  --libre-ink:  #ffffff;
-  --ticket:     #ffd100;  --ticket-ink: #0d1114;
-  --sortie:     #0b4a9e;  --sortie-ink: #ffffff;
-  --retard:     #a50018;  --retard-ink: #ffffff;
-  --retard-line:#a50018;
-  --retard-wash:#fde8ea;
+  --libre:      #0a6b62;  --libre-ink:  #ffffff;
+  --ticket:     #f0a531;  --ticket-ink: #102a43;
+  --sortie:     #0f5c9e;  --sortie-ink: #ffffff;
+  --retard:     #b42a12;  --retard-ink: #ffffff;
+  --retard-line:#b42a12;
+  --retard-wash:#fbe9e3;
   /* Texte d'état sur surface claire */
-  --libre-text: #075c2f;
-  --ticket-text:#6b4f00;
-  --sortie-text:#0b4a9e;
-  --retard-text:#a50018;
+  --libre-text: #0a6b62;
+  --ticket-text:#8a5208;
+  --sortie-text:#0f5c9e;
+  --retard-text:#b42a12;
 
-  --link:   #3b29ff;
-  --focus:  #3b29ff;
-  --select: #ffe680;
+  --link:   #0f6bb2;
+  --focus:  #0f6bb2;
+  --select: #f7d9a0;
 
   /* Surface inversée (toast) : marques lisibles sur l'encre */
   --inverse-libre:  #3cc47a;
@@ -74,8 +74,9 @@
   --stripes-ticket:   repeating-linear-gradient(-45deg, var(--ticket) 0 3px, transparent 3px 9px);
   --stripes-overtime: repeating-linear-gradient(-45deg, var(--retard) 0 6px, #1a0004 6px 10px);
 
-  --radius: 10px;
-  --radius-btn: 8px;
+  --radius: 12px;
+  --radius-btn: 9px;
+  --shadow-sm: 0 1px 2px rgba(16,42,67,.06), 0 2px 8px rgba(16,42,67,.05);
   --pill: 999px;
   --bar-h:  56px;
   --band-h: 52px;
@@ -301,7 +302,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 .form-check { flex-direction: row; align-items: center; gap: .6rem; min-height: 48px; cursor: pointer; font-weight: 700; }
 .form-check input { width: 22px; height: 22px; accent-color: var(--ink); }
 .form-actions { display: flex; gap: .6rem; flex-wrap: wrap; padding-top: .4rem; }
-.form-panel { max-width: 640px; background: var(--surface); border: 1px solid var(--rule); padding: 1.5rem; border-radius: var(--radius); }
+.form-panel { max-width: 640px; background: var(--surface); border: 1px solid var(--rule); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow-sm); }
 .form-panel .notice { margin-bottom: 1.1rem; }
 
 .password-field { position: relative; }
@@ -321,7 +322,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 .clock { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; line-height: 1; }
 .date-input { min-height: 44px; width: auto; }
 
-.empty-state { padding: 3rem 1.5rem; text-align: center; border: 1px solid var(--rule); border-top: 6px solid var(--accent); border-radius: var(--radius); background: var(--surface); }
+.empty-state { padding: 3rem 1.5rem; text-align: center; border: 1px solid var(--rule); border-top: 4px solid var(--accent); border-radius: var(--radius); background: var(--surface); }
 .empty-state h2 { font-size: 1.25rem; margin-bottom: .35rem; }
 .empty-state p { color: var(--ink-2); margin-bottom: 1rem; }
 
@@ -368,7 +369,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 /* Une ligne = plaque d'état | nom + chiffre | action */
 .tile {
   display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; align-items: stretch;
-  min-height: 72px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden;
+  min-height: 72px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);
 }
 .tile-state {
   grid-row: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem;
@@ -588,9 +589,9 @@ th[aria-sort="descending"] .th-sort .icon { transform: rotate(180deg); }
 }
 
 /* ── 13. Connexion ────────────────────────────────────────────── */
-.login-page { background: linear-gradient(180deg, var(--shell) 0 38%, var(--ground) 38%); }
+.login-page { background: var(--ground); }
 .login-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; gap: 1rem; }
-.login-card { width: min(400px, 100%); background: var(--surface); color: var(--ink); border-radius: var(--radius); overflow: hidden; }
+.login-card { width: min(400px, 100%); background: var(--surface); color: var(--ink); border-radius: var(--radius); overflow: hidden; box-shadow: 0 14px 34px rgba(16,42,67,.2); }
 .login-head { display: flex; align-items: center; gap: .9rem; padding: 1.2rem 1.4rem; background: var(--shell); color: var(--shell-ink); border-radius: var(--radius) var(--radius) 0 0; }
 .login-head img { width: 44px; height: 48px; }
 .login-head h1 { font-size: 1.35rem; }

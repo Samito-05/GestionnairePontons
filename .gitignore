@@ -199,3 +199,4 @@ docker-compose.override.yml
 .parcel-cache/
 .sass-cache/
 *.stackdump
+.mcp.json

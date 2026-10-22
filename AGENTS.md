@@ -107,7 +107,7 @@ Windows note: this repo lives on Windows. A `.venv/` and a `venv/` both exist; a
 
 Production runs from **Samito-05/nas-stack**, which builds this repo's `Dockerfile` next to the other projects behind one Cloudflare Tunnel, and handles pulls, backups and health waits. This repo only provides the image: migrations run at container start (`CMD`), `/health` is the healthcheck probe (public, `SELECT 1`), and `.dockerignore` keeps `.env*`, `data/` and `.git` out of the image. `docker-compose.yml` is a local test of the production image only (`127.0.0.1:8000`). SQLite lives in a named volume at `/app/data`. Keep `localhost` in `DJANGO_ALLOWED_HOSTS` for the healthcheck.
 
-On any UI release, bump `CACHE_NAME` in `static/sw.js` (currently `pontons-v6`) so installed PWAs drop old cached assets, and keep `static/manifest.json` colours in step with the shell tokens (`theme_color` = `--shell`, `background_color` = `--ground`).
+On any UI release, bump `CACHE_NAME` in `static/sw.js` (currently `pontons-v7`) so installed PWAs drop old cached assets, and keep `static/manifest.json` colours in step with the shell tokens (`theme_color` = `--shell`, `background_color` = `--ground`).
 
 ## Demo accounts
 

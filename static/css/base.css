@@ -51,11 +51,11 @@
   --signal:     #f0a531;
   --accent:     #14a096;
 
-  /* États (fond + encre posée dessus) — contraste ≥ 7:1 */
-  --libre:      #0a6b62;  --libre-ink:  #ffffff;
-  --ticket:     #f0a531;  --ticket-ink: #102a43;
-  --sortie:     #0f5c9e;  --sortie-ink: #ffffff;
-  --retard:     #b42a12;  --retard-ink: #ffffff;
+  /* États : champs pastel + encre foncée (contraste ≥ 7:1), texte d'état en toutes lettres */
+  --libre:      #bfe8de;  --libre-ink:  #0b3d38;
+  --ticket:     #fde3a8;  --ticket-ink: #5a3a05;
+  --sortie:     #c5dcf5;  --sortie-ink: #0c3a66;
+  --retard:     #f4b3a4;  --retard-ink: #6e1a0a;
   --retard-line:#b42a12;
   --retard-wash:#fbe9e3;
   /* Texte d'état sur surface claire */
@@ -71,7 +71,7 @@
   /* Surface inversée (toast) : marques lisibles sur l'encre */
   --inverse-libre:  #3cc47a;
   --inverse-sortie: #6fa6ff;
-  --stripes-ticket:   repeating-linear-gradient(-45deg, var(--ticket) 0 3px, transparent 3px 9px);
+  --stripes-ticket:   repeating-linear-gradient(-45deg, #e8b84a 0 3px, transparent 3px 9px);
   --stripes-overtime: repeating-linear-gradient(-45deg, var(--retard) 0 6px, #1a0004 6px 10px);
 
   --radius: 12px;
@@ -719,3 +719,10 @@ th[aria-sort="descending"] .th-sort .icon { transform: rotate(180deg); }
   .topbar, .tabbar, .toast-stack, .admin-sidebar, .page-actions, .tl-toolbar, .late-band, .filters { display: none !important; }
   body { background: #fff; padding: 0; }
 }
+
+/* ── Pastel : pas de pictogrammes d'état, bords discrets ──────── */
+.tile-state .mark, .filter .mark, .badge .mark, .late-band .mark, .tl-label-state .mark,
+.legend-item .mark, .tile-state .mark-when-ontime, .tile-state .mark-when-late { display: none; }
+.btn-vendre, .btn-sortir, .btn-retour, .badge-ticket, .badge-sortie, .badge-retard { box-shadow: inset 0 0 0 1px rgb(16 42 67 / .16); }
+.btn-vendre:hover, .btn-sortir:hover, .btn-retour:hover { filter: brightness(.96); }
+.tile-state { border-right: 1px solid rgb(16 42 67 / .12); }

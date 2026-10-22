@@ -1,5 +1,5 @@
-Django==5.2
-whitenoise==6.8.2
-python-dotenv==1.0.1
-gunicorn==23.0.0
-django-axes==7.0.2
+Django==5.2.18
+whitenoise==6.12.0
+python-dotenv==1.2.4
+gunicorn==26.2.0
+django-axes==8.3.1

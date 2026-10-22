@@ -403,6 +403,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 .tile--reservee .tile-state { background: var(--ticket); color: var(--ticket-ink); }
 .tile--sortie   .tile-state { background: var(--sortie); color: var(--sortie-ink); }
 .tile--sortie.is-late .tile-state { background: var(--retard); color: var(--retard-ink); }
+/* Ligne libre : 2 rangées (nom, puis champ client + Vendre), la plaque couvre les deux */
+.tile--libre .tile-state { grid-row: 1 / 3; }
 .tile .mark-when-late { display: none; }
 .tile.is-late .mark-when-late { display: block; }
 .tile.is-late .mark-when-ontime { display: none; }

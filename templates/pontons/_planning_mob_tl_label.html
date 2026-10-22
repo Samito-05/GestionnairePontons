@@ -1,5 +1,7 @@
 <div id="mob-tl-label-{{ row.embarcation.pk }}" class="mob-tl-label">
-  <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
+  {% if row.statut == 'sortie' %}{% if row.overtime %}<svg class="mark mark-retard" role="img" aria-label="Retard"><use href="#m-retard"/></svg>{% else %}<svg class="mark mark-sortie" role="img" aria-label="Sorti"><use href="#m-sortie"/></svg>{% endif %}
+  {% elif row.statut == 'reservee' %}<svg class="mark mark-ticket" role="img" aria-label="Ticket vendu"><use href="#m-ticket"/></svg>
+  {% else %}<svg class="mark mark-libre" role="img" aria-label="Libre"><use href="#m-libre"/></svg>{% endif %}
   <span class="tl-label-text">
     <span class="tl-label-name" title="{{ row.embarcation.nom }}">{{ row.embarcation.nom }}</span>
   </span>

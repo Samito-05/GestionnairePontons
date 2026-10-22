@@ -202,7 +202,11 @@
 
   /* ── Retards en tête de leur ponton : déplacés dans le DOM (pas en CSS)
      pour que l'ordre du clavier et des lecteurs d'écran suive l'écran ── */
+  var lastPointer = 0;
+  document.addEventListener('pointerdown', function () { lastPointer = Date.now(); }, true);
   function liftLateRows() {
+    // Jamais pendant qu'un doigt vise une ligne : on attend le tick suivant
+    if (Date.now() - lastPointer < 8000) return;
     document.querySelectorAll('.rows').forEach(function (rows) {
       var firstOnTime = null;
       Array.prototype.forEach.call(rows.children, function (el) {

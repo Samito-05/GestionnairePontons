@@ -1,57 +1,37 @@
 {% extends 'pontons/admin/base_admin.html' %}
-{% block title %}Tableau de bord{% endblock %}
+{% block title %}Gestion{% endblock %}
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Administration</p>
-    <h1 class="page-title">Tableau de <em>bord</em></h1>
-  </div>
+  {% now "l j F Y" as today %}<h1 class="page-title">Gestion<small>{{ today|capfirst }}</small></h1>
   <a href="{% url 'admin_location_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouvelle location</a>
 </div>
 
-<div class="stat-grid">
-  <div class="stat-card stat-card-coral">
-    <div class="stat-icon"><svg class="icon"><use href="#i-ticket"/></svg></div>
-    <div class="stat-value">{{ nb_locations_today }}</div>
-    <div class="stat-label">Location{{ nb_locations_today|pluralize }} aujourd'hui</div>
-    <a href="{% url 'admin_locations' %}" class="stat-link">Voir le détail →</a>
-  </div>
+<!-- Relevé : chaque chiffre mène à sa liste -->
+<nav class="summary" aria-label="Relevé">
+  <a href="{% url 'admin_locations' %}"><strong>{{ nb_locations_today }}</strong><span>location{{ nb_locations_today|pluralize }} aujourd'hui</span></a>
+  <a href="{% url 'admin_embarcations' %}"><strong>{{ nb_embarcations }}</strong><span>embarcation{{ nb_embarcations|pluralize }} active{{ nb_embarcations|pluralize }}</span></a>
+  <a href="{% url 'admin_pontons' %}"><strong>{{ nb_pontons }}</strong><span>ponton{{ nb_pontons|pluralize }}</span></a>
+  <a href="{% url 'admin_users' %}"><strong>{{ nb_users }}</strong><span>utilisateur{{ nb_users|pluralize }}</span></a>
+</nav>
 
-  <div class="stat-card stat-card-teal">
-    <div class="stat-icon"><svg class="icon"><use href="#i-boat"/></svg></div>
-    <div class="stat-value">{{ nb_embarcations }}</div>
-    <div class="stat-label">Embarcation{{ nb_embarcations|pluralize }} active{{ nb_embarcations|pluralize }}</div>
-    <a href="{% url 'admin_embarcations' %}" class="stat-link">Gérer →</a>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-icon"><svg class="icon"><use href="#i-anchor"/></svg></div>
-    <div class="stat-value">{{ nb_pontons }}</div>
-    <div class="stat-label">Ponton{{ nb_pontons|pluralize }}</div>
-    <a href="{% url 'admin_pontons' %}" class="stat-link">Gérer →</a>
-  </div>
-
-  <div class="stat-card stat-card-amber">
-    <div class="stat-icon"><svg class="icon"><use href="#i-users"/></svg></div>
-    <div class="stat-value">{{ nb_users }}</div>
-    <div class="stat-label">Utilisateur{{ nb_users|pluralize }}</div>
-    <a href="{% url 'admin_users' %}" class="stat-link">Gérer →</a>
-  </div>
-</div>
-
-<div class="card mt-4">
-  <div class="card-header">
-    <span class="card-header-title">Actions rapides</span>
-  </div>
-  <div class="card-body">
-    <div class="quick-actions">
-      <a href="{% url 'gestionnaire' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-boat"/></svg>Gérer les sorties</a>
-      <a href="{% url 'planning' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-calendar"/></svg>Voir le planning</a>
-      <a href="{% url 'admin_ponton_new' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-plus"/></svg>Nouveau ponton</a>
-      <a href="{% url 'admin_embarcation_new' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-plus"/></svg>Nouvelle embarcation</a>
-      <a href="{% url 'admin_user_new' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-plus"/></svg>Nouvel utilisateur</a>
-    </div>
-  </div>
+<div class="dash-grid">
+  <section class="panel" aria-labelledby="dash-create">
+    <h2 class="panel-title" id="dash-create">Créer</h2>
+    <ul class="link-list">
+      <li><a href="{% url 'admin_location_new' %}"><svg class="icon"><use href="#i-ticket"/></svg>Location<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_embarcation_new' %}"><svg class="icon"><use href="#i-boat"/></svg>Embarcation<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_ponton_new' %}"><svg class="icon"><use href="#i-anchor"/></svg>Ponton<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_user_new' %}"><svg class="icon"><use href="#i-user"/></svg>Utilisateur<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+    </ul>
+  </section>
+  <section class="panel" aria-labelledby="dash-ops">
+    <h2 class="panel-title" id="dash-ops">Exploitation</h2>
+    <ul class="link-list">
+      <li><a href="{% url 'gestionnaire' %}"><svg class="icon"><use href="#i-boat"/></svg>Sorties en direct<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'planning' %}"><svg class="icon"><use href="#i-calendar"/></svg>Planning du jour<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_locations' %}"><svg class="icon"><use href="#i-ticket"/></svg>Locations du jour<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+    </ul>
+  </section>
 </div>
 {% endblock %}

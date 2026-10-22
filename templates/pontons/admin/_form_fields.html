@@ -1,7 +1,7 @@
 {% comment %}Champs d'un ModelForm : libellé relié au champ, case à cocher en ligne, erreurs et aide.{% endcomment %}
 {% if form.non_field_errors %}
-  <div class="notice notice-error mb-4" role="alert">
-    <svg class="icon"><use href="#i-alert"/></svg>
+  <div class="notice notice-error" role="alert">
+    <svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>
     <span>{% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
   </div>
 {% endif %}
@@ -13,10 +13,10 @@
   </label>
   {% else %}
   <div class="form-field{% if field.errors %} has-error{% endif %}">
-    <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="form-optional">(optionnel)</span>{% endif %}</label>
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="form-optional">(facultatif)</span>{% endif %}</label>
     {{ field }}
     {% if field.errors %}
-      <span class="form-error" role="alert"><svg class="icon"><use href="#i-alert"/></svg>{{ field.errors.0 }}</span>
+      <span class="form-error" role="alert"><svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>{{ field.errors.0 }}</span>
     {% endif %}
     {% if field.help_text %}
       <span class="form-help">{{ field.help_text }}</span>

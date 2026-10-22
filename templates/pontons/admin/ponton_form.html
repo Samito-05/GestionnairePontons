@@ -3,23 +3,18 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Pontons</p>
-    <h1 class="page-title">{{ titre }}</h1>
-  </div>
-  <a href="{% url 'admin_pontons' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg>Retour à la liste</a>
+  <h1 class="page-title">{{ titre }}</h1>
+  <a href="{% url 'admin_pontons' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg>Pontons</a>
 </div>
 
-<div class="card form-card">
-  <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
-      {% include 'pontons/admin/_form_fields.html' %}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary btn-lg"><svg class="icon"><use href="#i-check"/></svg>Enregistrer</button>
-        <a href="{% url 'admin_pontons' %}" class="btn btn-ghost btn-lg">Annuler</a>
-      </div>
-    </form>
-  </div>
+<div class="form-panel">
+  <form method="post">
+    {% csrf_token %}
+    {% include 'pontons/admin/_form_fields.html' %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-lg">Enregistrer</button>
+      <a href="{% url 'admin_pontons' %}" class="btn btn-ghost btn-lg">Annuler</a>
+    </div>
+  </form>
 </div>
 {% endblock %}

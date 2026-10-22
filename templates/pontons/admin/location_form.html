@@ -3,27 +3,22 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Locations</p>
-    <h1 class="page-title">{{ titre }}</h1>
-  </div>
-  <a href="{% url 'admin_locations' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg>Retour à la liste</a>
+  <h1 class="page-title">{{ titre }}</h1>
+  <a href="{% url 'admin_locations' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg>Locations</a>
 </div>
 
-<div class="card form-card">
-  <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
-      {% include 'pontons/admin/_form_fields.html' %}
-      <div class="notice notice-info mb-4">
-        <svg class="icon"><use href="#i-info"/></svg>
-        <span>Si l'heure de fin est vide, elle sera fixée automatiquement à début + 1 h.</span>
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary btn-lg"><svg class="icon"><use href="#i-check"/></svg>Enregistrer</button>
-        <a href="{% url 'admin_locations' %}" class="btn btn-ghost btn-lg">Annuler</a>
-      </div>
-    </form>
-  </div>
+<div class="form-panel">
+  <form method="post">
+    {% csrf_token %}
+    <div class="notice">
+      <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+      <span>Fin prévue vide : elle est fixée à début + 1 h.</span>
+    </div>
+    {% include 'pontons/admin/_form_fields.html' %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-lg">Enregistrer</button>
+      <a href="{% url 'admin_locations' %}" class="btn btn-ghost btn-lg">Annuler</a>
+    </div>
+  </form>
 </div>
 {% endblock %}

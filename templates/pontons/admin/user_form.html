@@ -3,29 +3,24 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Utilisateurs</p>
-    <h1 class="page-title">{{ titre }}</h1>
-  </div>
-  <a href="{% url 'admin_users' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg>Retour à la liste</a>
+  <h1 class="page-title">{{ titre }}</h1>
+  <a href="{% url 'admin_users' %}" class="btn btn-ghost"><svg class="icon"><use href="#i-arrow-left"/></svg>Utilisateurs</a>
 </div>
 
-<div class="card form-card">
-  <div class="card-body">
-    {% if edit_user %}
-      <div class="notice notice-info mb-4">
-        <svg class="icon"><use href="#i-info"/></svg>
-        <span>Modification du rôle de <strong>{{ edit_user.username }}</strong>.</span>
-      </div>
-    {% endif %}
-    <form method="post">
-      {% csrf_token %}
-      {% include 'pontons/admin/_form_fields.html' %}
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary btn-lg"><svg class="icon"><use href="#i-check"/></svg>Enregistrer</button>
-        <a href="{% url 'admin_users' %}" class="btn btn-ghost btn-lg">Annuler</a>
-      </div>
-    </form>
-  </div>
+<div class="form-panel">
+  {% if edit_user %}
+    <div class="notice">
+      <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+      <span>Modification du rôle de <strong>{{ edit_user.username }}</strong>.</span>
+    </div>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {% include 'pontons/admin/_form_fields.html' %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-lg">Enregistrer</button>
+      <a href="{% url 'admin_users' %}" class="btn btn-ghost btn-lg">Annuler</a>
+    </div>
+  </form>
 </div>
 {% endblock %}

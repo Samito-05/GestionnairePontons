@@ -600,6 +600,7 @@ body.tl-fs-active { overflow: hidden; }
 .th-sort { background: none; border: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
 .th-sort:hover { color: var(--ink); background: var(--rule); }
 .th-sort .icon { width: .9rem; height: .9rem; opacity: .35; }
+th.cell-num .th-sort { justify-content: flex-end; }
 th[aria-sort] .th-sort { color: var(--ink); }
 th[aria-sort] .th-sort .icon { opacity: 1; }
 th[aria-sort="descending"] .th-sort .icon { transform: rotate(180deg); }
@@ -715,7 +716,7 @@ th[aria-sort="descending"] .th-sort .icon { transform: rotate(180deg); }
   .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
   .data-table thead { display: none; }
   .data-table tbody tr {
-    display: grid; grid-template-columns: 1fr 1fr; gap: .1rem .75rem;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .1rem .75rem;
     background: var(--surface); border: 1px solid var(--rule); padding: .6rem .8rem .7rem; margin-bottom: .5rem;
   }
   .data-table tbody tr:hover td { background: none; }
@@ -728,6 +729,7 @@ th[aria-sort="descending"] .th-sort .icon { transform: rotate(180deg); }
   .data-table .empty-row { display: block; }
   .data-table .empty-row td { padding: 2rem 0; }
   .cell-clip { max-width: 100%; }
+  .data-table td.cell-num { text-align: left; }
   .form-panel { padding: 1rem; border-left: 0; border-right: 0; margin: 0 -.75rem; }
   .form-actions .btn { flex: 1; }
 }

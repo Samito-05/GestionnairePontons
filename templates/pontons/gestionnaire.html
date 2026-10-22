@@ -1,40 +1,39 @@
 {% extends 'base.html' %}
-{% block title %}Gestion des sorties — La Plage{% endblock %}
+{% block title %}Sorties — La Plage{% endblock %}
 
 {% block content %}
 <section class="page-section">
   <div class="container" data-server-now="{{ now|date:'U' }}">
 
     <div class="page-header">
-      <div>
-        <p class="page-eyebrow">{{ now|date:"l j F" }}</p>
-        <h1 class="page-title">Gestion des <em>sorties</em></h1>
-      </div>
-      <div class="page-actions">
-        <span id="live-clock" class="clock-tag" title="Heure actuelle">
-          <svg class="icon"><use href="#i-clock"/></svg><span data-clock>{{ now|time:"H:i" }}</span>
-        </span>
-        <a href="{% url 'planning' %}" class="btn btn-ghost hide-mobile"><svg class="icon"><use href="#i-calendar"/></svg>Planning</a>
-      </div>
+      <h1 class="page-title">Sorties<small>{{ now|date:"l j F"|capfirst }}</small></h1>
+      <span id="live-clock" class="clock" title="Heure actuelle"><span data-clock>{{ now|time:"H:i" }}</span></span>
     </div>
 
     {% if embarcations_status %}
-    <!-- Résumé de la flotte : chaque puce filtre les tuiles -->
-    <div class="statbar" role="group" aria-label="Filtrer les embarcations par état">
-      <button type="button" class="stat-chip" data-filter="all" aria-pressed="true">
-        <strong data-count="all">–</strong> Toutes
+    <!-- Retards : rempli par app.js, un appui n'affiche que les retards -->
+    <button type="button" class="late-band" data-late-band hidden>
+      <svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>
+      <span class="late-band-text"><span class="sr-only">En retard : </span><span data-late-text></span></span>
+      <span class="late-band-go">Voir<svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></span>
+    </button>
+
+    <!-- État de la flotte : chaque case filtre les lignes -->
+    <div class="filters" role="group" aria-label="Filtrer les embarcations par état">
+      <button type="button" class="filter" data-filter="all" aria-pressed="true">
+        <strong data-count="all">–</strong><span>Tous</span>
       </button>
-      <button type="button" class="stat-chip" data-filter="libre" aria-pressed="false">
-        <span class="dot"></span><strong data-count="libre">–</strong> Disponibles
+      <button type="button" class="filter" data-filter="libre" aria-pressed="false">
+        <strong data-count="libre">–</strong><span><svg class="mark mark-libre" aria-hidden="true"><use href="#m-libre"/></svg>Libres</span>
       </button>
-      <button type="button" class="stat-chip" data-filter="reservee" aria-pressed="false">
-        <span class="dot"></span><strong data-count="reservee">–</strong> Tickets
+      <button type="button" class="filter" data-filter="reservee" aria-pressed="false">
+        <strong data-count="reservee">–</strong><span><svg class="mark mark-ticket" aria-hidden="true"><use href="#m-ticket"/></svg>Tickets</span>
       </button>
-      <button type="button" class="stat-chip" data-filter="sortie" aria-pressed="false">
-        <span class="dot"></span><strong data-count="sortie">–</strong> En sortie
+      <button type="button" class="filter" data-filter="sortie" aria-pressed="false">
+        <strong data-count="sortie">–</strong><span><svg class="mark mark-sortie" aria-hidden="true"><use href="#m-sortie"/></svg>Sortis</span>
       </button>
-      <button type="button" class="stat-chip" data-filter="retard" data-count-alert aria-pressed="false">
-        <span class="dot"></span><strong data-count="retard">–</strong> Retards
+      <button type="button" class="filter" data-filter="retard" data-count-alert aria-pressed="false">
+        <strong data-count="retard">–</strong><span><svg class="mark mark-retard" aria-hidden="true"><use href="#m-retard"/></svg>Retards</span>
       </button>
     </div>
     {% endif %}
@@ -42,24 +41,21 @@
     <div id="board" data-filter="all" data-count-scope>
       <div id="board-sections">
         {% for ponton_data in embarcations_status %}
-        <section class="ponton-section">
-          <h2 class="section-title">
+        <section class="ponton-section" aria-labelledby="ponton-{{ ponton_data.ponton.pk }}">
+          <h2 class="section-title" id="ponton-{{ ponton_data.ponton.pk }}">
             {{ ponton_data.ponton.nom }}
-            <span class="section-count">{{ ponton_data.embarcations|length }} embarcation{{ ponton_data.embarcations|length|pluralize }}</span>
+            <small>{{ ponton_data.embarcations|length }} embarcation{{ ponton_data.embarcations|length|pluralize }}</small>
           </h2>
-
-          <div class="emb-grid">
+          <div class="rows">
             {% for item in ponton_data.embarcations %}
               {% include 'pontons/_gestionnaire_tile.html' with item=item %}
             {% empty %}
-              <p class="text-muted text-sm" style="grid-column:1/-1;">Aucune embarcation sur ce ponton.</p>
+              <p class="rows-empty">Aucune embarcation sur ce ponton.</p>
             {% endfor %}
           </div>
         </section>
-
         {% empty %}
           <div class="empty-state">
-            <svg class="icon"><use href="#i-anchor"/></svg>
             <h2>Aucun ponton configuré</h2>
             <p>Ajoutez un ponton et ses embarcations pour commencer à gérer les sorties.</p>
             {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" class="btn btn-primary">Créer un ponton</a>{% endif %}
@@ -68,14 +64,13 @@
       </div>
 
       <div class="empty-state" id="filter-empty" hidden>
-        <svg class="icon"><use href="#i-check"/></svg>
         <h2>Rien dans ce filtre</h2>
-        <p>Aucune embarcation ne correspond à cet état pour le moment.</p>
+        <p>Aucune embarcation n'est dans cet état pour le moment.</p>
         <button type="button" class="btn btn-ghost" data-filter-reset>Tout afficher</button>
       </div>
     </div>
 
-    <!-- Synchronisation avec les autres postes : remplace les tuiles sans recharger la page -->
+    <!-- Synchronisation avec les autres postes : remplace les lignes sans recharger la page -->
     <span hidden
           hx-get="{% url 'gestionnaire' %}"
           hx-trigger="every 30s [boardIdle()], board-refresh from:body"
@@ -91,10 +86,10 @@
 <script>
 (function () {
   var board = document.getElementById('board');
-  var chips = document.querySelectorAll('.stat-chip[data-filter]');
+  var filters = document.querySelectorAll('.filter[data-filter]');
   var emptyBox = document.getElementById('filter-empty');
 
-  // Une section sans tuile visible est masquée ; message si le filtre ne donne rien
+  // Une section sans ligne visible est masquée ; message si le filtre ne donne rien
   function applyFilter() {
     var f = board.dataset.filter, anyVisible = false;
     board.querySelectorAll('.ponton-section').forEach(function (sec) {
@@ -110,18 +105,23 @@
   }
   function setFilter(f) {
     board.dataset.filter = f;
-    chips.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.filter === f ? 'true' : 'false'); });
+    filters.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.filter === f ? 'true' : 'false'); });
     applyFilter();
   }
-  chips.forEach(function (c) {
-    // Second appui sur la puce active = retour à « Toutes »
+  filters.forEach(function (c) {
+    // Second appui sur le filtre actif = retour à « Tous »
     c.addEventListener('click', function () { setFilter(board.dataset.filter === c.dataset.filter ? 'all' : c.dataset.filter); });
   });
   var reset = document.querySelector('[data-filter-reset]');
   if (reset) reset.addEventListener('click', function () { setFilter('all'); });
+  var band = document.querySelector('[data-late-band]');
+  if (band) band.addEventListener('click', function () {
+    setFilter('retard');
+    board.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
   document.body.addEventListener('htmx:afterSwap', applyFilter);
 
-  // Activité récente ou saisie en cours : on ne remplace pas les tuiles sous les doigts
+  // Activité récente ou saisie en cours : on ne remplace pas les lignes sous les doigts
   var lastActivity = 0;
   ['pointerdown', 'keydown', 'input'].forEach(function (ev) {
     document.addEventListener(ev, function () { lastActivity = Date.now(); }, true);

@@ -1,77 +1,58 @@
+{% comment %}Une ligne d'embarcation : plaque d'état | nom + chiffre | action (couleur de l'état produit).{% endcomment %}
 {% if item.statut == 'sortie' %}
 <article id="tile-{{ item.embarcation.pk }}" class="tile tile--sortie{% if item.overtime %} is-late{% endif %}"
          data-statut="sortie" data-end="{{ item.location.heure_fin|date:'U' }}000">
+  <div class="tile-state">
+    <svg class="mark mark-when-ontime" aria-hidden="true"><use href="#m-sortie"/></svg>
+    <svg class="mark mark-when-late" aria-hidden="true"><use href="#m-retard"/></svg>
+    <span data-state-label>{% if item.overtime %}Retard{% else %}Sorti{% endif %}</span>
+  </div>
   <div class="tile-body">
-    <div class="tile-head">
-      <span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span>
-      <h3 class="tile-name">{{ item.embarcation.nom }}</h3>
-      <span class="tile-type">{{ item.embarcation.get_type_embarcation_display }}</span>
-    </div>
-    <div class="tile-state">
-      <span class="dot pulse"></span>
-      <span data-state-label>{% if item.overtime %}Retard{% else %}En sortie{% endif %}</span>
-      <span class="tile-time">retour prévu {{ item.retour }}</span>
-    </div>
-    <div class="tile-remaining" data-remaining>{% if item.overtime %}{% if item.overtime_min %}+{{ item.overtime_min }}{% else %}&lt;1{% endif %}<small>min de retard</small>{% else %}&nbsp;{% endif %}</div>
-    {% if item.location.notes %}<div class="tile-note"><svg class="icon"><use href="#i-user"/></svg><span>{{ item.location.notes }}</span></div>{% endif %}
+    <h3 class="tile-name"><span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span><span>{{ item.embarcation.nom }}</span></h3>
+    <p class="tile-meta"><span class="tile-figure" data-remaining>{% if item.overtime %}+{% if item.overtime_min %}{{ item.overtime_min }}{% else %}&lt;1{% endif %} min{% endif %}</span> <span class="tile-sub">fin prévue {{ item.retour }}</span></p>
+    {% if item.location.notes %}<p class="tile-note"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>{{ item.location.notes }}</p>{% endif %}
   </div>
-  <div class="tile-action">
-    <form hx-post="{% url 'retour_embarcation' item.embarcation.pk %}"
-          hx-target="#tile-{{ item.embarcation.pk }}"
-          hx-swap="outerHTML">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-return"><svg class="icon"><use href="#i-return"/></svg>Retour</button>
-    </form>
-  </div>
+  <form class="tile-action" hx-post="{% url 'retour_embarcation' item.embarcation.pk %}"
+        hx-target="#tile-{{ item.embarcation.pk }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-retour" aria-label="Retour — {{ item.embarcation.nom }}">Retour</button>
+  </form>
 </article>
 
 {% elif item.statut == 'reservee' %}
 <article id="tile-{{ item.embarcation.pk }}" class="tile tile--reservee" data-statut="reservee">
+  <div class="tile-state">
+    <svg class="mark" aria-hidden="true"><use href="#m-ticket"/></svg>
+    <span>Ticket</span>
+  </div>
   <div class="tile-body">
-    <div class="tile-head">
-      <span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span>
-      <h3 class="tile-name">{{ item.embarcation.nom }}</h3>
-      <span class="tile-type">{{ item.embarcation.get_type_embarcation_display }}</span>
-    </div>
-    <div class="tile-state">
-      <svg class="icon"><use href="#i-ticket"/></svg>
-      <span>Ticket vendu</span>
-      <span class="tile-time">à {{ item.ticket_time }}</span>
-    </div>
-    {% if item.location.notes %}<div class="tile-note"><svg class="icon"><use href="#i-user"/></svg><span>{{ item.location.notes }}</span></div>{% endif %}
+    <h3 class="tile-name"><span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span><span>{{ item.embarcation.nom }}</span></h3>
+    <p class="tile-meta">vendu à {{ item.ticket_time }}</p>
+    {% if item.location.notes %}<p class="tile-note"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>{{ item.location.notes }}</p>{% endif %}
   </div>
-  <div class="tile-action">
-    <form hx-post="{% url 'sortir_embarcation' item.embarcation.pk %}"
-          hx-target="#tile-{{ item.embarcation.pk }}"
-          hx-swap="outerHTML">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-warning"><svg class="icon"><use href="#i-out"/></svg>Sortir</button>
-    </form>
-  </div>
+  <form class="tile-action" hx-post="{% url 'sortir_embarcation' item.embarcation.pk %}"
+        hx-target="#tile-{{ item.embarcation.pk }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sortir" aria-label="Sortir — {{ item.embarcation.nom }}">Sortir</button>
+  </form>
 </article>
 
 {% else %}
 <article id="tile-{{ item.embarcation.pk }}" class="tile tile--libre" data-statut="libre">
+  <div class="tile-state">
+    <svg class="mark" aria-hidden="true"><use href="#m-libre"/></svg>
+    <span>Libre</span>
+  </div>
   <div class="tile-body">
-    <div class="tile-head">
-      <span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span>
-      <h3 class="tile-name">{{ item.embarcation.nom }}</h3>
-      <span class="tile-type">{{ item.embarcation.get_type_embarcation_display }}</span>
-    </div>
-    <div class="tile-state">
-      <span class="dot"></span>
-      <span>Disponible</span>
-    </div>
+    <h3 class="tile-name"><span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span><span>{{ item.embarcation.nom }}</span></h3>
+    <p class="tile-meta">{{ item.embarcation.get_type_embarcation_display }}</p>
   </div>
-  <div class="tile-action">
-    <form hx-post="{% url 'louer_embarcation' item.embarcation.pk %}"
-          hx-target="#tile-{{ item.embarcation.pk }}"
-          hx-swap="outerHTML">
-      {% csrf_token %}
-      <input type="text" name="notes" class="tile-input" placeholder="Client (optionnel)" maxlength="255"
-             aria-label="Client pour {{ item.embarcation.nom }} (optionnel)" autocomplete="off" enterkeyhint="done">
-      <button type="submit" class="btn btn-success"><svg class="icon"><use href="#i-ticket"/></svg>Vente</button>
-    </form>
-  </div>
+  <form class="tile-sell" hx-post="{% url 'louer_embarcation' item.embarcation.pk %}"
+        hx-target="#tile-{{ item.embarcation.pk }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <input type="text" name="notes" class="input tile-input" placeholder="Client (facultatif)" maxlength="255"
+           aria-label="Client pour {{ item.embarcation.nom }} (facultatif)" autocomplete="off" enterkeyhint="done">
+    <button type="submit" class="btn btn-vendre" aria-label="Vendre un ticket — {{ item.embarcation.nom }}">Vendre</button>
+  </form>
 </article>
 {% endif %}

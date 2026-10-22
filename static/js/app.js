@@ -113,7 +113,7 @@
     // Planning : conserver la fenêtre 24h de la page (constante définie par planning.html)
     if (typeof WINDOW_START_ISO !== 'undefined') values.window_start = WINDOW_START_ISO;
     var target = form.getAttribute('hx-target');
-    window.showToast((d.nom || 'Embarcation') + ' rendu.', 'success', {
+    window.showToast('Retour enregistré : ' + (d.nom || 'embarcation'), 'success', {
       actionLabel: 'Annuler',
       delay: 15000,   // le serveur accepte l'annulation pendant 60 s
       onAction: function () {

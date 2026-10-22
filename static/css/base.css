@@ -264,9 +264,9 @@ main { flex: 1; }
   -webkit-mask: var(--toast-mark) center / contain no-repeat; mask: var(--toast-mark) center / contain no-repeat;
 }
 .toast-success { --toast-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 2 18 17H2z'/%3E%3C/svg%3E"); }
-.toast-success::before { color: var(--libre); }
+.toast-success::before { color: #3cc47a; }
 .toast-info { --toast-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='7.5'/%3E%3C/svg%3E"); }
-.toast-info::before { color: var(--sortie); }
+.toast-info::before { color: #6fa6ff; }
 .toast-warning { --toast-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 3l14 14M17 3 3 17' stroke='%23000' stroke-width='3.6'/%3E%3C/svg%3E"); }
 .toast-warning::before { color: var(--ticket); }
 .toast-error { background: var(--retard); color: var(--retard-ink); }
@@ -417,6 +417,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 .tile-note { display: flex; align-items: center; gap: .35rem; }
 .tile-note .icon { width: .95rem; height: .95rem; color: var(--ink-3); }
 .tile-figure { font-size: 1.25rem; font-weight: 800; color: var(--ink); }
+.tile-meta:has(.tile-figure) { white-space: normal; }
+.tile-sub { white-space: nowrap; }
 .tile.is-late .tile-figure { color: var(--retard-text); }
 
 .tile-action { display: flex; align-items: center; padding: .6rem .7rem .6rem 0; }

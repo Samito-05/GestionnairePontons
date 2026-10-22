@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Sorties — La Plage{% endblock %}
-{% block brand_sub %}Sorties · {{ now|date:"D j b" }}{% endblock %}
+{% block brand_sub %}<span class="hide-mobile">L'Isle-Adam</span><span class="hide-desktop">Sorties · {{ now|date:"D j b" }}</span>{% endblock %}
 {% block topbar_clock %}<span class="topbar-clock" aria-hidden="true"><span data-clock>{{ now|time:"H:i" }}</span></span>{% endblock %}
 
 {% block content %}

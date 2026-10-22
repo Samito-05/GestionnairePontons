@@ -407,7 +407,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 .tile .mark-when-late { display: none; }
 .tile.is-late .mark-when-late { display: block; }
 .tile.is-late .mark-when-ontime { display: none; }
-.tile.is-late { background: var(--retard-wash); border: 2px solid var(--retard-line); order: -1; }
+.tile.is-late { background: var(--retard-wash); border: 2px solid var(--retard-line); }
 
 .tile-body { padding: .45rem .75rem; display: flex; flex-direction: column; justify-content: center; gap: .1rem; min-width: 0; }
 .tile-name { display: flex; align-items: center; gap: .45rem; font-size: 1.1rem; font-weight: 800; min-width: 0; }

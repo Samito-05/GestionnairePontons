@@ -199,7 +199,21 @@
     }
   };
 
-  function tick() { updateClock(); updateCountdowns(); window.updateStatCounts(); }
+  /* ── Retards en tête de leur ponton : déplacés dans le DOM (pas en CSS)
+     pour que l'ordre du clavier et des lecteurs d'écran suive l'écran ── */
+  function liftLateRows() {
+    document.querySelectorAll('.rows').forEach(function (rows) {
+      var firstOnTime = null;
+      Array.prototype.forEach.call(rows.children, function (el) {
+        if (!el.classList.contains('tile')) return;
+        if (!el.classList.contains('is-late')) { if (!firstOnTime) firstOnTime = el; return; }
+        // Ne jamais déplacer la ligne sous le doigt / le focus
+        if (firstOnTime && !el.contains(document.activeElement)) rows.insertBefore(el, firstOnTime);
+      });
+    });
+  }
+
+  function tick() { updateClock(); updateCountdowns(); liftLateRows(); window.updateStatCounts(); }
   tick();
   setInterval(tick, 15000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });

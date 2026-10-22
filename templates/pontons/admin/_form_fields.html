@@ -14,7 +14,16 @@
   {% else %}
   <div class="form-field{% if field.errors %} has-error{% endif %}">
     <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="form-optional">(facultatif)</span>{% endif %}</label>
+    {% if field.widget_type == 'password' %}
+    <div class="password-field">
+      {{ field }}
+      <button type="button" class="password-toggle" data-password-toggle aria-label="Afficher le mot de passe" aria-pressed="false">
+        <svg class="icon"><use href="#i-eye"/></svg>
+      </button>
+    </div>
+    {% else %}
     {{ field }}
+    {% endif %}
     {% if field.errors %}
       <span class="form-error" role="alert"><svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>{{ field.errors.0 }}</span>
     {% endif %}

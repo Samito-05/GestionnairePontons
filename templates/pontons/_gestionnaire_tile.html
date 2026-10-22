@@ -9,8 +9,8 @@
   </div>
   <div class="tile-body">
     <h3 class="tile-name"><span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span><span>{{ item.embarcation.nom }}</span></h3>
-    <p class="tile-meta"><span class="tile-figure" data-remaining>{% if item.overtime %}+{% if item.overtime_min %}{{ item.overtime_min }}{% else %}&lt;1{% endif %} min{% endif %}</span> <span class="tile-sub">fin prévue {{ item.retour }}</span></p>
-    {% if item.location.notes %}<p class="tile-note"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>{{ item.location.notes }}</p>{% endif %}
+    <span class="tile-figure" data-remaining>{% if item.overtime %}+{% if item.overtime_min %}{{ item.overtime_min }}{% else %}&lt;1{% endif %} min{% endif %}</span>
+    <p class="tile-meta">fin {{ item.retour }}{% if item.location.notes %} · {{ item.location.notes }}{% endif %}</p>
   </div>
   <form class="tile-action" hx-post="{% url 'retour_embarcation' item.embarcation.pk %}"
         hx-target="#tile-{{ item.embarcation.pk }}" hx-swap="outerHTML">
@@ -27,8 +27,7 @@
   </div>
   <div class="tile-body">
     <h3 class="tile-name"><span class="color-dot" style="background:{{ item.embarcation.couleur }};"></span><span>{{ item.embarcation.nom }}</span></h3>
-    <p class="tile-meta">vendu à {{ item.ticket_time }}</p>
-    {% if item.location.notes %}<p class="tile-note"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>{{ item.location.notes }}</p>{% endif %}
+    <p class="tile-meta">vendu {{ item.ticket_time }}{% if item.location.notes %} · {{ item.location.notes }}{% endif %}</p>
   </div>
   <form class="tile-action" hx-post="{% url 'sortir_embarcation' item.embarcation.pk %}"
         hx-target="#tile-{{ item.embarcation.pk }}" hx-swap="outerHTML">

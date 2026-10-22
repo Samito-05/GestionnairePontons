@@ -37,7 +37,7 @@
   <div class="topbar-inner">
     <a class="brand" href="{% url 'planning' %}">
       <img src="{% static 'icons/blason.png' %}" alt="" width="26" height="29">
-      <span class="brand-name">La Plage<small>L'Isle-Adam</small></span>
+      <span class="brand-name">La Plage<small>{% block brand_sub %}L'Isle-Adam{% endblock %}</small></span>
     </a>
 
     <nav aria-label="Navigation principale" class="topnav-wrap">
@@ -55,6 +55,7 @@
       </ul>
     </nav>
 
+    {% block topbar_clock %}{% endblock %}
     <div class="topbar-end">
       {% if user.is_authenticated %}
         <span class="topbar-user">{{ user.username }}<small>{% if role == 'admin' %}Administrateur{% elif role == 'gestionnaire' %}Gestionnaire{% else %}Visiteur{% endif %}</small></span>

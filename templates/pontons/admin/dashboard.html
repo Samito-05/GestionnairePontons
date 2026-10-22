@@ -7,30 +7,30 @@
   <a href="{% url 'admin_location_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouvelle location</a>
 </div>
 
-<!-- Relevé : chaque chiffre mène à sa liste -->
-<nav class="summary" aria-label="Relevé">
-  <a href="{% url 'admin_locations' %}"><strong>{{ nb_locations_today }}</strong><span>location{{ nb_locations_today|pluralize }} aujourd'hui</span></a>
-  <a href="{% url 'admin_embarcations' %}"><strong>{{ nb_embarcations }}</strong><span>embarcation{{ nb_embarcations|pluralize }} active{{ nb_embarcations|pluralize }}</span></a>
-  <a href="{% url 'admin_pontons' %}"><strong>{{ nb_pontons }}</strong><span>ponton{{ nb_pontons|pluralize }}</span></a>
-  <a href="{% url 'admin_users' %}"><strong>{{ nb_users }}</strong><span>utilisateur{{ nb_users|pluralize }}</span></a>
-</nav>
-
 <div class="dash-grid">
+  <section class="panel" aria-labelledby="dash-manage">
+    <h2 class="panel-title" id="dash-manage">Gérer</h2>
+    <ul class="link-list">
+      <li><a href="{% url 'admin_locations' %}"><svg class="icon"><use href="#i-ticket"/></svg><span>Locations aujourd'hui</span><strong class="count">{{ nb_locations_today }}</strong><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_embarcations' %}"><svg class="icon"><use href="#i-boat"/></svg><span>Embarcations actives</span><strong class="count">{{ nb_embarcations }}</strong><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_pontons' %}"><svg class="icon"><use href="#i-anchor"/></svg><span>Pontons</span><strong class="count">{{ nb_pontons }}</strong><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_users' %}"><svg class="icon"><use href="#i-users"/></svg><span>Utilisateurs</span><strong class="count">{{ nb_users }}</strong><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+    </ul>
+  </section>
   <section class="panel" aria-labelledby="dash-create">
     <h2 class="panel-title" id="dash-create">Créer</h2>
     <ul class="link-list">
-      <li><a href="{% url 'admin_location_new' %}"><svg class="icon"><use href="#i-ticket"/></svg>Location<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
-      <li><a href="{% url 'admin_embarcation_new' %}"><svg class="icon"><use href="#i-boat"/></svg>Embarcation<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
-      <li><a href="{% url 'admin_ponton_new' %}"><svg class="icon"><use href="#i-anchor"/></svg>Ponton<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
-      <li><a href="{% url 'admin_user_new' %}"><svg class="icon"><use href="#i-user"/></svg>Utilisateur<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_location_new' %}"><svg class="icon"><use href="#i-plus"/></svg><span>Location</span><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_embarcation_new' %}"><svg class="icon"><use href="#i-plus"/></svg><span>Embarcation</span><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_ponton_new' %}"><svg class="icon"><use href="#i-plus"/></svg><span>Ponton</span><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'admin_user_new' %}"><svg class="icon"><use href="#i-plus"/></svg><span>Utilisateur</span><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
     </ul>
   </section>
   <section class="panel" aria-labelledby="dash-ops">
     <h2 class="panel-title" id="dash-ops">Exploitation</h2>
     <ul class="link-list">
-      <li><a href="{% url 'gestionnaire' %}"><svg class="icon"><use href="#i-boat"/></svg>Sorties en direct<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
-      <li><a href="{% url 'planning' %}"><svg class="icon"><use href="#i-calendar"/></svg>Planning du jour<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
-      <li><a href="{% url 'admin_locations' %}"><svg class="icon"><use href="#i-ticket"/></svg>Locations du jour<svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'gestionnaire' %}"><svg class="icon"><use href="#i-boat"/></svg><span>Sorties en direct</span><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a href="{% url 'planning' %}"><svg class="icon"><use href="#i-calendar"/></svg><span>Planning du jour</span><svg class="icon chev"><use href="#i-chevron-right"/></svg></a></li>
     </ul>
   </section>
 </div>

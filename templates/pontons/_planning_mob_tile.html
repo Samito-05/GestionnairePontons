@@ -13,8 +13,8 @@
   <div class="tile-body">
     <h3 class="tile-name"><span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span><span>{{ row.embarcation.nom }}</span></h3>
     {% if row.statut == 'sortie' %}
-      {% if row.overtime %}<p class="tile-meta"><span class="tile-figure">+{% if row.overtime_min %}{{ row.overtime_min }}{% else %}&lt;1{% endif %} min</span> <span class="tile-sub">fin prévue {{ row.retour }}</span></p>
-      {% elif row.retour %}<p class="tile-meta">retour prévu à {{ row.retour }}</p>{% endif %}
+      {% if row.overtime %}<span class="tile-figure">+{% if row.overtime_min %}{{ row.overtime_min }}{% else %}&lt;1{% endif %} min</span><p class="tile-meta">fin {{ row.retour }}</p>
+      {% elif row.retour %}<p class="tile-meta">fin {{ row.retour }}</p>{% endif %}
     {% else %}<p class="tile-meta">{{ row.embarcation.get_type_embarcation_display }}</p>
     {% endif %}
   </div>

@@ -2,7 +2,7 @@
    Strategy: only cache static assets.
    HTML pages are NEVER cached — always fetched fresh.
    ──────────────────────────────────────────────────────── */
-const CACHE_NAME = 'pontons-v7';
+const CACHE_NAME = 'pontons-v8';
 
 const STATIC_ASSETS = [
   '/static/manifest.json',

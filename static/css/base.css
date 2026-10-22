@@ -44,28 +44,28 @@
   --ink-3:      #4a6278;
 
   /* Coque : bleu pétrole de la ville, liseré jaune signal */
-  --shell:      #0c3d66;
-  --shell-2:    #165a93;
+  --shell:      #005378;
+  --shell-2:    #186485;
   --shell-ink:  #ffffff;
-  --shell-ink-2:#d3e2ef;
+  --shell-ink-2:#d6e8f0;
   --signal:     #f0a531;
-  --accent:     #14a096;
+  --accent:     #00abc2;
 
   /* États : champs pastel + encre foncée (contraste ≥ 7:1), texte d'état en toutes lettres */
-  --libre:      #bfe8de;  --libre-ink:  #0b3d38;
+  --libre:      #b8ecf3;  --libre-ink:  #00424d;
   --ticket:     #fde3a8;  --ticket-ink: #5a3a05;
-  --sortie:     #c5dcf5;  --sortie-ink: #0c3a66;
+  --sortie:     #d9d5ff;  --sortie-ink: #1d10a0;
   --retard:     #f4b3a4;  --retard-ink: #6e1a0a;
   --retard-line:#b42a12;
   --retard-wash:#fbe9e3;
   /* Texte d'état sur surface claire */
-  --libre-text: #0a6b62;
+  --libre-text: #006478;
   --ticket-text:#8a5208;
-  --sortie-text:#0f5c9e;
+  --sortie-text:#3b29ff;
   --retard-text:#b42a12;
 
-  --link:   #0f6bb2;
-  --focus:  #0f6bb2;
+  --link:   #3b29ff;
+  --focus:  #3b29ff;
   --select: #f7d9a0;
 
   /* Surface inversée (toast) : marques lisibles sur l'encre */

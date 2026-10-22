@@ -3,23 +3,20 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Flotte</p>
-    <h1 class="page-title">Pontons</h1>
-  </div>
+  <h1 class="page-title">Pontons<small>{{ pontons|length }} au total</small></h1>
   <a href="{% url 'admin_ponton_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouveau ponton</a>
 </div>
 
 <div class="table-wrap">
-  <table class="data-table">
+  <table class="data-table" data-sortable>
     <thead>
       <tr>
-        <th>Nom</th>
-        <th>Description</th>
-        <th>Embarcations</th>
-        <th>Ordre</th>
-        <th>Statut</th>
-        <th class="col-actions"><span class="sr-only">Actions</span></th>
+        <th data-sort="text">Nom</th>
+        <th data-sort="text">Description</th>
+        <th data-sort="num" class="cell-num">Embarcations</th>
+        <th data-sort="num" class="cell-num">Ordre</th>
+        <th data-sort="text">Statut</th>
+        <th class="col-actions"><span><span class="sr-only">Actions</span></span></th>
       </tr>
     </thead>
     <tbody>
@@ -27,18 +24,12 @@
       <tr>
         <td class="col-title"><span class="cell-main">{{ ponton.nom }}</span></td>
         <td data-label="Description" class="cell-muted">{{ ponton.description|default:"—" }}</td>
-        <td data-label="Embarcations"><span class="badge badge-info">{{ ponton.nb_embarcations }}</span></td>
-        <td data-label="Ordre" class="cell-muted">{{ ponton.ordre }}</td>
-        <td data-label="Statut">
-          {% if ponton.actif %}
-            <span class="badge badge-success"><span class="dot"></span>Actif</span>
-          {% else %}
-            <span class="badge badge-muted">Inactif</span>
-          {% endif %}
-        </td>
+        <td data-label="Embarcations" class="cell-num">{{ ponton.nb_embarcations }}</td>
+        <td data-label="Ordre" class="cell-num cell-muted">{{ ponton.ordre }}</td>
+        <td data-label="Statut">{% if ponton.actif %}<span class="badge badge-strong">Actif</span>{% else %}<span class="badge">Inactif</span>{% endif %}</td>
         <td class="col-actions">
           <div class="row-actions">
-            <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="btn btn-info btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
+            <a href="{% url 'admin_ponton_edit' ponton.pk %}" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
             <form method="post" action="{% url 'admin_ponton_delete' ponton.pk %}"
                   data-confirm="Supprimer « {{ ponton.nom }} » ?"
                   data-confirm-detail="Ses {{ ponton.nb_embarcations }} embarcation(s) et tout l'historique de locations associé seront définitivement perdus.&#10;&#10;Pour conserver l'historique, préférez Modifier → décocher Actif.">

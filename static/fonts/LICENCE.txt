@@ -3,6 +3,5 @@ Polices auto-hébergées (aucun appel à un CDN tiers — RGPD).
 Fraunces — Copyright The Fraunces Project Authors (https://github.com/undercasetype/Fraunces)
 Figtree  — Copyright The Figtree Project Authors (https://github.com/erikdkennedy/figtree)
 
-Les deux sont distribuées sous SIL Open Font License 1.1 : https://openfontlicense.org
-Fichiers : sous-ensemble « latin », variable (axe wght), issus des paquets
-@fontsource-variable/fraunces et @fontsource-variable/figtree (v5.1.0).
+SIL Open Font License 1.1 : https://openfontlicense.org
+Sous-ensemble « latin », variable, via @fontsource-variable (v5.1.0).

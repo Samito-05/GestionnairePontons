@@ -3,49 +3,40 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Flotte</p>
-    <h1 class="page-title">Embarcations</h1>
-  </div>
+  <h1 class="page-title">Embarcations<small>{{ embarcations|length }} au total</small></h1>
   <a href="{% url 'admin_embarcation_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouvelle embarcation</a>
 </div>
 
 <div class="table-wrap">
-  <table class="data-table">
+  <table class="data-table" data-sortable>
     <thead>
       <tr>
-        <th>Embarcation</th>
-        <th>Type</th>
-        <th>Ponton</th>
-        <th>Ordre</th>
-        <th>Statut</th>
-        <th class="col-actions"><span class="sr-only">Actions</span></th>
+        <th data-sort="text">Embarcation</th>
+        <th data-sort="text">Type</th>
+        <th data-sort="text">Ponton</th>
+        <th data-sort="num" class="cell-num">Ordre</th>
+        <th data-sort="text">Statut</th>
+        <th class="col-actions"><span><span class="sr-only">Actions</span></span></th>
       </tr>
     </thead>
     <tbody>
       {% for emb in embarcations %}
       <tr>
         <td class="col-title">
-          <span class="cell-main"><span class="color-dot color-dot-lg" style="background:{{ emb.couleur }};"></span>{{ emb.nom }}</span>
+          <span class="cell-main"><span class="color-dot" style="background:{{ emb.couleur }};"></span>{{ emb.nom }}</span>
         </td>
         <td data-label="Type" class="cell-muted">{{ emb.get_type_embarcation_display }}</td>
         <td data-label="Ponton">{{ emb.ponton.nom }}</td>
-        <td data-label="Ordre" class="cell-muted">{{ emb.ordre }}</td>
+        <td data-label="Ordre" class="cell-num cell-muted">{{ emb.ordre }}</td>
         <td data-label="Statut">
-          <div class="flex gap-1 flex-wrap">
-            {% if emb.actif %}
-              <span class="badge badge-success">Active</span>
-            {% else %}
-              <span class="badge badge-muted">Inactive</span>
-            {% endif %}
-            {% if emb.est_louee_maintenant %}
-              <span class="badge badge-danger"><span class="dot pulse"></span>En location</span>
-            {% endif %}
-          </div>
+          <span class="cell-main">
+            {% if emb.actif %}<span class="badge badge-strong">Active</span>{% else %}<span class="badge">Inactive</span>{% endif %}
+            {% if emb.est_louee_maintenant %}<span class="badge badge-sortie"><svg class="mark" aria-hidden="true"><use href="#m-sortie"/></svg>En location</span>{% endif %}
+          </span>
         </td>
         <td class="col-actions">
           <div class="row-actions">
-            <a href="{% url 'admin_embarcation_edit' emb.pk %}" class="btn btn-info btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
+            <a href="{% url 'admin_embarcation_edit' emb.pk %}" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
             <form method="post" action="{% url 'admin_embarcation_delete' emb.pk %}"
                   data-confirm="Supprimer « {{ emb.nom }} » ?"
                   data-confirm-detail="{{ emb.nb_locations }} location(s) en historique seront définitivement perdues.&#10;&#10;Pour conserver l'historique, préférez Modifier → décocher Actif.">

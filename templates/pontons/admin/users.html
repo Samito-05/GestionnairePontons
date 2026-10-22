@@ -3,22 +3,19 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Accès</p>
-    <h1 class="page-title">Utilisateurs</h1>
-  </div>
+  <h1 class="page-title">Utilisateurs<small>{{ users|length }} compte{{ users|length|pluralize }}</small></h1>
   <a href="{% url 'admin_user_new' %}" class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Nouvel utilisateur</a>
 </div>
 
 <div class="table-wrap">
-  <table class="data-table">
+  <table class="data-table" data-sortable>
     <thead>
       <tr>
-        <th>Identifiant</th>
-        <th>Nom complet</th>
-        <th>Email</th>
-        <th>Rôle</th>
-        <th class="col-actions"><span class="sr-only">Actions</span></th>
+        <th data-sort="text">Identifiant</th>
+        <th data-sort="text">Nom complet</th>
+        <th data-sort="text">Email</th>
+        <th data-sort="text">Rôle</th>
+        <th class="col-actions"><span><span class="sr-only">Actions</span></span></th>
       </tr>
     </thead>
     <tbody>
@@ -26,26 +23,26 @@
       <tr>
         <td class="col-title">
           <span class="cell-main">
-            <span class="user-avatar">{{ u.username|slice:":1" }}</span>{{ u.username }}
-            {% if u == request.user %}<span class="badge badge-muted">Vous</span>{% endif %}
+            <span class="user-avatar" aria-hidden="true">{{ u.username|slice:":1" }}</span>{{ u.username }}
+            {% if u == request.user %}<span class="badge">Vous</span>{% endif %}
           </span>
         </td>
         <td data-label="Nom complet" class="cell-muted">{{ u.get_full_name|default:"—" }}</td>
         <td data-label="Email" class="cell-muted">{{ u.email|default:"—" }}</td>
         <td data-label="Rôle">
           {% if u.is_superuser %}
-            <span class="badge badge-accent"><svg class="icon"><use href="#i-star"/></svg>Super admin</span>
+            <span class="badge badge-strong"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>Super admin</span>
           {% elif u.profile.role == 'admin' %}
-            <span class="badge badge-info">Administrateur</span>
+            <span class="badge badge-strong">Administrateur</span>
           {% elif u.profile.role == 'gestionnaire' %}
-            <span class="badge badge-success">Gestionnaire</span>
+            <span class="badge">Gestionnaire</span>
           {% else %}
-            <span class="badge badge-muted">Visiteur</span>
+            <span class="badge">Visiteur</span>
           {% endif %}
         </td>
         <td class="col-actions">
           <div class="row-actions">
-            <a href="{% url 'admin_user_edit' u.pk %}" class="btn btn-info btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
+            <a href="{% url 'admin_user_edit' u.pk %}" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
             {% if u != request.user %}
             <form method="post" action="{% url 'admin_user_delete' u.pk %}"
                   data-confirm="Supprimer l'utilisateur « {{ u.username }} » ?"

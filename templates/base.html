@@ -1,26 +1,17 @@
 {% load static %}<!DOCTYPE html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Gestion des locations d'embarcations">
-  <meta name="theme-color" content="#0c3d66">
-  <link rel="icon" type="image/png" href="/static/icons/blason.png">
+  <meta name="theme-color" content="#005378">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" type="image/png" href="{% static 'icons/blason.png' %}">
   <title>{% block title %}La Plage — L'Isle-Adam{% endblock %}</title>
 
-  <link rel="manifest" href="/static/manifest.json">
-  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
 
-  <!-- Thème appliqué avant le premier rendu (pas de flash clair/sombre) -->
-  <script>
-    (function () {
-      var t = null;
-      try { t = localStorage.getItem('theme'); } catch (e) {}
-      if (t !== 'dark' && t !== 'light')
-        t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
   <link rel="preload" href="{% static 'fonts/figtree-latin-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
@@ -32,70 +23,43 @@
 {% block shell %}
 <a class="skip-link" href="#contenu">Aller au contenu</a>
 
-<!-- ══ BARRE DE NAVIGATION ════════════════════════════════════ -->
-<header class="navbar">
-  <div class="navbar-inner">
-    <a class="navbar-brand" href="{% url 'planning' %}">
-      <img src="/static/icons/blason.png" alt="" width="33" height="36">
-      <span class="brand-text">
-        <span class="brand-label">La Plage</span>
-        <span class="brand-sub">L'Isle-Adam</span>
-      </span>
+<!-- ══ BARRE DU HAUT ══════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{% url 'planning' %}">
+      <img src="{% static 'icons/blason.png' %}" alt="" width="26" height="29">
+      <span class="brand-name">La Plage<small>{% block brand_sub %}L'Isle-Adam{% endblock %}</small></span>
     </a>
 
-    <ul class="nav-links">
-      <li>
-        <a class="nav-link {% if url_name == 'planning' %}active{% endif %}" href="{% url 'planning' %}"
-           {% if url_name == 'planning' %}aria-current="page"{% endif %}>
-          <svg class="icon"><use href="#i-calendar"/></svg>Planning
-        </a>
-      </li>
-      {% if role == 'gestionnaire' or role == 'admin' %}
-      <li>
-        <a class="nav-link {% if url_name == 'gestionnaire' %}active{% endif %}" href="{% url 'gestionnaire' %}"
-           {% if url_name == 'gestionnaire' %}aria-current="page"{% endif %}>
-          <svg class="icon"><use href="#i-boat"/></svg>Sorties
-        </a>
-      </li>
-      {% endif %}
-      {% if role == 'admin' %}
-      <li class="nav-dropdown">
-        <button type="button" class="nav-link nav-dropdown-toggle {% if 'admin_' in url_name %}active{% endif %}"
-                aria-haspopup="true" aria-expanded="false">
-          <svg class="icon"><use href="#i-settings"/></svg>Administration
-          <svg class="icon icon-chevron"><use href="#i-chevron-down"/></svg>
-        </button>
-        <div class="nav-dropdown-menu">
-          <a class="nav-link {% if url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}"><svg class="icon"><use href="#i-dashboard"/></svg>Tableau de bord</a>
-          <a class="nav-link {% if 'admin_ponton' in url_name %}active{% endif %}" href="{% url 'admin_pontons' %}"><svg class="icon"><use href="#i-anchor"/></svg>Pontons</a>
-          <a class="nav-link {% if 'admin_embarcation' in url_name %}active{% endif %}" href="{% url 'admin_embarcations' %}"><svg class="icon"><use href="#i-boat"/></svg>Embarcations</a>
-          <a class="nav-link {% if 'admin_location' in url_name %}active{% endif %}" href="{% url 'admin_locations' %}"><svg class="icon"><use href="#i-ticket"/></svg>Locations</a>
-          <hr>
-          <a class="nav-link {% if 'admin_user' in url_name %}active{% endif %}" href="{% url 'admin_users' %}"><svg class="icon"><use href="#i-users"/></svg>Utilisateurs</a>
-        </div>
-      </li>
-      {% endif %}
-    </ul>
+    <nav aria-label="Navigation principale" class="topnav-wrap">
+      <ul class="topnav">
+        <li><a href="{% url 'planning' %}" {% if url_name == 'planning' %}aria-current="page"{% endif %}>
+          <svg class="icon"><use href="#i-calendar"/></svg>Planning</a></li>
+        {% if role == 'gestionnaire' or role == 'admin' %}
+        <li><a href="{% url 'gestionnaire' %}" {% if url_name == 'gestionnaire' %}aria-current="page"{% endif %}>
+          <svg class="icon"><use href="#i-boat"/></svg>Sorties</a></li>
+        {% endif %}
+        {% if role == 'admin' %}
+        <li><a href="{% url 'admin_dashboard' %}" {% if 'admin_' in url_name %}aria-current="page"{% endif %}>
+          <svg class="icon"><use href="#i-settings"/></svg>Gestion</a></li>
+        {% endif %}
+      </ul>
+    </nav>
 
-    <div class="navbar-end">
-      <button type="button" class="nav-icon-btn theme-toggle" data-theme-toggle aria-label="Basculer entre thème clair et sombre" title="Thème clair / sombre">
-        <svg class="icon icon-moon"><use href="#i-moon"/></svg>
-        <svg class="icon icon-sun"><use href="#i-sun"/></svg>
-      </button>
+    {% block topbar_clock %}{% endblock %}
+    <div class="topbar-end">
       {% if user.is_authenticated %}
-        <span class="user-chip">
-          <span class="user-avatar">{{ user.username|slice:":1" }}</span>
-          <span>{{ user.username }}</span>
-          <span class="user-role">{% if role == 'admin' %}Admin{% elif role == 'gestionnaire' %}Gestionnaire{% else %}Visiteur{% endif %}</span>
-        </span>
+        <span class="topbar-user">{{ user.username }}<small>{% if role == 'admin' %}Administrateur{% elif role == 'gestionnaire' %}Gestionnaire{% else %}Visiteur{% endif %}</small></span>
+      {% endif %}
+      {% if user.is_authenticated %}
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}
-          <button type="submit" class="nav-btn" aria-label="Déconnexion" title="Déconnexion">
+          <button type="submit" class="topbar-btn" aria-label="Déconnexion" title="Déconnexion">
             <svg class="icon"><use href="#i-logout"/></svg><span class="hide-mobile">Déconnexion</span>
           </button>
         </form>
       {% else %}
-        <a href="{% url 'login' %}" class="nav-btn nav-btn-solid"><svg class="icon"><use href="#i-login"/></svg>Connexion</a>
+        <a href="{% url 'login' %}" class="topbar-btn topbar-btn--solid"><svg class="icon"><use href="#i-login"/></svg>Connexion</a>
       {% endif %}
     </div>
   </div>
@@ -104,31 +68,31 @@
 <!-- ══ CONTENU ═══════════════════════════════════════════════ -->
 <main id="contenu">{% block content %}{% endblock %}</main>
 
-<footer class="footer">La Plage — L'Isle-Adam · {% now "Y" %}</footer>
-
 <!-- ══ ONGLETS MOBILE (gestionnaires et admins) ══════════════ -->
 {% if role == 'gestionnaire' or role == 'admin' %}
-<nav class="tabbar" aria-label="Navigation principale">
-  <a class="tab {% if url_name == 'planning' %}active{% endif %}" href="{% url 'planning' %}">
+<nav class="tabbar" aria-label="Navigation principale (mobile)">
+  <a class="tab {% if url_name == 'planning' %}active{% endif %}" href="{% url 'planning' %}" {% if url_name == 'planning' %}aria-current="page"{% endif %}>
     <svg class="icon"><use href="#i-calendar"/></svg>Planning
   </a>
-  <a class="tab {% if url_name == 'gestionnaire' %}active{% endif %}" href="{% url 'gestionnaire' %}">
+  <a class="tab {% if url_name == 'gestionnaire' %}active{% endif %}" href="{% url 'gestionnaire' %}" {% if url_name == 'gestionnaire' %}aria-current="page"{% endif %}>
     <svg class="icon"><use href="#i-boat"/></svg>Sorties
     <span class="tab-badge" id="tabLateBadge" hidden></span>
   </a>
   {% if role == 'admin' %}
-  <a class="tab {% if 'admin_' in url_name %}active{% endif %}" href="{% url 'admin_dashboard' %}">
-    <svg class="icon"><use href="#i-settings"/></svg>Admin
+  <a class="tab {% if 'admin_' in url_name %}active{% endif %}" href="{% url 'admin_dashboard' %}" {% if 'admin_' in url_name %}aria-current="page"{% endif %}>
+    <svg class="icon"><use href="#i-settings"/></svg>Gestion
   </a>
   {% endif %}
 </nav>
 {% endif %}
 {% endblock shell %}
 
-<!-- ══ MESSAGES (toasts flottants) ═══════════════════════════ -->
+<!-- ══ MESSAGES (toasts, en haut : ne masquent jamais un bouton d'action) ══ -->
 <div class="toast-stack" id="toastStack" role="status" aria-live="polite">
   {% for message in messages %}
-    <div class="toast toast-{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}">
+    {% if 'error' in message.tags %}{% firstof 'error' as kind %}{% elif 'warning' in message.tags %}{% firstof 'warning' as kind %}{% elif 'success' in message.tags %}{% firstof 'success' as kind %}{% else %}{% firstof 'info' as kind %}{% endif %}
+    <div class="toast toast-{{ kind }}">
+      <svg class="mark" aria-hidden="true"><use href="#m-{% if kind == 'error' %}retard{% elif kind == 'warning' %}ticket{% elif kind == 'success' %}libre{% else %}sortie{% endif %}"/></svg>
       <span>{{ message }}</span>
       <button type="button" class="toast-close" aria-label="Fermer"><svg class="icon"><use href="#i-x"/></svg></button>
     </div>
@@ -138,13 +102,12 @@
 <!-- ══ DIALOGUE DE CONFIRMATION (formulaires data-confirm) ═══ -->
 <dialog class="dialog" id="confirmDialog" aria-labelledby="confirmTitle">
   <div class="dialog-body">
-    <div class="dialog-icon"><svg class="icon"><use href="#i-alert"/></svg></div>
-    <h2 class="dialog-title" id="confirmTitle"></h2>
+    <h2 class="dialog-title"><svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg><span id="confirmTitle"></span></h2>
     <p class="dialog-text" id="confirmText"></p>
   </div>
   <div class="dialog-actions">
     <button type="button" class="btn btn-ghost" data-dialog-cancel>Annuler</button>
-    <button type="button" class="btn btn-return" data-dialog-ok>Supprimer</button>
+    <button type="button" class="btn btn-danger-solid" data-dialog-ok>Supprimer</button>
   </div>
 </dialog>
 

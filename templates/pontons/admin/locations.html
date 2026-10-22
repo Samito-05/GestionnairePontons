@@ -3,10 +3,7 @@
 
 {% block admin_content %}
 <div class="page-header">
-  <div>
-    <p class="page-eyebrow">Locations · {{ locations|length }} ce jour</p>
-    <h1 class="page-title">{{ date_cible|date:"l j"|capfirst }} <em>{{ date_cible|date:"F Y" }}</em></h1>
-  </div>
+  <h1 class="page-title">Locations<small>{{ date_cible|date:"l j F Y"|capfirst }} · {{ locations|length }} location{{ locations|length|pluralize }}</small></h1>
   <div class="page-actions">
     <div class="btn-group" role="group" aria-label="Changer de jour">
       <a href="?date={{ date_prev|date:'Y-m-d' }}" class="btn btn-ghost btn-icon" aria-label="Jour précédent" title="Jour précédent"><svg class="icon"><use href="#i-chevron-left"/></svg></a>
@@ -19,17 +16,17 @@
 </div>
 
 <div class="table-wrap">
-  <table class="data-table">
+  <table class="data-table" data-sortable>
     <thead>
       <tr>
-        <th>Embarcation</th>
-        <th>Ponton</th>
-        <th>Horaire</th>
-        <th>Durée</th>
-        <th>État</th>
-        <th>Gestionnaire</th>
-        <th>Notes</th>
-        <th class="col-actions"><span class="sr-only">Actions</span></th>
+        <th data-sort="text">Embarcation</th>
+        <th data-sort="text">Ponton</th>
+        <th data-sort="text">Horaire</th>
+        <th data-sort="num" class="cell-num">Durée</th>
+        <th data-sort="text">État</th>
+        <th data-sort="text">Gestionnaire</th>
+        <th data-sort="text">Notes</th>
+        <th class="col-actions"><span><span class="sr-only">Actions</span></span></th>
       </tr>
     </thead>
     <tbody>
@@ -39,29 +36,29 @@
           <span class="cell-main"><span class="color-dot" style="background:{{ loc.embarcation.couleur }};"></span>{{ loc.embarcation.nom }}</span>
         </td>
         <td data-label="Ponton" class="cell-muted">{{ loc.embarcation.ponton.nom }}</td>
-        <td data-label="Horaire"><span><strong>{{ loc.heure_debut|time:"H:i" }}</strong> → {{ loc.heure_fin|time:"H:i" }}</span></td>
-        <td data-label="Durée"><span class="badge badge-muted">{{ loc.duree_minutes }}&thinsp;min</span></td>
+        <td data-label="Horaire"><strong>{{ loc.heure_debut|time:"H:i" }}</strong> – {{ loc.heure_fin|time:"H:i" }}</td>
+        <td data-label="Durée" class="cell-num" data-value="{{ loc.duree_minutes }}">{{ loc.duree_minutes }}&thinsp;min</td>
         <td data-label="État">
           {% if loc.returned_at %}
-            <span class="badge badge-muted"><svg class="icon"><use href="#i-check"/></svg>Rendue {{ loc.returned_at|time:"H:i" }}</span>
+            <span class="badge"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Rendue {{ loc.returned_at|time:"H:i" }}</span>
           {% elif loc.statut == 'reservee' %}
-            <span class="badge badge-warning">Ticket vendu</span>
+            <span class="badge badge-ticket"><svg class="mark" aria-hidden="true"><use href="#m-ticket"/></svg>Ticket vendu</span>
           {% elif loc.heure_debut > now %}
-            <span class="badge badge-info">Prévue</span>
+            <span class="badge"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Prévue</span>
           {% elif loc.is_overtime %}
-            <span class="badge badge-danger"><span class="dot pulse"></span>Retard{% if loc.overtime_minutes %} +{{ loc.overtime_minutes }} min{% endif %}</span>
+            <span class="badge badge-retard"><svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg>Retard{% if loc.overtime_minutes %} +{{ loc.overtime_minutes }} min{% endif %}</span>
           {% else %}
-            <span class="badge badge-danger">En sortie</span>
+            <span class="badge badge-sortie"><svg class="mark" aria-hidden="true"><use href="#m-sortie"/></svg>Sortie</span>
           {% endif %}
         </td>
         <td data-label="Gestionnaire" class="cell-muted">{{ loc.gestionnaire.username|default:"—" }}</td>
         <td data-label="Notes" class="cell-muted"><span class="cell-clip" title="{{ loc.notes }}">{{ loc.notes|default:"—" }}</span></td>
         <td class="col-actions">
           <div class="row-actions">
-            <a href="{% url 'admin_location_edit' loc.pk %}" class="btn btn-info btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
+            <a href="{% url 'admin_location_edit' loc.pk %}" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-edit"/></svg>Modifier</a>
             <form method="post" action="{% url 'admin_location_delete' loc.pk %}"
                   data-confirm="Supprimer cette location ?"
-                  data-confirm-detail="{{ loc.embarcation.nom }} · {{ loc.heure_debut|time:'H:i' }} → {{ loc.heure_fin|time:'H:i' }}&#10;Cette action est définitive.">
+                  data-confirm-detail="{{ loc.embarcation.nom }} · {{ loc.heure_debut|time:'H:i' }} – {{ loc.heure_fin|time:'H:i' }}&#10;Cette action est définitive.">
               {% csrf_token %}
               <button type="submit" class="btn btn-danger btn-sm"><svg class="icon"><use href="#i-trash"/></svg>Supprimer</button>
             </form>

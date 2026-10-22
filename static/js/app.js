@@ -1,35 +1,10 @@
 /* ─── La Plage — comportements communs à toutes les pages ───────────────
-   Thème · menu · toasts · dialogue de confirmation · erreurs HTMX
-   horloge · comptes à rebours des sorties · service worker
+   Toasts · dialogue de confirmation · erreurs HTMX
+   horloge · comptes à rebours des sorties · bandeau des retards
+   tri des tableaux · service worker
    ─────────────────────────────────────────────────────────────────── */
 (function () {
   'use strict';
-
-  /* ── Thème (la valeur initiale est posée dans <head>, avant le rendu) ── */
-  document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      try { localStorage.setItem('theme', next); } catch (e) {}
-    });
-  });
-
-  /* ── Menu déroulant (clic, pas survol — utilisable au doigt) ── */
-  function closeDropdowns() {
-    document.querySelectorAll('.nav-dropdown-menu.open').forEach(function (m) { m.classList.remove('open'); });
-    document.querySelectorAll('.nav-dropdown-toggle').forEach(function (t) { t.setAttribute('aria-expanded', 'false'); });
-  }
-  document.querySelectorAll('.nav-dropdown-toggle').forEach(function (toggle) {
-    toggle.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var menu = toggle.nextElementSibling;
-      var wasOpen = menu.classList.contains('open');
-      closeDropdowns();
-      if (!wasOpen) { menu.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); }
-    });
-  });
-  document.addEventListener('click', closeDropdowns);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDropdowns(); });
 
   /* ── Toasts ── */
   var stack = document.getElementById('toastStack');
@@ -49,14 +24,17 @@
     if (!stack) return null;
     options = options || {};
     var toast = document.createElement('div');
-    toast.className = 'toast toast-' + (kind || 'error');
-    toast.innerHTML = '<span></span><button type="button" class="toast-close" aria-label="Fermer">' +
+    kind = kind || 'error';
+    toast.className = 'toast toast-' + kind;
+    // Même marque de balisage que les messages Django (base.html)
+    var mark = { success: 'libre', info: 'sortie', warning: 'ticket', error: 'retard' }[kind] || 'sortie';
+    toast.innerHTML = '<svg class="mark" aria-hidden="true"><use href="#m-' + mark + '"/></svg><span></span><button type="button" class="toast-close" aria-label="Fermer">' +
                       '<svg class="icon"><use href="#i-x"/></svg></button>';
     toast.querySelector('span').textContent = msg;
     if (options.actionLabel) {
       var action = document.createElement('button');
       action.type = 'button';
-      action.className = 'btn btn-ghost btn-sm toast-action';
+      action.className = 'toast-action';
       action.textContent = options.actionLabel;
       action.addEventListener('click', function () {
         dismissToast(toast);
@@ -129,9 +107,9 @@
     // Planning : conserver la fenêtre 24h de la page (constante définie par planning.html)
     if (typeof WINDOW_START_ISO !== 'undefined') values.window_start = WINDOW_START_ISO;
     var target = form.getAttribute('hx-target');
-    window.showToast((d.nom || 'Embarcation') + ' — retour enregistré.', 'success', {
+    window.showToast('Retour enregistré : ' + (d.nom || 'embarcation'), 'success', {
       actionLabel: 'Annuler',
-      delay: 8000,
+      delay: 15000,   // le serveur accepte l'annulation pendant 60 s
       onAction: function () {
         htmx.ajax('POST', d.url, { target: target, swap: 'outerHTML', values: values });
       }
@@ -168,27 +146,26 @@
       var diff = Math.round((end - now) / 60000);
       var late = now > end;
       tile.classList.toggle('is-late', late);
-      var label = tile.querySelector('[data-state-label]');
-      if (label) label.textContent = late ? 'Retard' : 'En sortie';
       if (late) {
         var lateMin = Math.floor((now - end) / 60000);
-        out.innerHTML = (lateMin ? '+' + lateMin : '&lt;1') + '<small>min de retard</small>';
+        out.textContent = lateMin ? '+' + lateMin + ' min' : '+<1 min';
       } else {
-        out.innerHTML = Math.max(diff, 0) + '<small>min restantes</small>';
+        out.textContent = 'reste ' + Math.max(diff, 0) + ' min';
       }
     });
   }
 
-  /* ── Compteurs par état (puces .stat-chip[data-filter] > strong, légende du planning) ── */
+  /* ── Compteurs par état (filtres [data-count], légende du planning) ── */
   window.updateStatCounts = function () {
     var scope = document.querySelector('[data-count-scope]');
     if (!scope) return;
     var items = scope.querySelectorAll('[data-statut]');
     var n = { all: items.length, libre: 0, reservee: 0, sortie: 0, retard: 0 };
+    var firstLate = null;
     items.forEach(function (el) {
       var s = el.dataset.statut;
       if (s in n) n[s]++;
-      if (el.classList.contains('is-late')) n.retard++;
+      if (el.classList.contains('is-late')) { n.retard++; if (!firstLate) firstLate = el; }
     });
     document.querySelectorAll('[data-count]').forEach(function (el) {
       el.textContent = n[el.dataset.count];
@@ -198,11 +175,43 @@
     });
     var badge = document.getElementById('tabLateBadge');
     if (badge) { badge.hidden = n.retard === 0; badge.textContent = n.retard; }
+
+    // Bandeau des retards : le premier en clair, les suivants comptés
+    var band = document.querySelector('[data-late-band]');
+    if (band) {
+      band.hidden = !firstLate;
+      document.body.classList.toggle('has-late-band', !!firstLate);   // le toast passe sous le bandeau
+      if (firstLate) {
+        var name = firstLate.querySelector('.tile-name');
+        var fig = firstLate.querySelector('[data-remaining]');
+        var txt = (name ? name.textContent.trim() : '') + (fig ? ' ' + fig.textContent.trim() : '');
+        if (n.retard > 1) txt += ' · ' + (n.retard - 1) + ' autre' + (n.retard > 2 ? 's' : '');
+        band.querySelector('[data-late-text]').textContent = txt;
+      }
+    }
   };
 
-  function tick() { updateClock(); updateCountdowns(); window.updateStatCounts(); }
+  /* ── Retards en tête de leur ponton : déplacés dans le DOM (pas en CSS)
+     pour que l'ordre du clavier et des lecteurs d'écran suive l'écran ── */
+  var lastPointer = 0;
+  document.addEventListener('pointerdown', function () { lastPointer = Date.now(); }, true);
+  function liftLateRows() {
+    // Jamais pendant qu'un doigt vise une ligne : on attend le tick suivant
+    if (Date.now() - lastPointer < 8000) return;
+    document.querySelectorAll('.rows').forEach(function (rows) {
+      var firstOnTime = null;
+      Array.prototype.forEach.call(rows.children, function (el) {
+        if (!el.classList.contains('tile')) return;
+        if (!el.classList.contains('is-late')) { if (!firstOnTime) firstOnTime = el; return; }
+        // Ne jamais déplacer la ligne sous le doigt / le focus
+        if (firstOnTime && !el.contains(document.activeElement)) rows.insertBefore(el, firstOnTime);
+      });
+    });
+  }
+
+  function tick() { updateClock(); updateCountdowns(); liftLateRows(); window.updateStatCounts(); }
   tick();
-  setInterval(tick, 15000);
+  setInterval(function () { if (!document.hidden) tick(); }, 15000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
   document.body.addEventListener('htmx:afterSwap', tick);
   window.refreshLiveUi = tick;
@@ -215,6 +224,38 @@
       input.type = show ? 'text' : 'password';
       btn.setAttribute('aria-pressed', show ? 'true' : 'false');
       btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    });
+  });
+
+  /* ── Tableaux triables : <table data-sortable>, <th data-sort="text|num"> ──
+     Tri côté client de la page affichée ; l'ordre serveur revient au rechargement. */
+  var collator = new Intl.Collator('fr', { numeric: true, sensitivity: 'base' });
+  document.querySelectorAll('table[data-sortable]').forEach(function (table) {
+    var tbody = table.tBodies[0];
+    table.querySelectorAll('th[data-sort]').forEach(function (th, _, all) {
+      var idx = Array.prototype.indexOf.call(th.parentElement.children, th);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'th-sort';
+      btn.innerHTML = '<span></span><svg class="icon" aria-hidden="true"><use href="#i-sort"/></svg>';
+      btn.firstChild.textContent = th.textContent.trim();
+      th.textContent = '';
+      th.appendChild(btn);
+      btn.addEventListener('click', function () {
+        var dir = th.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
+        all.forEach(function (o) { o.removeAttribute('aria-sort'); });
+        th.setAttribute('aria-sort', dir);
+        var num = th.dataset.sort === 'num', sign = dir === 'ascending' ? 1 : -1;
+        // Clé lue une seule fois par ligne
+        var keyed = Array.prototype.filter.call(tbody.rows, function (r) { return !r.classList.contains('empty-row'); })
+          .map(function (r) {
+            var td = r.children[idx];
+            var v = td ? (td.dataset.value || td.textContent).trim() : '';
+            return { r: r, k: num ? parseFloat(v.replace(',', '.')) || 0 : v };
+          });
+        keyed.sort(function (a, b) { return sign * (num ? a.k - b.k : collator.compare(a.k, b.k)); });
+        keyed.forEach(function (o) { tbody.appendChild(o.r); });
+      });
     });
   });
 

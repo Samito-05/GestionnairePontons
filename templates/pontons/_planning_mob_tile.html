@@ -1,58 +1,50 @@
+{% comment %}Planning mobile, vue liste : même ligne que l'écran Sorties (plaque d'état | nom | action).{% endcomment %}
 <article id="mob-tile-{{ row.embarcation.pk }}"
          class="tile {% if row.statut == 'sortie' %}tile--sortie{% if row.overtime %} is-late{% endif %}{% elif row.statut == 'reservee' %}tile--reservee{% else %}tile--libre{% endif %}"
          data-statut="{{ row.statut|default:'libre' }}">
+  <div class="tile-state">
+    {% if row.statut == 'sortie' %}
+      {% if row.overtime %}<svg class="mark" aria-hidden="true"><use href="#m-retard"/></svg><span>Retard</span>
+      {% else %}<svg class="mark" aria-hidden="true"><use href="#m-sortie"/></svg><span>Sorti</span>{% endif %}
+    {% elif row.statut == 'reservee' %}<svg class="mark" aria-hidden="true"><use href="#m-ticket"/></svg><span>Ticket</span>
+    {% else %}<svg class="mark" aria-hidden="true"><use href="#m-libre"/></svg><span>Libre</span>
+    {% endif %}
+  </div>
   <div class="tile-body">
-    <div class="tile-head">
-      <span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span>
-      <h3 class="tile-name">{{ row.embarcation.nom }}</h3>
-    </div>
-    <div class="tile-state">
-      {% if row.statut == 'sortie' %}
-        <span class="dot pulse"></span>
-        {% if row.overtime %}
-        <span>Retard</span>{% if row.overtime_min %}<span class="tile-time" style="color:inherit;">+{{ row.overtime_min }} min</span>{% endif %}
-        {% else %}
-        <span>En sortie</span>{% if row.retour %}<span class="tile-time">retour {{ row.retour }}</span>{% endif %}
-        {% endif %}
-      {% elif row.statut == 'reservee' %}
-        <svg class="icon"><use href="#i-ticket"/></svg><span>Ticket vendu</span>
-      {% else %}
-        <span class="dot"></span><span>Disponible</span>
-      {% endif %}
-    </div>
+    <h3 class="tile-name"><span class="color-dot" style="background:{{ row.embarcation.couleur }};"></span><span>{{ row.embarcation.nom }}</span></h3>
+    {% if row.statut == 'sortie' %}
+      {% if row.overtime %}<p class="tile-meta"><span class="tile-figure">+{% if row.overtime_min %}{{ row.overtime_min }}{% else %}&lt;1{% endif %} min</span> <span class="tile-sub">fin prévue {{ row.retour }}</span></p>
+      {% elif row.retour %}<p class="tile-meta">retour prévu à {{ row.retour }}</p>{% endif %}
+    {% else %}<p class="tile-meta">{{ row.embarcation.get_type_embarcation_display }}</p>
+    {% endif %}
   </div>
   {% if role == 'gestionnaire' or role == 'admin' %}
-  <div class="tile-action">
     {% if row.statut == 'sortie' %}
-      <form hx-post="{% url 'retour_embarcation' row.embarcation.pk %}"
-            hx-target="#mob-tile-{{ row.embarcation.pk }}"
-            hx-swap="outerHTML"
+      <form class="tile-action" hx-post="{% url 'retour_embarcation' row.embarcation.pk %}"
+            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML"
             hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_mob">
         <input type="hidden" name="next" value="planning">
-        <button type="submit" class="btn btn-return"><svg class="icon"><use href="#i-return"/></svg>Retour</button>
+        <button type="submit" class="btn btn-retour" aria-label="Retour — {{ row.embarcation.nom }}">Retour</button>
       </form>
     {% elif row.statut == 'reservee' %}
-      <form hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}"
-            hx-target="#mob-tile-{{ row.embarcation.pk }}"
-            hx-swap="outerHTML"
+      <form class="tile-action" hx-post="{% url 'sortir_embarcation' row.embarcation.pk %}"
+            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML"
             hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_mob">
         <input type="hidden" name="next" value="planning">
-        <button type="submit" class="btn btn-warning"><svg class="icon"><use href="#i-out"/></svg>Sortir</button>
+        <button type="submit" class="btn btn-sortir" aria-label="Sortir — {{ row.embarcation.nom }}">Sortir</button>
       </form>
     {% else %}
-      <form hx-post="{% url 'louer_embarcation' row.embarcation.pk %}"
-            hx-target="#mob-tile-{{ row.embarcation.pk }}"
-            hx-swap="outerHTML"
+      <form class="tile-action" hx-post="{% url 'louer_embarcation' row.embarcation.pk %}"
+            hx-target="#mob-tile-{{ row.embarcation.pk }}" hx-swap="outerHTML"
             hx-vals="js:{window_start: WINDOW_START_ISO}">{% csrf_token %}
         <input type="hidden" name="_htmx_partial" value="planning_mob">
         <input type="hidden" name="notes" value="">
         <input type="hidden" name="next" value="planning">
-        <button type="submit" class="btn btn-success"><svg class="icon"><use href="#i-ticket"/></svg>Vente</button>
+        <button type="submit" class="btn btn-vendre" aria-label="Vendre un ticket — {{ row.embarcation.nom }}">Vendre</button>
       </form>
     {% endif %}
-  </div>
   {% endif %}
   {% if row.statut == 'sortie' %}
   <span hidden

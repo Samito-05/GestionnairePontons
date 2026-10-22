@@ -443,6 +443,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
 .legend-item strong { color: var(--ink); font-size: 1.05rem; }
 .legend-swatch { width: 22px; height: 12px; flex-shrink: 0; border-radius: 1px; }
 .legend-now { width: 2px; height: 16px; background: var(--ink); }
+.rental-swatch { background: var(--sortie); }
+.done-swatch { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--rule-strong); }
+.overtime-swatch { background: repeating-linear-gradient(-45deg, var(--retard) 0 4px, #1a0004 4px 7px); }
 
 #tl-container { margin-bottom: 1.5rem; border: 1px solid var(--rule); background: var(--surface); overflow: hidden; }
 .tl-toolbar, .mob-tl-toolbar {
@@ -511,7 +514,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
   box-shadow: inset 1px 0 0 var(--ticket-text);
   opacity: .9;
 }
-/* Location : bleu tant que sortie, neutre une fois rendue, contour si à venir */
+/* Location : bleu tant que non rendue, neutre une fois rendue */
 .rental-block {
   position: absolute; top: 10px; bottom: 10px; z-index: 10; min-width: 6px;
   display: flex; align-items: center; justify-content: center; padding: 0 8px;
@@ -520,7 +523,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
   background: var(--sortie); color: var(--sortie-ink);
 }
 .rental-block.is-done { background: var(--surface-2); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--rule-strong); }
-.rental-block.is-planned { background: var(--surface); color: var(--sortie-text); box-shadow: inset 0 0 0 2px var(--sortie); }
 .rental-block.is-narrow { font-size: 0; padding: 0; }
 /* Dépassement : rayures rouge / noir (marque de danger isolé) */
 .overtime-block {

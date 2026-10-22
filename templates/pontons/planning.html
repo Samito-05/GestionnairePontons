@@ -7,10 +7,7 @@
 
     <!-- ── En-tête : date + navigation ─────────────────────────── -->
     <div class="page-header">
-      <div>
-        <p class="page-eyebrow">Planning{% if date_cible == now.date %} · aujourd'hui{% endif %}</p>
-        <h1 class="page-title">{{ date_cible|date:"l j"|capfirst }} <em>{{ date_cible|date:"F Y" }}</em></h1>
-      </div>
+      <h1 class="page-title">Planning<small>{{ date_cible|date:"l j F Y"|capfirst }}{% if date_cible == now.date %} · aujourd'hui{% endif %}</small></h1>
       <div class="page-actions">
         <div class="btn-group" role="group" aria-label="Changer de jour">
           <a href="?date={{ date_prev|date:'Y-m-d' }}" class="btn btn-ghost btn-icon" aria-label="Jour précédent" title="Jour précédent">
@@ -24,20 +21,12 @@
         {% if date_cible != now.date %}
         <a href="{% url 'planning' %}" class="btn btn-ghost">Aujourd'hui</a>
         {% endif %}
-        <span id="live-clock" class="clock-tag" title="Heure actuelle">
-          <svg class="icon"><use href="#i-clock"/></svg><span data-clock>{{ now|time:"H:i" }}</span>
-        </span>
-        {% if role == 'gestionnaire' or role == 'admin' %}
-        <a href="{% url 'gestionnaire' %}" class="btn btn-primary hide-mobile">
-          <svg class="icon"><use href="#i-boat"/></svg>Gérer les sorties
-        </a>
-        {% endif %}
+        <span id="live-clock" class="clock" title="Heure actuelle"><span data-clock>{{ now|time:"H:i" }}</span></span>
       </div>
     </div>
 
     {% if not planning_data %}
       <div class="empty-state">
-        <svg class="icon"><use href="#i-anchor"/></svg>
         <h2>Aucun ponton actif</h2>
         <p>Le planning s'affichera dès qu'un ponton et ses embarcations seront configurés.</p>
         {% if role == 'admin' %}<a href="{% url 'admin_pontons' %}" class="btn btn-primary">Ajouter un ponton</a>{% endif %}
@@ -47,11 +36,14 @@
 
     <!-- ── Légende + état de la flotte en ce moment ────────────── -->
     <div class="legend" aria-label="État actuel de la flotte">
-      <span class="legend-item"><span class="legend-dot" style="background:var(--success-fill);"></span>Disponibles <strong data-count="libre"></strong></span>
-      <span class="legend-item"><span class="legend-swatch" style="background:repeating-linear-gradient(-45deg,transparent 0 3px,var(--warning-fill) 3px 5px);border-left:3px solid var(--warning-fill);"></span>Tickets <strong data-count="reservee"></strong></span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--danger-fill);"></span>En sortie <strong data-count="sortie"></strong></span>
-      <span class="legend-item"><span class="legend-swatch" style="background:repeating-linear-gradient(-45deg,var(--danger-fill) 0 3px,#7d1f0d 3px 5px);"></span>Retards <strong data-count="retard"></strong></span>
-      <span class="legend-item"><span class="legend-line"></span>Maintenant</span>
+      <span class="legend-item"><svg class="mark mark-libre" aria-hidden="true"><use href="#m-libre"/></svg>Libres <strong data-count="libre"></strong></span>
+      <span class="legend-item"><svg class="mark mark-ticket" aria-hidden="true"><use href="#m-ticket"/></svg>Tickets <strong data-count="reservee"></strong></span>
+      <span class="legend-item"><svg class="mark mark-sortie" aria-hidden="true"><use href="#m-sortie"/></svg>Sortis <strong data-count="sortie"></strong></span>
+      <span class="legend-item"><svg class="mark mark-retard" aria-hidden="true"><use href="#m-retard"/></svg>Retards <strong data-count="retard"></strong></span>
+      <span class="legend-item hide-mobile"><span class="legend-swatch rental-swatch"></span>En cours</span>
+      <span class="legend-item hide-mobile"><span class="legend-swatch done-swatch"></span>Rendue</span>
+      <span class="legend-item hide-mobile"><span class="legend-swatch overtime-swatch"></span>Dépassement</span>
+      <span class="legend-item hide-mobile"><span class="legend-now"></span>Maintenant</span>
     </div>
 
     <!-- ════════════════════════════════════════
@@ -59,7 +51,7 @@
     ════════════════════════════════════════ -->
     <div id="tl-container">
       <div class="tl-toolbar">
-        <span class="tl-toolbar-info">{{ window_start|date:"D j, G\h" }} → {{ window_end|date:"D j, G\h" }} · faites défiler pour voir la journée</span>
+        <span class="tl-toolbar-info">{{ window_start|date:"D j, G\h" }} – {{ window_end|date:"D j, G\h" }} · défilement horizontal</span>
         <div class="tl-toolbar-actions">
           <button type="button" class="btn btn-ghost btn-sm" onclick="scrollTlToCenter(true)" title="Recentrer sur l'heure actuelle">
             <svg class="icon"><use href="#i-target"/></svg>Maintenant
@@ -108,15 +100,15 @@
          MOBILE — choix de la vue
     ════════════════════════════════════════ -->
     <div class="segmented" role="group" aria-label="Type de vue">
-      <button type="button" id="btn-mob-grid" class="active">Grille</button>
+      <button type="button" id="btn-mob-grid" class="active">Liste</button>
       <button type="button" id="btn-mob-tl">Chronologie</button>
     </div>
 
     <!-- MOBILE — chronologie -->
     <div id="mob-tl-outer" class="mob-tl-outer" style="display:none;">
       <div class="mob-tl-toolbar">
-        <span class="tl-toolbar-info">{{ window_start|date:"d/m G\h" }} → {{ window_end|date:"d/m G\h" }}</span>
-        <button type="button" class="btn btn-ghost btn-xs" onclick="scrollMobTlToNow()">
+        <span class="tl-toolbar-info">{{ window_start|date:"d/m G\h" }} – {{ window_end|date:"d/m G\h" }}</span>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="scrollMobTlToNow()">
           <svg class="icon"><use href="#i-target"/></svg>Maintenant
         </button>
       </div>
@@ -152,12 +144,12 @@
       </div><!-- /mob-tl-scroll -->
     </div><!-- /mob-tl-outer -->
 
-    <!-- MOBILE — grille de tuiles (sert aussi de source aux compteurs de la légende) -->
+    <!-- MOBILE — liste de lignes (sert aussi de source aux compteurs de la légende) -->
     <div id="mob-grid" class="mobile-planning" data-count-scope>
       {% for ponton_data in planning_data %}
         <section class="ponton-section">
-          <h2 class="section-title">{{ ponton_data.ponton.nom }}</h2>
-          <div class="emb-grid">
+          <h2 class="section-title">{{ ponton_data.ponton.nom }}<small>{{ ponton_data.rows|length }} embarcation{{ ponton_data.rows|length|pluralize }}</small></h2>
+          <div class="rows">
             {% for row in ponton_data.rows %}
             {% include 'pontons/_planning_mob_tile.html' with row=row %}
             {% endfor %}

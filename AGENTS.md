@@ -28,7 +28,7 @@ Three access levels, each with its own area:
 - **Icons**: inline SVG sprite `templates/_icons.html`, used as `<svg class="icon"><use href="#i-name"/></svg>` (stroke icons) and `<svg class="mark"><use href="#m-libre|m-ticket|m-sortie|m-retard"/></svg>` (filled fleet-state marks). No icon font.
 - **PWA**: `static/manifest.json` + `static/sw.js`
 - **Gunicorn** in production, containerized via Docker + Cloudflare Tunnel
-- `gunicorn`, `python-dotenv` runtime deps; `django-extensions`, `Pillow` dev-only
+- `gunicorn`, `python-dotenv` runtime deps; no dev-only requirements file
 
 ## Layout
 

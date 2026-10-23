@@ -49,7 +49,7 @@
   {% if row.statut == 'sortie' %}
   <span hidden
         hx-get="{% url 'planning_row_partial' row.embarcation.pk %}?partial=planning_mob"
-        hx-trigger="every 20s"
+        hx-trigger="every 20s [!document.hidden]"
         hx-target="#mob-tile-{{ row.embarcation.pk }}"
         hx-swap="outerHTML"
         hx-vals="js:{window_start: WINDOW_START_ISO}"></span>

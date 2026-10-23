@@ -93,6 +93,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'data' / 'db.sqlite3',
+        # WAL : les lectures (planning public rafraîchi toutes les 20 s) ne bloquent plus les écritures.
+        # IMMEDIATE : chaque transaction prend le verrou d'écriture dès son début, donc deux actions au même
+        # instant s'attendent au lieu d'échouer (« database is locked »). select_for_update() ne fait rien sous SQLite.
+        'OPTIONS': {'init_command': 'PRAGMA journal_mode=WAL;', 'transaction_mode': 'IMMEDIATE'},
     }
 }
 

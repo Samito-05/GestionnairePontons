@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 6am on monday"],
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "description": "Correctifs et versions mineures : une seule PR groupée par semaine",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchPackageNames": ["!python", "!node"],
+      "groupName": "dépendances"
+    },
+    {
+      "description": "Versions majeures : PR seulement sur demande, depuis le Dependency Dashboard",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Nouvelle version de Python ou de Node (image Docker) : à monter avec la version de la CI, sur demande",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python", "node"],
+      "dependencyDashboardApproval": true
+    }
+  ]
+}

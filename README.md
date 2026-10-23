@@ -10,16 +10,16 @@ Installable comme application mobile (PWA) sur Android, iOS et desktop.
 
 | Composant | Version |
 |---|---|
-| Python | 3.12 |
+| Python | 3.14 (image Docker) |
 | Django | 5.2 |
-| Base de données | SQLite (dev) / remplaçable PostgreSQL ou MySQL |
+| Base de données | SQLite (dev et production, volume Docker sur le NAS) |
 | CSS | Thème maritime custom (CSS variables, sans framework) |
 | Icônes | Font Awesome 6 (CDN) |
-| Fichiers statiques | WhiteNoise 6.8 avec CompressedManifestStaticFilesStorage |
-| WSGI | Gunicorn 23 |
-| Anti brute-force | django-axes 7 (5 echecs → compte verrouille 15 min) |
-| Variables d'environnement | python-dotenv 1.0 |
-| Déploiement | Docker + Cloudflare Tunnel |
+| Fichiers statiques | WhiteNoise 6.12 avec CompressedManifestStaticFilesStorage |
+| WSGI | Gunicorn 26 |
+| Anti brute-force | django-axes 8 (5 echecs → compte verrouille 15 min) |
+| Variables d'environnement | python-dotenv 1.2 |
+| Déploiement | Docker + Cloudflare Tunnel, via [nas-stack](https://github.com/Samito-05/nas-stack) |
 | PWA | manifest.json + Service Worker v3 (cache-first static, HTML jamais mis en cache) |
 
 ---
@@ -236,7 +236,7 @@ GestionnairePontons/
 ├── .env.example             # Template configuration developpement (versionne, sans secrets)
 ├── .env.production.example  # Template configuration production (versionne, sans secrets)
 ├── .env                     # Configuration developpement reelle (gitignore)
-├── .env.production          # Configuration production reelle (gitignore, sur le serveur)
+├── .env.production          # Test local de l'image (gitignore) ; en production : env/pontons.env de nas-stack
 ├── startup.ps1              # Script de demarrage Windows (developpement)
 ├── startup.bat
 ├── .dockerignore            # Secrets, base et .git exclus de l'image
@@ -248,7 +248,7 @@ GestionnairePontons/
 
 ## Maintenance — Aide-memoire
 
-Les commandes de production (mise à jour, sauvegardes, comptes, journaux) sont dans le README de **nas-stack**. Les plus courantes, depuis le dossier `nas-stack` sur le NAS :
+Les commandes de production (mise à jour, sauvegardes, comptes, journaux) sont dans le README de **nas-stack**. Les plus courantes, depuis le dossier `nas-stack` sur le NAS (`ssh nas` depuis le PC, même hors de la maison : voir nas-stack, « Se connecter au NAS à distance ») :
 
 ```bash
 sh deploy.sh pontons                                         # mettre à jour
